@@ -10,6 +10,7 @@ import { UserRole } from '../users/interfaces/user.interface';
 import { ForgotPasswordInput } from './inputs/forgot-password.input';
 import { ForgotPasswordModel } from './models/forgot-password.model';
 import { RandomStringService } from '@akanass/nestjsx-crypto';
+import { ResetPasswordInput } from './inputs/reset-password.input';
 
 @Resolver('Auth')
 export class AuthResolver {
@@ -76,6 +77,24 @@ export class AuthResolver {
 
     return {
       wasSentEmail,
+    };
+  }
+
+  @Mutation(returns => AuthModel)
+  async resetPassword(@Args('resetPasswordData') input: ResetPasswordInput) {
+
+    const user = await this.usersService.getUserByResetToken(input.token);
+    if (!user
+      || Date.now() > (new Date(user.resetPasswordExpirationDate)).getTime()
+    ) {
+      throw new UnauthorizedException('User not found or reset token is expired');
+    }
+
+    await this.usersService.updateResetPasswordInfo(user,null, input.password);
+    const token = await this.authService.generateToken(user);
+    return {
+      user,
+      token,
     };
   }
 }

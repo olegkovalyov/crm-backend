@@ -38,7 +38,6 @@ export class UsersService {
 
     const salt = await bcrypt.genSalt();
 
-
     return this.userModel.create({
       id: uuid(),
       firstName,
@@ -89,14 +88,31 @@ export class UsersService {
     return user.save();
   }
 
-  async updateResetPasswordInfo(user: UserInterface, token: string): Promise<void> {
-    user.resetPasswordToken = token;
-    const expTimestamp = Date.now() + 60 * 1000 * 60;
-    user.resetPasswordExpirationDate = new Date(expTimestamp);
+  async updateResetPasswordInfo(user: UserInterface, token: string, password: string = null): Promise<void> {
+    if (token) {
+      user.resetPasswordToken = token;
+      const expTimestamp = Date.now() + 60 * 1000 * 60;
+      user.resetPasswordExpirationDate = new Date(expTimestamp);
+    } else {
+      user.resetPasswordToken = null;
+      user.resetPasswordExpirationDate = null;
+    }
+
+    if (password) {
+      const newSalt = await bcrypt.genSalt();
+      const newPasswordHash = await bcrypt.hash(password, newSalt);
+      user.passwordSalt = newSalt;
+      user.passwordHash = newPasswordHash;
+    }
+
     try {
       await user.save();
     } catch (e) {
 
     }
+  }
+
+  async getUserByResetToken(token: string): Promise<UserInterface> {
+    return this.userModel.findOne({ resetPasswordToken: token }).exec();
   }
 }
