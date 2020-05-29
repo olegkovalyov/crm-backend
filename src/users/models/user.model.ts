@@ -22,6 +22,7 @@ export class UserModel {
   @Field()
   createdAt: string;
 
+
   @Field()
   updatedAt: string;
 

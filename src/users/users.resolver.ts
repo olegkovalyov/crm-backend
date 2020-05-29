@@ -5,6 +5,7 @@ import { CreateUserInput } from './inputs/create-user.input';
 import { UsersService } from './users.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateUserInput } from './inputs/update-user.input';
 
 @Resolver(of => UserModel)
 export class UsersResolver {
@@ -32,5 +33,10 @@ export class UsersResolver {
   @Mutation(returns => UserModel)
   async createUser(@Args('createUserData') createUserData: CreateUserInput): Promise<UserInterface> {
     return this.usersService.createUser(createUserData);
+  }
+
+  @Mutation(returns => UserModel)
+  async updateUser(@Args('updateUserData') updateUserData: UpdateUserInput): Promise<UserInterface> {
+    return this.usersService.updateUser(updateUserData);
   }
 }

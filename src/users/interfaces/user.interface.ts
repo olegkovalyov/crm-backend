@@ -7,6 +7,8 @@ export interface UserInterface extends Document{
   email: string,
   passwordSalt: string,
   passwordHash: string,
+  resetPasswordToken?: string,
+  resetPasswordExpirationDate?: Date,
   role: UserRole,
   createdAt: Date,
   updatedAt: Date,

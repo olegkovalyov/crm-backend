@@ -5,6 +5,7 @@ import { UserInterface } from './interfaces/user.interface';
 import { CreateUserInput } from './inputs/create-user.input';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
+import { UpdateUserInput } from './inputs/update-user.input';
 
 @Injectable()
 export class UsersService {
@@ -45,10 +46,57 @@ export class UsersService {
       email,
       passwordHash: await bcrypt.hash(password, salt),
       passwordSalt: salt,
+      resetPasswordToken: null,
+      resetPasswordExpirationDate: null,
       role,
       licenseType,
       createdAt: (new Date()).toISOString(),
       updatedAt: (new Date()).toISOString(),
     });
+  }
+
+  async updateUser(updateData: UpdateUserInput): Promise<UserInterface> {
+    const { id, firstName, lastName, password, role, licenseType } = updateData;
+
+    const user = await this.userModel.findOne({ id });
+    if (!user) {
+      throw new BadRequestException(`User with id:${id} doesnt exists`);
+    }
+
+    if (password) {
+      const newSalt = await bcrypt.genSalt();
+      const newPasswordHash = await bcrypt.hash(password, newSalt);
+      user.passwordSalt = newSalt;
+      user.passwordHash = newPasswordHash;
+    }
+
+    if (firstName) {
+      user.firstName = firstName;
+    }
+
+    if (lastName) {
+      user.lastName = lastName;
+    }
+
+    if (role) {
+      user.role = role;
+    }
+
+    if (licenseType) {
+      user.licenseType = licenseType;
+    }
+
+    return user.save();
+  }
+
+  async updateResetPasswordInfo(user: UserInterface, token: string): Promise<void> {
+    user.resetPasswordToken = token;
+    const expTimestamp = Date.now() + 60 * 1000 * 60;
+    user.resetPasswordExpirationDate = new Date(expTimestamp);
+    try {
+      await user.save();
+    } catch (e) {
+
+    }
   }
 }
