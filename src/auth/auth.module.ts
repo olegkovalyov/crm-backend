@@ -9,13 +9,13 @@ import { CryptoModule, RandomStringService } from '@akanass/nestjsx-crypto';
 
 @Module({
   imports: [
-    CryptoModule,
     UsersModule,
     PassportModule,
     JwtModule.register({
       secret: 'secret',
       signOptions: { expiresIn: 3600 * 24 },
     }),
+    CryptoModule,
   ],
   providers: [AuthService, JwtStrategy, AuthResolver, RandomStringService],
   exports: [AuthService],
