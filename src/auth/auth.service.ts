@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { UserInterface } from '../users/interfaces/user.interface';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
 
   constructor(private readonly jwtService: JwtService,
-              private readonly mailerService: MailerService) {
+              private readonly mailerService: MailerService,
+              private readonly configService: ConfigService,
+  ) {
 
   }
 
@@ -21,7 +24,7 @@ export class AuthService {
           subject: 'Reset password',
           template: 'forgot-password', // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
           context: {  // Data to be sent to template engine.
-            link: 'http://localhost:3000/reset-password/' + token,
+            link: this.configService.get('FRONTEND_HOST') + '/reset-password/' + token,
             username: `${user.firstName} ${user.lastName}`,
           },
         });

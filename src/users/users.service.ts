@@ -13,7 +13,7 @@ export class UsersService {
   }
 
   async getUsers(): Promise<UserInterface[]> {
-    return this.userModel.find().exec();
+    return this.userModel.find().sort({ updatedAt: -1 }).exec();
   }
 
   async getUserById(id: string): Promise<UserInterface> {
