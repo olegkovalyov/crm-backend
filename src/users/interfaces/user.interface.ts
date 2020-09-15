@@ -1,6 +1,6 @@
-import {Document} from 'mongoose';
+import { Document } from 'mongoose';
 
-export interface UserInterface extends Document{
+export interface UserInterface extends Document {
   id: string,
   firstName: string,
   lastName: string,
@@ -26,6 +26,7 @@ export enum UserRole {
 }
 
 export enum LicenseType {
+  NONE = 'NONE',
   A = 'A',
   B = 'B',
   C = 'C',

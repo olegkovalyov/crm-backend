@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { LicenseType, UserRole } from '../interfaces/user.interface';
-import { IsEmail, IsEnum, IsIn, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class CreateUserInput {
@@ -33,5 +33,5 @@ export class CreateUserInput {
 
   @Field()
   @IsEnum(LicenseType)
-  licenseType?: LicenseType;
+  licenseType: LicenseType;
 }
