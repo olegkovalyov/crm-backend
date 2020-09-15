@@ -95,6 +95,8 @@ export class UsersService {
       user.licenseType = licenseType;
     }
 
+    user.updatedAt = new Date();
+
     return user.save();
   }
 
