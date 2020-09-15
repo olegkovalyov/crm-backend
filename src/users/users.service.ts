@@ -55,11 +55,21 @@ export class UsersService {
   }
 
   async updateUser(updateData: UpdateUserInput): Promise<UserInterface> {
-    const { id, firstName, lastName, password, role, licenseType } = updateData;
+    const { id, firstName, lastName, email, password, role, licenseType } = updateData;
 
     const user = await this.userModel.findOne({ id });
     if (!user) {
-      throw new BadRequestException(`User with id:${id} doesnt exists`);
+      throw new BadRequestException(`User with id: ${id} doesnt exists`);
+    }
+
+    if (email) {
+      const userWithEmail = await this.userModel.findOne({ email });
+      if (userWithEmail
+        && userWithEmail.id !== id
+      ) {
+        throw new BadRequestException(`User with email: ${email} already exists`);
+      }
+      user.email = email;
     }
 
     if (password) {

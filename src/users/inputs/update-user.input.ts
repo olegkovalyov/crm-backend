@@ -21,6 +21,7 @@ export class UpdateUserInput {
   lastName?: string;
 
   @Field()
+  @IsOptional()
   @IsNotEmpty()
   @IsEmail()
   email?: string;
