@@ -6,14 +6,19 @@ import { JwtStrategy } from './passport-strategies/jwt.strategy';
 import { AuthResolver } from './auth.resolver';
 import { UsersModule } from '../users/users.module';
 import { CryptoModule, RandomStringService } from '@akanass/nestjsx-crypto';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: 'secret',
-      signOptions: { expiresIn: 3600 * 24 },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('SECRET'),
+        signOptions: { expiresIn: 3600 * 24 },
+      }),
     }),
     CryptoModule,
   ],

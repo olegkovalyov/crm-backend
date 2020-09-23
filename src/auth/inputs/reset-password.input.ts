@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty, Length, MaxLength, MinLength } from 'class-validator';
+import { IsNotEmpty, Length, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class ResetPasswordInput {

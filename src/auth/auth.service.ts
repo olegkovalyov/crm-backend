@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UserInterface } from '../users/interfaces/user.interface';
+import { IUser } from '../users/interfaces/user.interface';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { ITokens } from './interfaces/auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -14,34 +15,34 @@ export class AuthService {
 
   }
 
-  async sendForgotPasswordEmailWithToken(user: UserInterface, token: string): Promise<boolean> {
-    try {
-      await this
-        .mailerService
-        .sendMail({
-          to: user.email,
-          from: 'noreply@nestjs.com',
-          subject: 'Reset password',
-          template: 'forgot-password', // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
-          context: {  // Data to be sent to template engine.
-            link: this.configService.get('FRONTEND_HOST') + '/reset-password/' + token,
-            username: `${user.firstName} ${user.lastName}`,
-          },
-        });
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  async generateToken(user: UserInterface): Promise<string> {
+  async generateAccessToken(user: IUser): Promise<string> {
     const { email, firstName, lastName, role, licenseType } = user;
-    return this.jwtService.sign({
+    return this.jwtService.signAsync({
       email,
       firstName,
       lastName,
       role,
       licenseType,
-    });
+    }, { expiresIn: this.configService.get<string>('ACCESS_TOKEN_EXPIRATION_TIME') });
+  }
+
+  async generateRefreshToken(user: IUser): Promise<string> {
+    const { email } = user;
+    return this.jwtService.signAsync({
+      email,
+    }, { expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRATION_TIME') });
+  }
+
+  async createOrUpdateTokens(user: IUser): Promise<ITokens> {
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+    const refreshTokenExpTimestamp = Date.now() + 60 * 1000 * 60;
+    user.refreshToken = refreshToken;
+    user.refreshTokenExpirationDate = new Date(refreshTokenExpTimestamp);
+    await user.save();
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 }

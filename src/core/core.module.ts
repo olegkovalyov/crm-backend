@@ -9,7 +9,7 @@ import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
 @Module({
   imports: [
     GraphQLModule.forRoot({
-      context: ({ req }) => ({ req }),
+      context: ({ req, res }) => ({ req, res }),
       autoSchemaFile: true,
     }),
     MongooseModule.forRootAsync({

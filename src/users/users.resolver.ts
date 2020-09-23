@@ -1,6 +1,6 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserModel } from './models/user.model';
-import { LicenseType, UserInterface, UserRole } from './interfaces/user.interface';
+import { IUser } from './interfaces/user.interface';
 import { CreateUserInput } from './inputs/create-user.input';
 import { UsersService } from './users.service';
 import { UseGuards } from '@nestjs/common';
@@ -16,27 +16,31 @@ export class UsersResolver {
 
   @Query(returns => [UserModel], { nullable: 'items' })
   @UseGuards(JwtAuthGuard)
-  async getUsers(): Promise<UserInterface[]> {
+  async getUsers(): Promise<IUser[]> {
     return this.usersService.getUsers();
   }
 
   @Query(returns => UserModel, { nullable: true })
-  async getUser(@Args('id') id: string): Promise<UserInterface> {
+  @UseGuards(JwtAuthGuard)
+  async getUser(@Args('id') id: string): Promise<IUser> {
     return this.usersService.getUserById(id);
   }
 
   @Mutation(returns => UserModel, { nullable: true })
+  @UseGuards(JwtAuthGuard)
   async removeUser(@Args('id') id: string) {
     return this.usersService.removeUserById(id);
   }
 
   @Mutation(returns => UserModel)
-  async createUser(@Args('createUserData') createUserData: CreateUserInput): Promise<UserInterface> {
+  @UseGuards(JwtAuthGuard)
+  async createUser(@Args('createUserData') createUserData: CreateUserInput): Promise<IUser> {
     return this.usersService.createUser(createUserData);
   }
 
   @Mutation(returns => UserModel)
-  async updateUser(@Args('updateUserData') updateUserData: UpdateUserInput): Promise<UserInterface> {
+  @UseGuards(JwtAuthGuard)
+  async updateUser(@Args('updateUserData') updateUserData: UpdateUserInput): Promise<IUser> {
     return this.usersService.updateUser(updateUserData);
   }
 }

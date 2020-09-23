@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserInterface } from './interfaces/user.interface';
+import { IUser } from './interfaces/user.interface';
 import { CreateUserInput } from './inputs/create-user.input';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
@@ -9,18 +9,18 @@ import { UpdateUserInput } from './inputs/update-user.input';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<UserInterface>) {
+  constructor(@InjectModel('User') private userModel: Model<IUser>) {
   }
 
-  async getUsers(): Promise<UserInterface[]> {
+  async getUsers(): Promise<IUser[]> {
     return this.userModel.find().sort({ updatedAt: -1 }).exec();
   }
 
-  async getUserById(id: string): Promise<UserInterface> {
+  async getUserById(id: string): Promise<IUser> {
     return this.userModel.findOne({ id: id }).exec();
   }
 
-  async getUserByEmail(email: string): Promise<UserInterface> {
+  async getUserByEmail(email: string): Promise<IUser> {
     return this.userModel.findOne({ email });
   }
 
@@ -28,7 +28,7 @@ export class UsersService {
     return this.userModel.findOneAndDelete({ id: id }).exec();
   }
 
-  async createUser(createUserData: CreateUserInput): Promise<UserInterface> {
+  async createUser(createUserData: CreateUserInput): Promise<IUser> {
     const { firstName, lastName, email, password, role, licenseType } = createUserData;
 
     const userExists = await this.userModel.findOne({ email });
@@ -54,7 +54,7 @@ export class UsersService {
     });
   }
 
-  async updateUser(updateData: UpdateUserInput): Promise<UserInterface> {
+  async updateUser(updateData: UpdateUserInput): Promise<IUser> {
     const { id, firstName, lastName, email, password, role, licenseType } = updateData;
 
     const user = await this.userModel.findOne({ id });
@@ -100,7 +100,7 @@ export class UsersService {
     return user.save();
   }
 
-  async updateResetPasswordInfo(user: UserInterface, token: string, password: string = null): Promise<void> {
+  async updateResetPasswordInfo(user: IUser, token: string, password: string = null): Promise<void> {
     if (token) {
       user.resetPasswordToken = token;
       const expTimestamp = Date.now() + 60 * 1000 * 60;
@@ -124,7 +124,7 @@ export class UsersService {
     }
   }
 
-  async getUserByResetToken(token: string): Promise<UserInterface> {
+  async getUserByResetToken(token: string): Promise<IUser> {
     return this.userModel.findOne({ resetPasswordToken: token }).exec();
   }
 }

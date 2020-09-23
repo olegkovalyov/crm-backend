@@ -12,6 +12,8 @@ export const UserSchema = new mongoose.Schema({
   },
   resetPasswordToken: types.String,
   resetPasswordExpirationDate: types.Date,
+  refreshToken: types.String,
+  refreshTokenExpirationDate: types.Date,
   passwordHash: types.String,
   passwordSalt: types.String,
   role: types.String,

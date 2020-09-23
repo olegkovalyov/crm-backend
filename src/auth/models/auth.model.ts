@@ -7,7 +7,7 @@ export class AuthModel {
   user: UserModel;
 
   @Field()
-  token: string;
+  accessToken: string;
 }
 
 
