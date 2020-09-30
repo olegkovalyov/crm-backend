@@ -3,12 +3,14 @@ import { IUser } from '../users/interfaces/user.interface';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { ITokens } from './interfaces/auth.interface';
+import { IDecodedRefreshToken, ITokens } from './interfaces/auth.interface';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
 
   constructor(private readonly jwtService: JwtService,
+              private readonly userService: UsersService,
               private readonly mailerService: MailerService,
               private readonly configService: ConfigService,
   ) {
@@ -44,5 +46,21 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async clearRefreshToken(refreshToken: string): Promise<void> {
+    try {
+      const decodedData = await this.jwtService.decode(refreshToken, this.configService.get('SECRET'));
+      if (decodedData) {
+        const user = await this.userService.getUserByEmail((decodedData as IDecodedRefreshToken).email);
+        if (user) {
+          user.refreshToken = null;
+          user.refreshTokenExpirationDate = null;
+          await user.save();
+        }
+      }
+    } catch (e) {
+      console.log('Error removing refresh token');
+    }
   }
 }

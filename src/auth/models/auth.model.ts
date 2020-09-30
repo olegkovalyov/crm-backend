@@ -3,10 +3,10 @@ import { UserModel } from '../../users/models/user.model';
 
 @ObjectType()
 export class AuthModel {
-  @Field(type => UserModel)
+  @Field(type => UserModel, { nullable: true })
   user: UserModel;
 
-  @Field()
+  @Field({ nullable: true })
   accessToken: string;
 }
 

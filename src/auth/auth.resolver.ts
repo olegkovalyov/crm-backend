@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthModel } from './models/auth.model';
 import { LoginInput } from './inputs/login.input';
 import { UsersService } from '../users/users.service';
@@ -13,7 +13,6 @@ import { RandomStringService } from '@akanass/nestjsx-crypto';
 import { ResetPasswordInput } from './inputs/reset-password.input';
 import { ServerRequest, ServerResponse } from './decorators/decorators';
 import { Response, Request } from 'express';
-import { AccessTokenModel } from './models/access-token.model';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { IDecodedRefreshToken, ITokens } from './interfaces/auth.interface';
@@ -153,40 +152,52 @@ export class AuthResolver {
     };
   }
 
-  @Mutation(returns => AccessTokenModel)
+  @Query(returns => AuthModel)
   async refreshToken(
     @ServerResponse() res: Response,
     @ServerRequest() req: Request,
   ) {
+    // throw new UnauthorizedException('User not found or token is expired');
     const refreshToken = req.cookies['refreshToken'];
     if (!refreshToken) {
-      throw new UnauthorizedException('User not found or token is expired');
+      throw new UnauthorizedException('User not found or session is expired');
     }
+    let user = null;
     let accessToken = '';
 
     try {
       const decodedData = await this.jwtService.verifyAsync(refreshToken, this.configService.get('SECRET'));
       if (decodedData) {
-        const user = await this.usersService.getUserByEmail((decodedData as IDecodedRefreshToken).email);
+        user = await this.usersService.getUserByEmail((decodedData as IDecodedRefreshToken).email);
         const tokens: ITokens = await this.authService.createOrUpdateTokens(user);
         accessToken = tokens.accessToken;
         res.cookie('refreshToken', tokens.refreshToken);
       }
     } catch (e) {
-      const decodedData = await this.jwtService.decode(refreshToken, this.configService.get('SECRET'));
-      if (decodedData) {
-        const user = await this.usersService.getUserByEmail((decodedData as IDecodedRefreshToken).email);
-        if (user) {
-          user.refreshToken = null;
-          user.refreshTokenExpirationDate = null;
-          await user.save();
-        }
-      }
+      await this.authService.clearRefreshToken(refreshToken);
       res.clearCookie('refreshToken');
-      throw new UnauthorizedException('User not found or token is expired');
+      throw new UnauthorizedException('User not found or session is expired');
     }
     return {
+      user,
       accessToken,
+    };
+  }
+
+  @Query(returns => AuthModel)
+  async logout(
+    @ServerResponse() res: Response,
+    @ServerRequest() req: Request,
+  ) {
+    const refreshToken = req.cookies['refreshToken'];
+
+    if (refreshToken) {
+      await this.authService.clearRefreshToken(refreshToken);
+    }
+    res.clearCookie('refreshToken');
+    return {
+      user: null,
+      accessToken: null,
     };
   }
 }
