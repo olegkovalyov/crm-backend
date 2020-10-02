@@ -1,21 +1,21 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthModel } from './models/auth.model';
-import { LoginInput } from './inputs/login.input';
-import { UsersService } from '../users/users.service';
-import { CreateUserInput } from '../users/inputs/create-user.input';
+import { AuthModel } from '../models/auth.model';
+import { LoginInput } from '../inputs/login.input';
+import { UsersService } from '../../users/services/users.service';
+import { CreateUserInput } from '../../users/inputs/create-user.input';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { AuthService } from './auth.service';
-import { UserRole } from '../users/interfaces/user.interface';
-import { ForgotPasswordInput } from './inputs/forgot-password.input';
-import { ForgotPasswordModel } from './models/forgot-password.model';
+import { AuthService } from '../services/auth.service';
+import { UserRole } from '../../users/interfaces/user.interface';
+import { ForgotPasswordInput } from '../inputs/forgot-password.input';
+import { ForgotPasswordModel } from '../models/forgot-password.model';
 import { RandomStringService } from '@akanass/nestjsx-crypto';
-import { ResetPasswordInput } from './inputs/reset-password.input';
-import { ServerRequest, ServerResponse } from './decorators/decorators';
+import { ResetPasswordInput } from '../inputs/reset-password.input';
+import { ServerRequest, ServerResponse } from '../decorators/decorators';
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { IDecodedRefreshToken, ITokens } from './interfaces/auth.interface';
+import { IDecodedRefreshToken, ITokens } from '../interfaces/auth.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Resolver('Auth')
@@ -60,7 +60,7 @@ export class AuthResolver {
     @Args('registerData') input: CreateUserInput,
     @ServerResponse() res: Response,
   ) {
-    if (input.role !== UserRole.SKYDIVER) {
+    if (!input.roles.includes(UserRole.SKYDIVER)) {
       throw new BadRequestException('Invalid role');
     }
     const user = await this.usersService.createUser(input);

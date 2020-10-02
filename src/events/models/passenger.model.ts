@@ -2,6 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { UserModel } from '../../users/models/user.model';
 import { IsEnum } from 'class-validator';
 import { PassengerStatus } from '../interfaces/passenger.interface';
+import { LoadModel } from './load.model';
 
 @ObjectType()
 export class PassengerModel {
@@ -31,17 +32,12 @@ export class PassengerModel {
   @Field()
   handCamera: boolean;
 
-  @Field(type => UserModel, { nullable: true })
-  operator?: UserModel;
+  @Field()
+  cameraman: boolean;
 
-  @Field(type => UserModel, { nullable: true })
-  instructor?: UserModel;
 
   @Field({ nullable: true })
-  jumpDate?: string;
-
-  @Field({ nullable: true })
-  numberOfLoad?: number;
+  date?: Date;
 
   @Field({ nullable: true })
   notes?: string;

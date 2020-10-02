@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { IUser } from '../users/interfaces/user.interface';
+import { IUser } from '../../users/interfaces/user.interface';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { IDecodedRefreshToken, ITokens } from './interfaces/auth.interface';
-import { UsersService } from '../users/users.service';
+import { IDecodedRefreshToken, ITokens } from '../interfaces/auth.interface';
+import { UsersService } from '../../users/services/users.service';
 
 @Injectable()
 export class AuthService {
@@ -18,12 +18,12 @@ export class AuthService {
   }
 
   async generateAccessToken(user: IUser): Promise<string> {
-    const { email, firstName, lastName, role, licenseType } = user;
+    const { email, firstName, lastName, roles, licenseType } = user;
     return this.jwtService.signAsync({
       email,
       firstName,
       lastName,
-      role,
+      roles,
       licenseType,
     }, { expiresIn: this.configService.get<string>('ACCESS_TOKEN_EXPIRATION_TIME') });
   }

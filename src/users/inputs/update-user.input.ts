@@ -1,12 +1,17 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { LicenseType, UserRole } from '../interfaces/user.interface';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { LicenseType, UserRole, UserStatus } from '../interfaces/user.interface';
+import { IsEmail, IsEnum, IsIn, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class UpdateUserInput {
 
   @IsNotEmpty()
   id: string;
+
+  @Field()
+  @IsOptional()
+  @IsEnum(UserStatus)
+  status?: string;
 
   @Field()
   @IsOptional()
@@ -32,10 +37,9 @@ export class UpdateUserInput {
   @MaxLength(20)
   password?: string;
 
-  @Field()
+  @Field(type => [String])
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  roles?: UserRole[];
 
   @Field()
   @IsOptional()

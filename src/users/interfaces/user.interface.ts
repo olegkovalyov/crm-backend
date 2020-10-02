@@ -2,6 +2,7 @@ import { Document } from 'mongoose';
 
 export interface IUser extends Document {
   id: string,
+  status: string,
   firstName: string,
   lastName: string,
   email: string,
@@ -11,7 +12,7 @@ export interface IUser extends Document {
   resetPasswordExpirationDate: Date | null,
   refreshToken: string | null,
   refreshTokenExpirationDate: Date | null,
-  role: UserRole,
+  roles: string[],
   createdAt: Date,
   updatedAt: Date,
   licenseType?: LicenseType,
@@ -20,7 +21,8 @@ export interface IUser extends Document {
 export enum UserRole {
   STUDENT = 'STUDENT',
   SKYDIVER = 'SKYDIVER',
-  INSTRUCTOR = 'INSTRUCTOR',
+  COACH = 'COACH',
+  CAMERAMAN = 'CAMERAMAN',
   TM = 'TM',
   PACKER = 'PACKER',
   RIGGER = 'RIGGER',
@@ -34,4 +36,9 @@ export enum LicenseType {
   B = 'B',
   C = 'C',
   D = 'D',
+}
+
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  BLOCKED = 'BLOCKED'
 }

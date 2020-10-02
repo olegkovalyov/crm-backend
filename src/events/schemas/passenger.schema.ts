@@ -11,16 +11,8 @@ export const PassengerSchema = new mongoose.Schema({
   gender: types.String,
   weight: types.Number,
   handCamera: types.Boolean,
-  operator: {
-    type: types.ObjectId,
-    ref: 'User',
-  },
-  instructor: {
-    type: types.ObjectId,
-    ref: 'User',
-  },
-  numberOfLoad: types.Number,
-  jumpDate: types.Date,
+  cameraman: types.Boolean,
+  date: types.Date,
   notes: types.String,
 });
 

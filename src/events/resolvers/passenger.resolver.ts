@@ -1,17 +1,15 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { JumpsService } from './jumps.service';
-import { PassengerModel } from './models/passenger.model';
-import { CreatePassengerInput } from './inputs/create-passenger.input';
-import { IPassenger } from './interfaces/passenger.interface';
-import { PassengerService } from './passenger.service';
-import { UpdatePassengerInput } from './inputs/update-passenger.input';
-import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PassengerModel } from '../models/passenger.model';
+import { CreatePassengerInput } from '../inputs/create-passenger.input';
+import { IPassenger } from '../interfaces/passenger.interface';
+import { PassengerService } from '../services/passenger.service';
+import { UpdatePassengerInput } from '../inputs/update-passenger.input';
+import { EventService } from '../services/event.service';
 
-@Resolver('Jumps')
-export class JumpsResolver {
+@Resolver(of => PassengerModel)
+export class PassengerResolver {
   constructor(
-    private readonly jumpsService: JumpsService,
+    private readonly eventService: EventService,
     private readonly passengerService: PassengerService,
   ) {
   }

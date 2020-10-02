@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUser } from './interfaces/user.interface';
-import { CreateUserInput } from './inputs/create-user.input';
+import { IUser, UserRole } from '../interfaces/user.interface';
+import { CreateUserInput } from '../inputs/create-user.input';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
-import { UpdateUserInput } from './inputs/update-user.input';
+import { UpdateUserInput } from '../inputs/update-user.input';
+import { availableUserRoles } from '../constants/user.constants';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +30,13 @@ export class UsersService {
   }
 
   async createUser(createUserData: CreateUserInput): Promise<IUser> {
-    const { firstName, lastName, email, password, role, licenseType } = createUserData;
+    const { status, firstName, lastName, email, password, roles, licenseType } = createUserData;
+
+    if (roles
+      && !this.validateRoles(roles)
+    ) {
+      throw new BadRequestException(`Invalid roles`);
+    }
 
     const userExists = await this.userModel.findOne({ email });
     if (userExists) {
@@ -40,6 +47,7 @@ export class UsersService {
 
     return this.userModel.create({
       id: uuid(),
+      status,
       firstName,
       lastName,
       email,
@@ -47,7 +55,7 @@ export class UsersService {
       passwordSalt: salt,
       resetPasswordToken: null,
       resetPasswordExpirationDate: null,
-      role,
+      roles,
       licenseType,
       createdAt: (new Date()).toISOString(),
       updatedAt: (new Date()).toISOString(),
@@ -55,7 +63,13 @@ export class UsersService {
   }
 
   async updateUser(updateData: UpdateUserInput): Promise<IUser> {
-    const { id, firstName, lastName, email, password, role, licenseType } = updateData;
+    const { id, status, firstName, lastName, email, password, roles, licenseType } = updateData;
+
+    if (roles
+      && !this.validateRoles(roles)
+    ) {
+      throw new BadRequestException(`Invalid roles`);
+    }
 
     const user = await this.userModel.findOne({ id });
     if (!user) {
@@ -79,6 +93,10 @@ export class UsersService {
       user.passwordHash = newPasswordHash;
     }
 
+    if (status) {
+      user.status = status;
+    }
+
     if (firstName) {
       user.firstName = firstName;
     }
@@ -87,8 +105,8 @@ export class UsersService {
       user.lastName = lastName;
     }
 
-    if (role) {
-      user.role = role;
+    if (roles) {
+      user.roles = roles;
     }
 
     if (licenseType) {
@@ -126,5 +144,15 @@ export class UsersService {
 
   async getUserByResetToken(token: string): Promise<IUser> {
     return this.userModel.findOne({ resetPasswordToken: token }).exec();
+  }
+
+  private validateRoles(roles: UserRole[]): boolean {
+    let isValid = true;
+    roles.every((role) => {
+      if (!availableUserRoles.includes(role)) {
+        isValid = false;
+      }
+    });
+    return isValid;
   }
 }

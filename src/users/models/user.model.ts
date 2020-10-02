@@ -8,6 +8,9 @@ export class UserModel {
   id: string;
 
   @Field()
+  status: string;
+
+  @Field()
   firstName: string;
 
   @Field()
@@ -16,8 +19,8 @@ export class UserModel {
   @Field()
   email: string;
 
-  @Field()
-  role: UserRole;
+  @Field(type => [String])
+  roles: UserRole[];
 
   @Field()
   createdAt: string;

@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUser } from '../users/interfaces/user.interface';
-import { IPassenger, IPassengerNestedObjectIds } from './interfaces/passenger.interface';
-import { CreatePassengerInput } from './inputs/create-passenger.input';
+import { IUser } from '../../users/interfaces/user.interface';
+import { IPassenger } from '../interfaces/passenger.interface';
+import { CreatePassengerInput } from '../inputs/create-passenger.input';
 import { v4 as uuid } from 'uuid';
-import { UpdatePassengerInput } from './inputs/update-passenger.input';
+import { UpdatePassengerInput } from '../inputs/update-passenger.input';
 
 @Injectable()
 export class PassengerService {
@@ -28,12 +28,10 @@ export class PassengerService {
       weight,
       phone,
       handCamera,
-      numberOfLoad,
-      jumpDate,
+      cameraman,
+      date,
       notes,
     } = createData;
-
-    const { instructor, operator } = await this.getPassengersNestedObjectIds(createData);
 
     return this.passengerModel.create({
       id: uuid(),
@@ -44,10 +42,8 @@ export class PassengerService {
       weight,
       phone,
       handCamera,
-      instructor,
-      operator,
-      numberOfLoad: numberOfLoad ? numberOfLoad : null,
-      jumpDate: jumpDate ? jumpDate : null,
+      cameraman,
+      date: date ? date : null,
       notes: notes ? notes : null,
     });
   }
@@ -61,8 +57,9 @@ export class PassengerService {
       gender,
       weight,
       phone,
-      numberOfLoad,
-      jumpDate,
+      handCamera,
+      cameraman,
+      date,
       notes,
     } = updateData;
 
@@ -96,22 +93,16 @@ export class PassengerService {
       currentPassenger.phone = phone;
     }
 
-    const { instructor, operator } = await this.getPassengersNestedObjectIds(updateData);
-
-    if (updateData.instructorId !== undefined) {
-      currentPassenger.instructor = instructor;
+    if (handCamera) {
+      currentPassenger.handCamera = handCamera;
     }
 
-    if (updateData.operatorId !== undefined) {
-      currentPassenger.operator = operator;
+    if (cameraman !== undefined) {
+      currentPassenger.cameraman = cameraman;
     }
 
-    if (numberOfLoad) {
-      currentPassenger.numberOfLoad = numberOfLoad;
-    }
-
-    if (jumpDate) {
-      currentPassenger.jumpDate = jumpDate;
+    if (date) {
+      currentPassenger.date = date;
     }
 
     if (notes) {
@@ -125,21 +116,4 @@ export class PassengerService {
     return this.passengerModel.findOneAndDelete({ id: id }).exec();
   }
 
-  private async getPassengersNestedObjectIds(
-    passenger: CreatePassengerInput | UpdatePassengerInput,
-  ): Promise<IPassengerNestedObjectIds> {
-    let instructor = null;
-    if (passenger.operatorId) {
-      instructor = await this.userModel.findOne({ id: passenger.instructorId });
-    }
-
-    let operator = null;
-    if (passenger.operatorId) {
-      operator = await this.userModel.findOne({ id: passenger.operatorId });
-    }
-    return {
-      instructor,
-      operator,
-    };
-  }
 }

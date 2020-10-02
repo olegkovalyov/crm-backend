@@ -1,10 +1,20 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsBoolean, IsDateString, IsEnum, IsInt, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { PassengerStatus } from '../interfaces/passenger.interface';
 
 @InputType()
 export class UpdatePassengerInput {
 
+  @Field()
   @IsNotEmpty()
   id: string;
 
@@ -47,23 +57,15 @@ export class UpdatePassengerInput {
   @IsBoolean()
   handCamera?: boolean;
 
-  @Field({ nullable: true })
+  @Field()
   @IsOptional()
-  operatorId?: string;
+  @IsBoolean()
+  cameraman?: boolean;
 
   @Field({ nullable: true })
   @IsOptional()
-  instructorId?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsInt()
-  numberOfLoad?: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsDateString()
-  jumpDate?: string;
+  @IsDate()
+  date?: Date;
 
   @Field({ nullable: true })
   @IsOptional()

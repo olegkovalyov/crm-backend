@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { CoreModule } from './core/core.module';
 import { ConfigModule } from '@nestjs/config';
-import { JumpsModule } from './jumps/jumps.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -12,7 +12,7 @@ import { JumpsModule } from './jumps/jumps.module';
     }),
     CoreModule,
     UsersModule,
-    JumpsModule,
+    EventsModule,
   ],
 })
 export class AppModule {

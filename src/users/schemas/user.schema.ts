@@ -4,6 +4,7 @@ const types = mongoose.Schema.Types;
 
 export const UserSchema = new mongoose.Schema({
   id: types.String,
+  status: types.String,
   firstName: types.String,
   lastName: types.String,
   email: {
@@ -16,7 +17,7 @@ export const UserSchema = new mongoose.Schema({
   refreshTokenExpirationDate: types.Date,
   passwordHash: types.String,
   passwordSalt: types.String,
-  role: types.String,
+  roles: [types.String],
   createdAt: types.Date,
   updatedAt: types.Date,
   licenseType: types.String,
