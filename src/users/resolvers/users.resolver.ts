@@ -1,11 +1,12 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserModel } from '../models/user.model';
-import { IUser } from '../interfaces/user.interface';
+import { IUser, UserRole } from '../interfaces/user.interface';
 import { CreateUserInput } from '../inputs/create-user.input';
 import { UsersService } from '../services/users.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UpdateUserInput } from '../inputs/update-user.input';
+import { GetUsersFilterInput } from '../inputs/get-users-filter.input';
 
 @Resolver(of => UserModel)
 export class UsersResolver {
@@ -15,9 +16,10 @@ export class UsersResolver {
   }
 
   @Query(returns => [UserModel], { nullable: 'items' })
-  @UseGuards(JwtAuthGuard)
-  async getUsers(): Promise<IUser[]> {
-    return this.usersService.getUsers();
+  // @UseGuards(JwtAuthGuard)
+  async getUsers(@Args('getUsersFilterInput') getUsersFilterInput: GetUsersFilterInput): Promise<IUser[]> {
+    console.log(getUsersFilterInput);
+    return this.usersService.getUsers(getUsersFilterInput);
   }
 
   @Query(returns => UserModel, { nullable: true })

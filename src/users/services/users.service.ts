@@ -7,14 +7,22 @@ import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserInput } from '../inputs/update-user.input';
 import { availableUserRoles } from '../constants/user.constants';
+import { GetUsersFilterInput } from '../inputs/get-users-filter.input';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel('User') private userModel: Model<IUser>) {
   }
 
-  async getUsers(): Promise<IUser[]> {
-    return this.userModel.find().sort({ updatedAt: -1 }).exec();
+  async getUsers(filterParams: GetUsersFilterInput): Promise<IUser[]> {
+
+    const conditions = {};
+
+    if (filterParams.roles) {
+      conditions['roles'] = { $in: filterParams.roles };
+    }
+
+    return this.userModel.find(conditions).sort({ updatedAt: -1 }).exec();
   }
 
   async getUserById(id: string): Promise<IUser> {
