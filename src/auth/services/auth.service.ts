@@ -18,8 +18,10 @@ export class AuthService {
   }
 
   async generateAccessToken(user: IUser): Promise<string> {
-    const { email, firstName, lastName, roles, licenseType } = user;
+    const { id, status, email, firstName, lastName, roles, licenseType } = user;
     return this.jwtService.signAsync({
+      id,
+      status,
       email,
       firstName,
       lastName,

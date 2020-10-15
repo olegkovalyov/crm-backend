@@ -5,10 +5,10 @@ import { ArrayUnique, IsEnum, IsOptional } from 'class-validator';
 @InputType()
 export class GetUsersFilterInput {
 
-  @Field()
+  @Field(type=> [String])
   @IsOptional()
-  @IsEnum(UserStatus)
-  status?: string;
+  @ArrayUnique()
+  statuses?: string;
 
   @Field(type => [String])
   @IsOptional()

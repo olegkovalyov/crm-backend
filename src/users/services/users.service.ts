@@ -1,25 +1,39 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Scope, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUser, UserRole } from '../interfaces/user.interface';
+import { IUser, IUserAccessTokenPayload, UserRole } from '../interfaces/user.interface';
 import { CreateUserInput } from '../inputs/create-user.input';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserInput } from '../inputs/update-user.input';
 import { availableUserRoles } from '../constants/user.constants';
 import { GetUsersFilterInput } from '../inputs/get-users-filter.input';
+import { CONTEXT } from '@nestjs/graphql';
+import { JwtService } from '@nestjs/jwt';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<IUser>) {
+  constructor(
+    @Inject(CONTEXT) private context,
+    @InjectModel('User') private userModel: Model<IUser>,
+    private readonly jwtService: JwtService,
+  ) {
   }
 
   async getUsers(filterParams: GetUsersFilterInput): Promise<IUser[]> {
-
     const conditions = {};
+
+    const token = this.context.req.header('authorization').slice(7);
+    const decodedToken = this.jwtService.decode(token) as IUserAccessTokenPayload;
+    if (decodedToken) {
+      conditions['email'] = { $ne: decodedToken.email };
+    }
 
     if (filterParams.roles) {
       conditions['roles'] = { $in: filterParams.roles };
+    }
+    if (filterParams.statuses) {
+      conditions['status'] = { $in: filterParams.statuses };
     }
 
     return this.userModel.find(conditions).sort({ updatedAt: -1 }).exec();

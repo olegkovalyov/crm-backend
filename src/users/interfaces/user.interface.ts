@@ -18,6 +18,17 @@ export interface IUser extends Document {
   licenseType?: LicenseType,
 }
 
+export interface IUserAccessTokenPayload {
+  id: string,
+  status: string,
+  firstName: string,
+  lastName: string,
+  email: string,
+  roles: UserRole[],
+  iat: number,
+  exp: number,
+}
+
 export enum UserRole {
   STUDENT = 'STUDENT',
   SKYDIVER = 'SKYDIVER',
