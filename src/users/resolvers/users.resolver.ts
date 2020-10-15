@@ -7,7 +7,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UpdateUserInput } from '../inputs/update-user.input';
 import { GetUsersFilterInput } from '../inputs/get-users-filter.input';
-import { IsAdminOrManifestGuard } from '../../auth/guards/is-admin-or-manifest-guard.service';
+import { IsAdminOrManifestGuard } from '../../auth/guards/is-admin-or-manifest-guard.guard';
 
 @Resolver(of => UserModel)
 export class UsersResolver {
