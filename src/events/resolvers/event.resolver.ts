@@ -4,6 +4,11 @@ import { EventService } from '../services/event.service';
 import { IEvent } from '../interfaces/event.interface';
 import { CreateEventInput } from '../inputs/create-event.input';
 import { UpdateEventInput } from '../inputs/update-event.input';
+import { UserModel } from '../../users/models/user.model';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { IsAdminOrManifestGuard } from '../../auth/guards/is-admin-or-manifest-guard.guard';
+import { IUser } from '../../users/interfaces/user.interface';
 
 @Resolver(of => EventModel)
 export class EventResolver {
@@ -30,5 +35,10 @@ export class EventResolver {
   @Mutation(returns => EventModel, { nullable: true })
   async removeEvent(@Args('id') id: string) {
     return this.eventService.removeEventById(id);
+  }
+
+  @Query(returns => EventModel, { nullable: true })
+  async getEvent(@Args('id') id: string): Promise<IEvent> {
+    return this.eventService.getEventById(id);
   }
 }

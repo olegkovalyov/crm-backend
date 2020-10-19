@@ -18,27 +18,27 @@ export class EventService {
   }
 
   async getEvents(): Promise<IEvent[]> {
-    return this.eventModel.find().populate('loads');
+    return this.eventModel.find().sort({ date: -1 }).populate('loads');
   }
 
   async createEvent(createData: CreateEventInput): Promise<IEvent> {
     const {
-      title,
+      name,
       date,
       notes,
     } = createData;
     return this.eventModel.create({
       id: uuid(),
-      title,
+      name,
       date,
-      notes: notes ? notes : null,
+      notes,
     });
   }
 
   async updateEvent(updateData: UpdateEventInput): Promise<IEvent> {
     const {
       id,
-      title,
+      name,
       date,
       notes,
     } = updateData;
@@ -50,8 +50,8 @@ export class EventService {
     }
 
 
-    if (title) {
-      currentEvent.title = title;
+    if (name) {
+      currentEvent.name = name;
     }
 
     if (date) {
@@ -67,6 +67,10 @@ export class EventService {
 
   async removeEventById(id: string) {
     return this.eventModel.findOneAndDelete({ id: id }).exec();
+  }
+
+  async getEventById(id: string): Promise<IEvent> {
+    return this.eventModel.findOne({ id: id }).exec();
   }
 
 }

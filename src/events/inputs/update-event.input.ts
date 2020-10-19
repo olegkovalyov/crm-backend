@@ -12,14 +12,14 @@ export class UpdateEventInput {
   @IsOptional()
   @MinLength(3)
   @MaxLength(20)
-  title?: string;
+  name?: string;
 
   @Field()
   @IsOptional()
   @IsDate()
   date?: Date;
 
-  @Field({ nullable: true })
+  @Field()
   @IsOptional()
   notes?: string;
 }

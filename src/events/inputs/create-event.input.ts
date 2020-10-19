@@ -8,13 +8,13 @@ export class CreateEventInput {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(20)
-  title: string;
+  name: string;
 
   @Field()
   @IsDate()
   date: Date;
 
-  @Field({ nullable: true })
+  @Field()
   @IsOptional()
-  notes?: string;
+  notes: string;
 }

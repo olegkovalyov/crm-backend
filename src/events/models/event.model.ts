@@ -7,7 +7,7 @@ export class EventModel {
   id: string;
 
   @Field()
-  title: string;
+  name: string;
 
   @Field()
   date: Date;
@@ -15,6 +15,6 @@ export class EventModel {
   @Field(type => [LoadModel], { nullable: true })
   loads?: [LoadModel];
 
-  @Field({ nullable: true })
-  notes?: string;
+  @Field()
+  notes: string;
 }
