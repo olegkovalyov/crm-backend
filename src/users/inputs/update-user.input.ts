@@ -8,10 +8,11 @@ export class UpdateUserInput {
   @IsNotEmpty()
   id: string;
 
-  @Field()
+  @Field(type => UserStatus)
   @IsOptional()
+  @IsNotEmpty()
   @IsEnum(UserStatus)
-  status?: string;
+  status?: UserStatus;
 
   @Field()
   @IsOptional()
@@ -37,11 +38,11 @@ export class UpdateUserInput {
   @MaxLength(20)
   password?: string;
 
-  @Field(type => [String])
+  @Field(type => [UserRole])
   @IsOptional()
   roles?: UserRole[];
 
-  @Field()
+  @Field(type => LicenseType)
   @IsOptional()
   @IsEnum(LicenseType)
   licenseType?: LicenseType;

@@ -5,10 +5,10 @@ import { ArrayNotEmpty, ArrayUnique, IsEmail, IsEnum, IsNotEmpty, MaxLength, Min
 @InputType()
 export class CreateUserInput {
 
-  @Field()
+  @Field(type => UserStatus)
   @IsNotEmpty()
   @IsEnum(UserStatus)
-  status: string;
+  status: UserStatus;
 
   @Field()
   @IsNotEmpty()
@@ -33,12 +33,13 @@ export class CreateUserInput {
   @MaxLength(20)
   password: string;
 
-  @Field(type => [String])
+  @Field(type => [UserRole])
   @ArrayNotEmpty()
   @ArrayUnique()
   roles: UserRole[];
 
-  @Field()
+  @Field(type => LicenseType)
+  @IsNotEmpty()
   @IsEnum(LicenseType)
   licenseType: LicenseType;
 }

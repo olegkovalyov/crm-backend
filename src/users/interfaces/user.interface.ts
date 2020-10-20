@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { registerEnumType } from '@nestjs/graphql';
 
 export interface IUser extends Document {
   id: string,
@@ -53,3 +54,15 @@ export enum UserStatus {
   ACTIVE = 'ACTIVE',
   BLOCKED = 'BLOCKED'
 }
+
+registerEnumType(UserStatus, {
+  name: 'UserStatus',
+});
+
+registerEnumType(LicenseType, {
+  name: 'LicenseType',
+});
+
+registerEnumType(UserRole, {
+  name: 'UserRole',
+});

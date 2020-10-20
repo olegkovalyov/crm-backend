@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { UserRole } from '../interfaces/user.interface';
+import { LicenseType, UserRole, UserStatus } from '../interfaces/user.interface';
+
 
 @ObjectType()
 export class UserModel {
@@ -7,8 +8,8 @@ export class UserModel {
   @Field()
   id: string;
 
-  @Field()
-  status: string;
+  @Field(type => UserStatus)
+  status: UserStatus;
 
   @Field()
   firstName: string;
@@ -19,7 +20,7 @@ export class UserModel {
   @Field()
   email: string;
 
-  @Field(type => [String])
+  @Field(type => [UserRole])
   roles: UserRole[];
 
   @Field()
@@ -28,8 +29,8 @@ export class UserModel {
   @Field()
   updatedAt: string;
 
-  @Field({ nullable: true })
-  licenseType?: string;
+  @Field(type => LicenseType)
+  licenseType?: LicenseType;
 }
 
 
