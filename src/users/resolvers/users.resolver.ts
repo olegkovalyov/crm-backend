@@ -1,6 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UserModel } from '../models/user.model';
-import { IUser } from '../interfaces/user.interface';
+import { IUser, UserRole } from '../interfaces/user.interface';
 import { CreateUserInput } from '../inputs/create-user.input';
 import { UsersService } from '../services/users.service';
 import { UseGuards } from '@nestjs/common';
@@ -17,32 +17,42 @@ export class UsersResolver {
   }
 
   @Query(returns => [UserModel], { nullable: 'items' })
-  @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getUsers(@Args('getUsersFilterInput') getUsersFilterInput: GetUsersFilterInput): Promise<IUser[]> {
     return this.usersService.getUsers(getUsersFilterInput);
   }
 
   @Query(returns => UserModel, { nullable: true })
-  @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getUser(@Args('id') id: string): Promise<IUser> {
     return this.usersService.getUserById(id);
   }
 
   @Mutation(returns => UserModel, { nullable: true })
-  @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async removeUser(@Args('id') id: string) {
     return this.usersService.removeUserById(id);
   }
 
   @Mutation(returns => UserModel)
-  @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async createUser(@Args('createUserData') createUserData: CreateUserInput): Promise<IUser> {
     return this.usersService.createUser(createUserData);
   }
 
   @Mutation(returns => UserModel)
-  @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async updateUser(@Args('updateUserData') updateUserData: UpdateUserInput): Promise<IUser> {
     return this.usersService.updateUser(updateUserData);
+  }
+
+  @Query(returns => [UserModel], { nullable: true })
+  async getStaff(): Promise<IUser[]> {
+    return this.usersService.getUsersByRoles([
+      UserRole.TM,
+      UserRole.COACH,
+      UserRole.CAMERAMAN,
+      UserRole.PACKER,
+    ]);
   }
 }

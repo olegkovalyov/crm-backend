@@ -23,11 +23,11 @@ export class UsersService {
   async getUsers(filterParams: GetUsersFilterInput): Promise<IUser[]> {
     const conditions = {};
 
-    const token = this.context.req.header('authorization').slice(7);
-    const decodedToken = this.jwtService.decode(token) as IUserAccessTokenPayload;
-    if (decodedToken) {
-      conditions['email'] = { $ne: decodedToken.email };
-    }
+    // const token = this.context.req.header('authorization').slice(7);
+    // const decodedToken = this.jwtService.decode(token) as IUserAccessTokenPayload;
+    // if (decodedToken) {
+    //   conditions['email'] = { $ne: decodedToken.email };
+    // }
 
     if (filterParams.roles) {
       conditions['roles'] = { $in: filterParams.roles };
@@ -45,6 +45,10 @@ export class UsersService {
 
   async getUserByEmail(email: string): Promise<IUser> {
     return this.userModel.findOne({ email });
+  }
+
+  async getUsersByRoles(roles: UserRole[]): Promise<IUser[]> {
+    return this.userModel.find({ roles: { $in: roles } }).exec();
   }
 
   async removeUserById(id: string) {

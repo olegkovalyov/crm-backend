@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { LoadModel } from './load.model';
+import { UserModel } from '../../users/models/user.model';
 
 @ObjectType()
 export class EventModel {
@@ -12,8 +13,11 @@ export class EventModel {
   @Field()
   date: Date;
 
-  @Field(type => [LoadModel], { nullable: true })
-  loads?: [LoadModel];
+  @Field(type => [LoadModel])
+  loads: [LoadModel];
+
+  @Field(type => [UserModel])
+  staff: [UserModel];
 
   @Field()
   notes: string;

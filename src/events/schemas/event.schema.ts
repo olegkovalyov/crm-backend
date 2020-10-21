@@ -10,6 +10,10 @@ export const EventSchema = new mongoose.Schema({
     type: types.ObjectId,
     ref: 'Load',
   }],
+  staff: [{
+    type: types.ObjectId,
+    ref: 'User',
+  }],
   notes: types.String,
 });
 

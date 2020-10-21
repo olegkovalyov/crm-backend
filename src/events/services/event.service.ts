@@ -18,7 +18,11 @@ export class EventService {
   }
 
   async getEvents(): Promise<IEvent[]> {
-    return this.eventModel.find().sort({ date: -1 }).populate('loads');
+    return this.eventModel
+      .find()
+      .sort({ date: -1 })
+      .populate('loads')
+      .populate('staff');
   }
 
   async createEvent(createData: CreateEventInput): Promise<IEvent> {
@@ -26,12 +30,17 @@ export class EventService {
       name,
       date,
       notes,
+      staffIds,
     } = createData;
+
+    const staff = await this.userModel.find({ id: { $in: staffIds } }).exec();
+
     return this.eventModel.create({
       id: uuid(),
       name,
       date,
       notes,
+      staff,
     });
   }
 
@@ -41,6 +50,7 @@ export class EventService {
       name,
       date,
       notes,
+      staffIds,
     } = updateData;
 
     const currentEvent = await this.eventModel.findOne({ id: updateData.id });
@@ -58,6 +68,8 @@ export class EventService {
       currentEvent.date = date;
     }
 
+    currentEvent.staff = await this.userModel.find({ id: { $in: staffIds } }).exec();
+
     if (notes) {
       currentEvent.notes = notes;
     }
@@ -70,7 +82,7 @@ export class EventService {
   }
 
   async getEventById(id: string): Promise<IEvent> {
-    return this.eventModel.findOne({ id: id }).exec();
+    return this.eventModel.findOne({ id: id }).populate('staff').exec();
   }
 
 }

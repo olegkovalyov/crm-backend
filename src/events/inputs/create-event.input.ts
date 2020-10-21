@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsDate, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import { ArrayNotEmpty, ArrayUnique, IsDate, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class CreateEventInput {
@@ -13,6 +13,10 @@ export class CreateEventInput {
   @Field()
   @IsDate()
   date: Date;
+
+  @Field(type => [String])
+  @ArrayUnique()
+  staffIds?: string[];
 
   @Field()
   @IsOptional()
