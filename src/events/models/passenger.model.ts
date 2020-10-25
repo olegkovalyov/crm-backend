@@ -30,15 +30,20 @@ export class PassengerModel {
   phone: string;
 
   @Field()
-  handCamera: boolean;
+  withHandCameraVideo: boolean;
 
   @Field()
-  cameraman: boolean;
+  withCameraman: boolean;
 
+  @Field(type => UserModel, {nullable: true})
+  tm: UserModel;
+
+  @Field(type => UserModel, {nullable: true})
+  cameraman: UserModel;
 
   @Field({ nullable: true })
-  date?: Date;
+  date: Date;
 
   @Field({ nullable: true })
-  notes?: string;
+  notes: string;
 }

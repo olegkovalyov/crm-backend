@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
+  ArrayUnique,
   IsBoolean,
   IsDate,
   IsEnum,
@@ -50,20 +51,28 @@ export class CreatePassengerInput {
   @Field()
   @IsNotEmpty()
   @IsBoolean()
-  handCamera: boolean;
+  withHandCameraVideo: boolean;
 
   @Field()
   @IsNotEmpty()
   @IsBoolean()
-  cameraman: boolean;
+  withCameraman: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  tmId: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  cameramanId: string;
 
 
   @Field({ nullable: true })
   @IsOptional()
   @IsDate()
-  date?: Date;
+  date: Date;
 
   @Field({ nullable: true })
   @IsOptional()
-  notes?: string;
+  notes: string;
 }

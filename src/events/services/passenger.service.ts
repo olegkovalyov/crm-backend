@@ -16,7 +16,7 @@ export class PassengerService {
   }
 
   async getPassengers(): Promise<IPassenger[]> {
-    return this.passengerModel.find().populate('instructor operator');
+    return this.passengerModel.find().populate('tm').populate('cameraman');
   }
 
   async createPassenger(createData: CreatePassengerInput): Promise<IPassenger> {
@@ -27,11 +27,24 @@ export class PassengerService {
       gender,
       weight,
       phone,
-      handCamera,
-      cameraman,
+      withHandCameraVideo,
+      withCameraman,
+      tmId,
+      cameramanId,
       date,
       notes,
     } = createData;
+
+    let tm: IUser | null = null;
+    let cameraman: IUser | null = null;
+
+    if (tmId) {
+      tm = await this.userModel.findOne({ id: tmId }).exec();
+    }
+
+    if (cameramanId) {
+      cameraman = await this.userModel.findOne({ id: cameramanId }).exec();
+    }
 
     return this.passengerModel.create({
       id: uuid(),
@@ -41,10 +54,12 @@ export class PassengerService {
       gender,
       weight,
       phone,
-      handCamera,
+      withHandCameraVideo,
+      withCameraman,
+      tm,
       cameraman,
-      date: date ? date : null,
-      notes: notes ? notes : null,
+      date: date ?? null,
+      notes: notes ?? null,
     });
   }
 
@@ -57,8 +72,10 @@ export class PassengerService {
       gender,
       weight,
       phone,
-      handCamera,
-      cameraman,
+      withHandCameraVideo,
+      withCameraman,
+      tmId,
+      cameramanId,
       date,
       notes,
     } = updateData;
@@ -93,13 +110,26 @@ export class PassengerService {
       currentPassenger.phone = phone;
     }
 
-    if (handCamera) {
-      currentPassenger.handCamera = handCamera;
+    if (withHandCameraVideo) {
+      currentPassenger.withHandCameraVideo = withHandCameraVideo;
     }
 
-    if (cameraman !== undefined) {
+    if (withCameraman) {
+      currentPassenger.withCameraman = withCameraman;
+    }
+
+    let tm, cameraman: IUser | null;
+
+    if (tmId) {
+      tm = await this.userModel.findOne({ id: tmId }).exec();
+      currentPassenger.tm = tm;
+    }
+
+    if (cameramanId) {
+      cameraman = await this.userModel.findOne({ id: cameramanId }).exec();
       currentPassenger.cameraman = cameraman;
     }
+
 
     if (date) {
       currentPassenger.date = date;

@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { IUser } from '../../users/interfaces/user.interface';
 
 export interface IPassenger extends Document {
   id: string,
@@ -8,8 +9,10 @@ export interface IPassenger extends Document {
   gender: string;
   weight: number;
   phone: string;
-  handCamera: boolean;
-  cameraman: boolean;
+  withHandCameraVideo: boolean;
+  withCameraman: boolean;
+  tm: IUser | null;
+  cameraman: IUser | null;
   date: Date | null;
   notes: string | null;
 }

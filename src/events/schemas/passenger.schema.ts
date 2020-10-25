@@ -10,8 +10,16 @@ export const PassengerSchema = new mongoose.Schema({
   phone: types.String,
   gender: types.String,
   weight: types.Number,
-  handCamera: types.Boolean,
-  cameraman: types.Boolean,
+  withHandCameraVideo: types.Boolean,
+  withCameraman: types.Boolean,
+  tm: {
+    type: types.ObjectId,
+    ref: 'User',
+  },
+  cameraman: {
+    type: types.ObjectId,
+    ref: 'User',
+  },
   date: types.Date,
   notes: types.String,
 });

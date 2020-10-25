@@ -55,12 +55,20 @@ export class UpdatePassengerInput {
   @Field()
   @IsOptional()
   @IsBoolean()
-  handCamera?: boolean;
+  withHandCameraVideo: boolean;
 
   @Field()
   @IsOptional()
   @IsBoolean()
-  cameraman?: boolean;
+  withCameraman: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  tmId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  cameramanId?: string;
 
   @Field({ nullable: true })
   @IsOptional()
