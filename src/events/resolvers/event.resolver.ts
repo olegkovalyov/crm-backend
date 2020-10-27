@@ -1,7 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { EventModel } from '../models/event.model';
 import { EventService } from '../services/event.service';
-import { IEvent } from '../interfaces/event.interface';
+import { EventInterface } from '../interfaces/event.interface';
 import { CreateEventInput } from '../inputs/create-event.input';
 import { UpdateEventInput } from '../inputs/update-event.input';
 
@@ -13,27 +13,27 @@ export class EventResolver {
   }
 
   @Query(returns => [EventModel], { nullable: 'items' })
-  async getEvents(): Promise<IEvent[]> {
+  async getEvents(): Promise<EventInterface[]> {
     return this.eventService.getEvents();
   }
 
   @Mutation(returns => EventModel)
-  async createEvent(@Args('createEventData') createData: CreateEventInput): Promise<IEvent> {
+  async createEvent(@Args('createEventData') createData: CreateEventInput): Promise<EventInterface> {
     return this.eventService.createEvent(createData);
   }
 
   @Mutation(returns => EventModel)
-  async updateEvent(@Args('updateEventData') updateData: UpdateEventInput): Promise<IEvent> {
+  async updateEvent(@Args('updateEventData') updateData: UpdateEventInput): Promise<EventInterface> {
     return this.eventService.updateEvent(updateData);
   }
 
   @Mutation(returns => EventModel, { nullable: true })
-  async removeEvent(@Args('id') id: string) {
+  async deleteEvent(@Args('id') id: string) {
     return this.eventService.removeEventById(id);
   }
 
   @Query(returns => EventModel, { nullable: true })
-  async getEvent(@Args('id') id: string): Promise<IEvent> {
+  async getEvent(@Args('id') id: string): Promise<EventInterface> {
     return this.eventService.getEventById(id);
   }
 

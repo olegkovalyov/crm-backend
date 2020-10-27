@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUser } from '../../users/interfaces/user.interface';
-import { IPassenger } from '../interfaces/passenger.interface';
+import { MemberInterface } from '../../members/interfaces/member.interface';
+import { ClientInterface } from '../interfaces/client.interface';
 import { v4 as uuid } from 'uuid';
-import { IEvent } from '../interfaces/event.interface';
+import { EventInterface } from '../interfaces/event.interface';
 import { ILoad } from '../interfaces/load.interface';
 import { CreateLoadInput } from '../inputs/create-load.input';
 import { UpdateLoadInput } from '../inputs/update-load.input';
@@ -12,9 +12,9 @@ import { UpdateLoadInput } from '../inputs/update-load.input';
 @Injectable()
 export class LoadService {
   constructor(
-    @InjectModel('User') private userModel: Model<IUser>,
-    @InjectModel('Passenger') private passengerModel: Model<IPassenger>,
-    @InjectModel('Event') private eventModel: Model<IEvent>,
+    @InjectModel('Member') private memberModel: Model<MemberInterface>,
+    @InjectModel('Client') private clientModel: Model<ClientInterface>,
+    @InjectModel('Event') private eventModel: Model<EventInterface>,
     @InjectModel('Load') private loadModel: Model<ILoad>,
   ) {
   }

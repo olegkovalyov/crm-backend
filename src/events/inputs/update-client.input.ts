@@ -9,10 +9,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { PassengerStatus } from '../interfaces/passenger.interface';
+import { PassengerStatus } from '../interfaces/client.interface';
 
 @InputType()
-export class UpdatePassengerInput {
+export class UpdateClientInput {
 
   @Field()
   @IsNotEmpty()
@@ -55,12 +55,22 @@ export class UpdatePassengerInput {
   @Field()
   @IsOptional()
   @IsBoolean()
-  withHandCameraVideo: boolean;
+  withHandCameraVideo?: boolean;
 
   @Field()
   @IsOptional()
   @IsBoolean()
-  withCameraman: boolean;
+  withCameraman?: boolean;
+
+  @Field()
+  @IsOptional()
+  @IsBoolean()
+  onlyFlight?: boolean;
+
+  @Field()
+  @IsOptional()
+  @IsBoolean()
+  paid?: boolean;
 
   @Field({ nullable: true })
   @IsOptional()

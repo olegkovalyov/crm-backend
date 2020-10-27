@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 const types = mongoose.Schema.Types;
 
-export const PassengerSchema = new mongoose.Schema({
+export const ClientSchema = new mongoose.Schema({
   id: types.String,
   status: types.String,
   firstName: types.String,
@@ -12,16 +12,18 @@ export const PassengerSchema = new mongoose.Schema({
   weight: types.Number,
   withHandCameraVideo: types.Boolean,
   withCameraman: types.Boolean,
+  onlyFlight: types.Boolean,
+  paid: types.Boolean,
   tm: {
     type: types.ObjectId,
-    ref: 'User',
+    ref: 'Member',
   },
   cameraman: {
     type: types.ObjectId,
-    ref: 'User',
+    ref: 'Member',
   },
   date: types.Date,
   notes: types.String,
 });
 
-export const PassengerMongooseModel = mongoose.model('Passenger', PassengerSchema);
+export const PassengerMongooseModel = mongoose.model('Client', ClientSchema);

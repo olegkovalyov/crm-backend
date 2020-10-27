@@ -1,11 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { UserModel } from '../../users/models/user.model';
+import { MemberModel } from '../../members/models/member.model';
 import { IsEnum } from 'class-validator';
-import { PassengerStatus } from '../interfaces/passenger.interface';
-import { LoadModel } from './load.model';
+import { PassengerStatus } from '../interfaces/client.interface';
 
 @ObjectType()
-export class PassengerModel {
+export class ClientModel {
 
   @Field()
   id: string;
@@ -35,11 +34,17 @@ export class PassengerModel {
   @Field()
   withCameraman: boolean;
 
-  @Field(type => UserModel, {nullable: true})
-  tm: UserModel;
+  @Field()
+  onlyFlight: boolean;
 
-  @Field(type => UserModel, {nullable: true})
-  cameraman: UserModel;
+  @Field()
+  paid: boolean;
+
+  @Field(type => MemberModel, {nullable: true})
+  tm: MemberModel;
+
+  @Field(type => MemberModel, {nullable: true})
+  cameraman: MemberModel;
 
   @Field({ nullable: true })
   date: Date;

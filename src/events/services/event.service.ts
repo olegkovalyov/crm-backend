@@ -1,23 +1,23 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUser } from '../../users/interfaces/user.interface';
-import { IPassenger } from '../interfaces/passenger.interface';
+import { MemberInterface } from '../../members/interfaces/member.interface';
+import { ClientInterface } from '../interfaces/client.interface';
 import { v4 as uuid } from 'uuid';
-import { IEvent } from '../interfaces/event.interface';
+import { EventInterface } from '../interfaces/event.interface';
 import { CreateEventInput } from '../inputs/create-event.input';
 import { UpdateEventInput } from '../inputs/update-event.input';
 
 @Injectable()
 export class EventService {
   constructor(
-    @InjectModel('User') private userModel: Model<IUser>,
-    @InjectModel('Passenger') private passengerModel: Model<IPassenger>,
-    @InjectModel('Event') private eventModel: Model<IEvent>,
+    @InjectModel('Member') private memberModel: Model<MemberInterface>,
+    @InjectModel('Client') private clientModel: Model<ClientInterface>,
+    @InjectModel('Event') private eventModel: Model<EventInterface>,
   ) {
   }
 
-  async getEvents(): Promise<IEvent[]> {
+  async getEvents(): Promise<EventInterface[]> {
     return this.eventModel
       .find()
       .sort({ date: -1 })
@@ -25,7 +25,7 @@ export class EventService {
       .populate('staff');
   }
 
-  async createEvent(createData: CreateEventInput): Promise<IEvent> {
+  async createEvent(createData: CreateEventInput): Promise<EventInterface> {
     const {
       name,
       date,
@@ -33,7 +33,7 @@ export class EventService {
       staffIds,
     } = createData;
 
-    const staff = await this.userModel.find({ id: { $in: staffIds } }).exec();
+    const staff = await this.memberModel.find({ id: { $in: staffIds } }).exec();
 
     return this.eventModel.create({
       id: uuid(),
@@ -44,7 +44,7 @@ export class EventService {
     });
   }
 
-  async updateEvent(updateData: UpdateEventInput): Promise<IEvent> {
+  async updateEvent(updateData: UpdateEventInput): Promise<EventInterface> {
     const {
       id,
       name,
@@ -68,7 +68,7 @@ export class EventService {
       currentEvent.date = date;
     }
 
-    currentEvent.staff = await this.userModel.find({ id: { $in: staffIds } }).exec();
+    currentEvent.staff = await this.memberModel.find({ id: { $in: staffIds } }).exec();
 
     if (notes) {
       currentEvent.notes = notes;
@@ -81,8 +81,7 @@ export class EventService {
     return this.eventModel.findOneAndDelete({ id: id }).exec();
   }
 
-  async getEventById(id: string): Promise<IEvent> {
+  async getEventById(id: string): Promise<EventInterface> {
     return this.eventModel.findOne({ id: id }).populate('staff').exec();
   }
-
 }

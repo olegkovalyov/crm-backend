@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PassengerResolver } from './resolvers/passenger.resolver';
-import { PassengerService } from './services/passenger.service';
+import { ClientResolver } from './resolvers/client.resolver';
+import { ClientService } from './services/client.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PassengerSchema } from './schemas/passenger.schema';
-import { UsersModule } from '../users/users.module';
+import { ClientSchema } from './schemas/client.schema';
+import { MembersModule } from '../members/membersModule';
 import { EventSchema } from './schemas/event.schema';
 import { EventResolver } from './resolvers/event.resolver';
 import { EventService } from './services/event.service';
@@ -17,18 +17,18 @@ import { LoadSchema } from './schemas/load.schema';
       [
         { name: 'Event', schema: EventSchema },
         { name: 'Load', schema: LoadSchema },
-        { name: 'Passenger', schema: PassengerSchema },
+        { name: 'Client', schema: ClientSchema },
       ],
     ),
-    UsersModule,
+    MembersModule,
   ],
   providers: [
     EventService,
     EventResolver,
     LoadService,
     LoadResolver,
-    PassengerResolver,
-    PassengerService,
+    ClientResolver,
+    ClientService,
   ],
 })
 export class EventsModule {

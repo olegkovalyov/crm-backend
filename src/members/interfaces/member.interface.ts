@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 import { registerEnumType } from '@nestjs/graphql';
 
-export interface IUser extends Document {
+export interface MemberInterface extends Document {
   id: string,
   status: string,
   firstName: string,
@@ -19,18 +19,18 @@ export interface IUser extends Document {
   licenseType?: LicenseType,
 }
 
-export interface IUserAccessTokenPayload {
+export interface MemberAccessTokenPayloadInterface {
   id: string,
   status: string,
   firstName: string,
   lastName: string,
   email: string,
-  roles: UserRole[],
+  roles: MemberRole[],
   iat: number,
   exp: number,
 }
 
-export enum UserRole {
+export enum MemberRole {
   STUDENT = 'STUDENT',
   SKYDIVER = 'SKYDIVER',
   COACH = 'COACH',
@@ -50,19 +50,19 @@ export enum LicenseType {
   D = 'D',
 }
 
-export enum UserStatus {
+export enum MemberStatus {
   ACTIVE = 'ACTIVE',
   BLOCKED = 'BLOCKED'
 }
 
-registerEnumType(UserStatus, {
-  name: 'UserStatus',
+registerEnumType(MemberStatus, {
+  name: 'MemberStatus',
 });
 
 registerEnumType(LicenseType, {
   name: 'LicenseType',
 });
 
-registerEnumType(UserRole, {
-  name: 'UserRole',
+registerEnumType(MemberRole, {
+  name: 'MemberRole',
 });

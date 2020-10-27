@@ -12,7 +12,7 @@ export const EventSchema = new mongoose.Schema({
   }],
   staff: [{
     type: types.ObjectId,
-    ref: 'User',
+    ref: 'Member',
   }],
   notes: types.String,
 });

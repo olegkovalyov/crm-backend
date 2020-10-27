@@ -1,13 +1,13 @@
 import { Document } from 'mongoose';
 import { ILoad } from './load.interface';
-import { IUser } from '../../users/interfaces/user.interface';
+import { MemberInterface } from '../../members/interfaces/member.interface';
 
-export interface IEvent extends Document {
+export interface EventInterface extends Document {
   id: string,
   name: string,
   date: Date,
   loads: ILoad[] | null;
-  staff: IUser[];
+  staff: MemberInterface[];
   notes: string;
 }
 

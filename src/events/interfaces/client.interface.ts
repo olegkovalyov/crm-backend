@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
-import { IUser } from '../../users/interfaces/user.interface';
+import { MemberInterface } from '../../members/interfaces/member.interface';
 
-export interface IPassenger extends Document {
+export interface ClientInterface extends Document {
   id: string,
   status: string,
   firstName: string;
@@ -11,8 +11,10 @@ export interface IPassenger extends Document {
   phone: string;
   withHandCameraVideo: boolean;
   withCameraman: boolean;
-  tm: IUser | null;
-  cameraman: IUser | null;
+  tm: MemberInterface | null;
+  cameraman: MemberInterface | null;
+  onlyFlight: boolean;
+  paid: boolean;
   date: Date | null;
   notes: string | null;
 }

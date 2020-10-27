@@ -4,13 +4,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './passport-strategies/jwt.strategy';
 import { AuthResolver } from './resolvers/auth.resolver';
-import { UsersModule } from '../users/users.module';
+import { MembersModule } from '../members/membersModule';
 import { CryptoModule, RandomStringService } from '@akanass/nestjsx-crypto';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    UsersModule,
+    MembersModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

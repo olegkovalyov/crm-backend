@@ -1,15 +1,15 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { LicenseType, UserRole, UserStatus } from '../interfaces/user.interface';
+import { LicenseType, MemberRole, MemberStatus } from '../interfaces/member.interface';
 
 
 @ObjectType()
-export class UserModel {
+export class MemberModel {
 
   @Field()
   id: string;
 
-  @Field(type => UserStatus)
-  status: UserStatus;
+  @Field(type => MemberStatus)
+  status: MemberStatus;
 
   @Field()
   firstName: string;
@@ -20,8 +20,8 @@ export class UserModel {
   @Field()
   email: string;
 
-  @Field(type => [UserRole])
-  roles: UserRole[];
+  @Field(type => [MemberRole])
+  roles: MemberRole[];
 
   @Field()
   createdAt: string;

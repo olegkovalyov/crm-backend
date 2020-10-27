@@ -1,6 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
-  ArrayUnique,
   IsBoolean,
   IsDate,
   IsEnum,
@@ -10,10 +9,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { PassengerStatus } from '../interfaces/passenger.interface';
+import { PassengerStatus } from '../interfaces/client.interface';
 
 @InputType()
-export class CreatePassengerInput {
+export class CreateClientInput {
 
   @Field()
   @IsEnum(PassengerStatus)
@@ -57,6 +56,16 @@ export class CreatePassengerInput {
   @IsNotEmpty()
   @IsBoolean()
   withCameraman: boolean;
+
+  @Field()
+  @IsNotEmpty()
+  @IsBoolean()
+  onlyFlight: boolean;
+
+  @Field()
+  @IsNotEmpty()
+  @IsBoolean()
+  paid: boolean;
 
   @Field({ nullable: true })
   @IsOptional()

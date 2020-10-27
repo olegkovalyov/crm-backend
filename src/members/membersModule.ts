@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { UsersResolver } from './resolvers/users.resolver';
-import { UsersService } from './services/users.service';
+import { MembersResolver } from './resolvers/members.resolver';
+import { MembersService } from './services/members.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from './schemas/user.schema';
+import { MemberSchema } from './schemas/member.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -18,12 +18,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
     MongooseModule.forFeature(
       [
-        { name: 'User', schema: UserSchema },
+        { name: 'Member', schema: MemberSchema },
       ],
     ),
   ],
-  exports: [UsersService, MongooseModule],
-  providers: [UsersResolver, UsersService],
+  exports: [MembersService, MongooseModule],
+  providers: [MembersResolver, MembersService],
 })
-export class UsersModule {
+export class MembersModule {
 }

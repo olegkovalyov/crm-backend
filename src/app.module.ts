@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
+import { MembersModule } from './members/membersModule';
 import { CoreModule } from './core/core.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
@@ -11,7 +11,7 @@ import { EventsModule } from './events/events.module';
       envFilePath: '.env',
     }),
     CoreModule,
-    UsersModule,
+    MembersModule,
     EventsModule,
   ],
 })

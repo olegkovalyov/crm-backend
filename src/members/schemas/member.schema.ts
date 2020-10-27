@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 const types = mongoose.Schema.Types;
 
-export const UserSchema = new mongoose.Schema({
+export const MemberSchema = new mongoose.Schema({
   id: types.String,
   status: types.String,
   firstName: types.String,
@@ -23,4 +23,4 @@ export const UserSchema = new mongoose.Schema({
   licenseType: types.String,
 });
 
-export const UserMongooseModel = mongoose.model('User', UserSchema);
+export const MemberMongooseModel = mongoose.model('Member', MemberSchema);
