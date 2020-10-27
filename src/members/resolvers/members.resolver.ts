@@ -16,7 +16,7 @@ export class MembersResolver {
 
   }
 
-  @Query(returns => [MemberModel], { nullable: 'items' })
+  @Query(returns => [MemberModel])
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getMembers(@Args('getMembersFilterInput') getMembersFilterInput: GetMembersFilterInput): Promise<MemberInterface[]> {
     return this.membersService.getMembers(getMembersFilterInput);

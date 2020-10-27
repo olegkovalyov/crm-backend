@@ -24,10 +24,10 @@ export class MemberModel {
   roles: MemberRole[];
 
   @Field()
-  createdAt: string;
+  createdAt: Date;
 
   @Field()
-  updatedAt: string;
+  updatedAt: Date;
 
   @Field(type => LicenseType)
   licenseType?: LicenseType;

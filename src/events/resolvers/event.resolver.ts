@@ -12,7 +12,7 @@ export class EventResolver {
   ) {
   }
 
-  @Query(returns => [EventModel], { nullable: 'items' })
+  @Query(returns => [EventModel])
   async getEvents(): Promise<EventInterface[]> {
     return this.eventService.getEvents();
   }

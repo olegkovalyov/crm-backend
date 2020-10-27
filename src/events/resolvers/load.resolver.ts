@@ -12,7 +12,7 @@ export class LoadResolver {
   ) {
   }
 
-  @Query(returns => [LoadModel], { nullable: 'items' })
+  @Query(returns => [LoadModel])
   async getLoads(): Promise<ILoad[]> {
     return this.loadService.getLoads();
   }

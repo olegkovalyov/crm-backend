@@ -14,7 +14,7 @@ export class ClientResolver {
   ) {
   }
 
-  @Query(returns => [ClientModel], { nullable: 'items' })
+  @Query(returns => [ClientModel])
   async getClients(): Promise<ClientInterface[]> {
     return this.clientService.getClients();
   }
