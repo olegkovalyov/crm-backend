@@ -1,15 +1,15 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
   IsBoolean,
-  IsDate,
+  IsDate, IsEmail,
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsOptional,
-  MaxLength,
+  IsOptional, Max,
+  MaxLength, Min,
   MinLength,
 } from 'class-validator';
-import { PassengerStatus } from '../interfaces/client.interface';
+import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
 
 @InputType()
 export class UpdateClientInput {
@@ -20,8 +20,25 @@ export class UpdateClientInput {
 
   @Field()
   @IsOptional()
-  @IsEnum(PassengerStatus)
-  status?: PassengerStatus;
+  @IsEnum(ClientType)
+  type?: ClientType;
+
+  @Field()
+  @IsOptional()
+  @IsEnum(ClientStatus)
+  status?: ClientStatus;
+
+  @Field()
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
+
+  @Field()
+  @IsOptional()
+  @IsInt()
+  @Min(3)
+  @Max(100)
+  age?: number;
 
   @Field()
   @IsOptional()
@@ -35,11 +52,10 @@ export class UpdateClientInput {
   @MaxLength(20)
   lastName?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsOptional()
-  @MinLength(3)
-  @MaxLength(20)
-  gender?: string;
+  @IsEmail()
+  email?: string;
 
   @Field()
   @IsOptional()
@@ -54,6 +70,12 @@ export class UpdateClientInput {
 
   @Field()
   @IsOptional()
+  @MinLength(5)
+  @MaxLength(200)
+  address?: string;
+
+  @Field()
+  @IsOptional()
   @IsBoolean()
   withHandCameraVideo?: boolean;
 
@@ -64,13 +86,8 @@ export class UpdateClientInput {
 
   @Field()
   @IsOptional()
-  @IsBoolean()
-  onlyFlight?: boolean;
-
-  @Field()
-  @IsOptional()
-  @IsBoolean()
-  paid?: boolean;
+  @IsEnum(PaymentStatus)
+  paymentStatus?: PaymentStatus;
 
   @Field({ nullable: true })
   @IsOptional()

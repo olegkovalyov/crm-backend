@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MemberInterface } from '../../members/interfaces/member.interface';
-import { ClientInterface } from '../interfaces/client.interface';
+import { ClientInterface, ClientType } from '../interfaces/client.interface';
 import { CreateClientInput } from '../inputs/create-client.input';
 import { v4 as uuid } from 'uuid';
 import { UpdateClientInput } from '../inputs/update-client.input';
@@ -21,16 +21,19 @@ export class ClientService {
 
   async createClient(createData: CreateClientInput): Promise<ClientInterface> {
     const {
+      type,
       status,
+      gender,
+      age,
       firstName,
       lastName,
-      gender,
+      email,
       weight,
       phone,
+      address,
       withHandCameraVideo,
       withCameraman,
-      onlyFlight,
-      paid,
+      paymentStatus,
       tmId,
       cameramanId,
       date,
@@ -40,26 +43,30 @@ export class ClientService {
     let tm: MemberInterface | null = null;
     let cameraman: MemberInterface | null = null;
 
-    if (tmId) {
-      tm = await this.memberModel.findOne({ id: tmId }).exec();
-    }
-
-    if (cameramanId) {
-      cameraman = await this.memberModel.findOne({ id: cameramanId }).exec();
+    if (type === ClientType.TANDEM) {
+      if (tmId) {
+        tm = await this.memberModel.findOne({ id: tmId }).exec();
+      }
+      if (cameramanId) {
+        cameraman = await this.memberModel.findOne({ id: cameramanId }).exec();
+      }
     }
 
     return this.clientModel.create({
       id: uuid(),
+      type,
       status,
+      gender,
+      age,
       firstName,
       lastName,
-      gender,
+      email: email ?? null,
       weight,
       phone,
+      address,
       withHandCameraVideo,
       withCameraman,
-      onlyFlight,
-      paid,
+      paymentStatus,
       tm,
       cameraman,
       date: date ?? null,
@@ -70,16 +77,19 @@ export class ClientService {
   async updateClient(updateData: UpdateClientInput): Promise<ClientInterface> {
     const {
       id,
+      type,
       status,
+      gender,
+      age,
       firstName,
       lastName,
-      gender,
+      email,
       weight,
       phone,
+      address,
       withHandCameraVideo,
       withCameraman,
-      onlyFlight,
-      paid,
+      paymentStatus,
       tmId,
       cameramanId,
       date,
@@ -96,6 +106,14 @@ export class ClientService {
       client.status = status;
     }
 
+    if (age) {
+      client.age = age;
+    }
+
+    if (gender) {
+      client.gender = gender;
+    }
+
     if (firstName) {
       client.firstName = firstName;
     }
@@ -104,8 +122,8 @@ export class ClientService {
       client.lastName = lastName;
     }
 
-    if (gender) {
-      client.gender = gender;
+    if (email) {
+      client.email = email;
     }
 
     if (weight) {
@@ -116,6 +134,10 @@ export class ClientService {
       client.phone = phone;
     }
 
+    if (address) {
+      client.address = address;
+    }
+
     if (withHandCameraVideo) {
       client.withHandCameraVideo = withHandCameraVideo;
     }
@@ -124,24 +146,29 @@ export class ClientService {
       client.withCameraman = withCameraman;
     }
 
-    if (onlyFlight) {
-      client.onlyFlight = onlyFlight;
+    if (paymentStatus) {
+      client.paymentStatus = paymentStatus;
     }
 
-    if (paid) {
-      client.paid = paid;
+    if (type) {
+      client.type = type;
     }
 
-    let tm, cameraman: MemberInterface | null;
+    let tm: MemberInterface | null = null;
+    let cameraman: MemberInterface | null = null;
 
-    if (tmId) {
-      tm = await this.memberModel.findOne({ id: tmId }).exec();
-      client.tm = tm;
-    }
-
-    if (cameramanId) {
-      cameraman = await this.memberModel.findOne({ id: cameramanId }).exec();
-      client.cameraman = cameraman;
+    if (client.type === ClientType.TANDEM) {
+      if (tmId) {
+        tm = await this.memberModel.findOne({ id: tmId }).exec();
+        client.tm = tm;
+      }
+      if (cameramanId) {
+        cameraman = await this.memberModel.findOne({ id: cameramanId }).exec();
+        client.cameraman = cameraman;
+      }
+    } else {
+      client.tm = null;
+      client.cameraman = null;
     }
 
 
