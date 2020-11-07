@@ -58,4 +58,7 @@ export class ClientModel {
 
   @Field({ nullable: true })
   notes: string;
+
+  @Field({ nullable: true })
+  certificate: string;
 }

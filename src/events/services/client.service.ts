@@ -38,6 +38,7 @@ export class ClientService {
       cameramanId,
       date,
       notes,
+      certificate,
     } = createData;
 
     let tm: MemberInterface | null = null;
@@ -71,6 +72,7 @@ export class ClientService {
       cameraman,
       date: date ?? null,
       notes: notes ?? null,
+      certificate: certificate ?? null,
     });
   }
 
@@ -94,6 +96,7 @@ export class ClientService {
       cameramanId,
       date,
       notes,
+      certificate,
     } = updateData;
 
     const client = await this.clientModel.findOne({ id: updateData.id });
@@ -106,12 +109,20 @@ export class ClientService {
       client.status = status;
     }
 
+    if (type) {
+      client.type = type;
+    }
+
     if (age) {
       client.age = age;
     }
 
     if (gender) {
       client.gender = gender;
+    }
+
+    if (weight) {
+      client.weight = weight;
     }
 
     if (firstName) {
@@ -126,23 +137,23 @@ export class ClientService {
       client.email = email;
     }
 
-    if (weight) {
-      client.weight = weight;
-    }
-
     if (phone) {
       client.phone = phone;
+    }
+
+    if (email) {
+      client.email = email;
     }
 
     if (address) {
       client.address = address;
     }
 
-    if (withHandCameraVideo) {
+    if (withHandCameraVideo !== undefined) {
       client.withHandCameraVideo = withHandCameraVideo;
     }
 
-    if (withCameraman) {
+    if (withCameraman !== undefined) {
       client.withCameraman = withCameraman;
     }
 
@@ -150,9 +161,6 @@ export class ClientService {
       client.paymentStatus = paymentStatus;
     }
 
-    if (type) {
-      client.type = type;
-    }
 
     let tm: MemberInterface | null = null;
     let cameraman: MemberInterface | null = null;
@@ -178,6 +186,10 @@ export class ClientService {
 
     if (notes) {
       client.notes = notes;
+    }
+
+    if (certificate) {
+      client.certificate = certificate;
     }
 
     return client.save();

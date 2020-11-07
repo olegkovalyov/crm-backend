@@ -21,6 +21,7 @@ export interface ClientInterface extends Document {
   paymentStatus: PaymentStatus;
   date: Date | null;
   notes: string | null;
+  certificate: string | null;
 }
 
 export enum ClientStatus {
@@ -36,7 +37,7 @@ export enum PaymentStatus {
 }
 
 export enum Gender {
-  MAIL = 'MALE',
+  MALE = 'MALE',
   FEMALE = 'FEMALE',
 }
 

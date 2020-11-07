@@ -18,17 +18,17 @@ export class UpdateClientInput {
   @IsNotEmpty()
   id: string;
 
-  @Field()
+  @Field(type => ClientType)
   @IsOptional()
   @IsEnum(ClientType)
   type?: ClientType;
 
-  @Field()
+  @Field(type => ClientStatus)
   @IsOptional()
   @IsEnum(ClientStatus)
   status?: ClientStatus;
 
-  @Field()
+  @Field(type => Gender)
   @IsOptional()
   @IsEnum(Gender)
   gender?: Gender;
@@ -84,7 +84,7 @@ export class UpdateClientInput {
   @IsBoolean()
   withCameraman?: boolean;
 
-  @Field()
+  @Field(type => PaymentStatus)
   @IsOptional()
   @IsEnum(PaymentStatus)
   paymentStatus?: PaymentStatus;
@@ -105,4 +105,8 @@ export class UpdateClientInput {
   @Field({ nullable: true })
   @IsOptional()
   notes?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  certificate?: string;
 }

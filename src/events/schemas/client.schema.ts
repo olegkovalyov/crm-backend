@@ -4,16 +4,19 @@ const types = mongoose.Schema.Types;
 
 export const ClientSchema = new mongoose.Schema({
   id: types.String,
+  type: types.String,
   status: types.String,
-  firstName: types.String,
-  lastName: types.String,
-  phone: types.String,
   gender: types.String,
   weight: types.Number,
+  age: types.Number,
+  firstName: types.String,
+  lastName: types.String,
+  email: types.String,
+  phone: types.String,
+  address: types.String,
+  paymentStatus: types.String,
   withHandCameraVideo: types.Boolean,
   withCameraman: types.Boolean,
-  onlyFlight: types.Boolean,
-  paid: types.Boolean,
   tm: {
     type: types.ObjectId,
     ref: 'Member',
@@ -24,6 +27,7 @@ export const ClientSchema = new mongoose.Schema({
   },
   date: types.Date,
   notes: types.String,
+  certificate: types.String,
 });
 
 export const PassengerMongooseModel = mongoose.model('Client', ClientSchema);

@@ -14,15 +14,15 @@ import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/c
 @InputType()
 export class CreateClientInput {
 
-  @Field()
+  @Field(type => ClientType)
   @IsEnum(ClientType)
   type: ClientType;
 
-  @Field()
+  @Field(type => ClientStatus)
   @IsEnum(ClientStatus)
   status: ClientStatus;
 
-  @Field()
+  @Field(type => Gender)
   @IsEnum(Gender)
   gender: Gender;
 
@@ -77,7 +77,7 @@ export class CreateClientInput {
   @IsBoolean()
   withCameraman: boolean;
 
-  @Field()
+  @Field(type => PaymentStatus)
   @IsEnum(PaymentStatus)
   paymentStatus: PaymentStatus;
 
@@ -98,4 +98,8 @@ export class CreateClientInput {
   @Field({ nullable: true })
   @IsOptional()
   notes: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  certificate: string;
 }
