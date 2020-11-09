@@ -100,7 +100,7 @@ export class UpdateClientInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsDate()
-  date?: Date;
+  processedAt?: Date;
 
   @Field({ nullable: true })
   @IsOptional()

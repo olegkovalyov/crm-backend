@@ -89,11 +89,10 @@ export class CreateClientInput {
   @IsOptional()
   cameramanId: string;
 
-
   @Field({ nullable: true })
   @IsOptional()
   @IsDate()
-  date: Date;
+  processedAt: Date;
 
   @Field({ nullable: true })
   @IsOptional()

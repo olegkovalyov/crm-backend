@@ -5,6 +5,7 @@ import { ClientInterface } from '../interfaces/client.interface';
 import { ClientService } from '../services/client.service';
 import { UpdateClientInput } from '../inputs/update-client.input';
 import { EventService } from '../services/event.service';
+import { GetClientsFilterInput } from '../inputs/get-clients-filter.input';
 
 @Resolver(of => ClientModel)
 export class ClientResolver {
@@ -15,8 +16,8 @@ export class ClientResolver {
   }
 
   @Query(returns => [ClientModel])
-  async getClients(): Promise<ClientInterface[]> {
-    return this.clientService.getClients();
+  async getClients(@Args('getClientsFilterInput') getClientsFilterInput: GetClientsFilterInput): Promise<ClientInterface[]> {
+    return this.clientService.getClients(getClientsFilterInput);
   }
 
   @Mutation(returns => ClientModel)

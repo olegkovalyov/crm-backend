@@ -19,7 +19,8 @@ export interface ClientInterface extends Document {
   tm: MemberInterface | null;
   cameraman: MemberInterface | null;
   paymentStatus: PaymentStatus;
-  date: Date | null;
+  createdAt: Date;
+  processedAt: Date | null;
   notes: string | null;
   certificate: string | null;
 }

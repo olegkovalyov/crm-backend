@@ -25,7 +25,8 @@ export const ClientSchema = new mongoose.Schema({
     type: types.ObjectId,
     ref: 'Member',
   },
-  date: types.Date,
+  createdAt: types.Date,
+  processedAt: types.Date,
   notes: types.String,
   certificate: types.String,
 });

@@ -53,8 +53,11 @@ export class ClientModel {
   @Field(type => MemberModel, { nullable: true })
   cameraman: MemberModel;
 
+  @Field()
+  createdAt: Date;
+
   @Field({ nullable: true })
-  date: Date;
+  processedAt: Date;
 
   @Field({ nullable: true })
   notes: string;

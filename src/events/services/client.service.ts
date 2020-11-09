@@ -6,6 +6,7 @@ import { ClientInterface, ClientType } from '../interfaces/client.interface';
 import { CreateClientInput } from '../inputs/create-client.input';
 import { v4 as uuid } from 'uuid';
 import { UpdateClientInput } from '../inputs/update-client.input';
+import { GetClientsFilterInput } from '../inputs/get-clients-filter.input';
 
 @Injectable()
 export class ClientService {
@@ -15,8 +16,35 @@ export class ClientService {
   ) {
   }
 
-  async getClients(): Promise<ClientInterface[]> {
-    return this.clientModel.find().populate('tm').populate('cameraman');
+  async getClients(filterParams: GetClientsFilterInput): Promise<ClientInterface[]> {
+    const conditions = {};
+
+    if (filterParams.clientStatuses) {
+      conditions['status'] = { $in: filterParams.clientStatuses };
+    }
+    if (filterParams.paymentStatuses) {
+      conditions['paymentStatus'] = { $in: filterParams.paymentStatuses };
+    }
+
+
+    if (filterParams.createdAtMin
+      || filterParams.createdAtMax
+    ) {
+      let dateCondition = {};
+      if (filterParams.createdAtMin) {
+        dateCondition = { $gte: filterParams.createdAtMin, ...dateCondition };
+      }
+      if (filterParams.createdAtMax) {
+        dateCondition = { $lte: filterParams.createdAtMax, ...dateCondition };
+      }
+      conditions['createdAt'] = dateCondition;
+    }
+
+
+    return this.clientModel.find(conditions)
+      .sort({ createdAt: -1 })
+      .populate('tm')
+      .populate('cameraman');
   }
 
   async createClient(createData: CreateClientInput): Promise<ClientInterface> {
@@ -36,7 +64,7 @@ export class ClientService {
       paymentStatus,
       tmId,
       cameramanId,
-      date,
+      processedAt,
       notes,
       certificate,
     } = createData;
@@ -70,7 +98,8 @@ export class ClientService {
       paymentStatus,
       tm,
       cameraman,
-      date: date ?? null,
+      createdAt: new Date(),
+      processedAt: processedAt ?? null,
       notes: notes ?? null,
       certificate: certificate ?? null,
     });
@@ -94,7 +123,7 @@ export class ClientService {
       paymentStatus,
       tmId,
       cameramanId,
-      date,
+      processedAt,
       notes,
       certificate,
     } = updateData;
@@ -180,8 +209,8 @@ export class ClientService {
     }
 
 
-    if (date) {
-      client.date = date;
+    if (processedAt) {
+      client.processedAt = processedAt;
     }
 
     if (notes) {
