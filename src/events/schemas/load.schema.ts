@@ -11,6 +11,18 @@ export const LoadSchema = new mongoose.Schema({
   status: types.String,
   date: types.Date,
   loadNumber: types.Number,
+  members: [
+    {
+      type: types.ObjectId,
+      ref: 'Member',
+    },
+  ],
+  clients: [
+    {
+      type: types.ObjectId,
+      ref: 'Client',
+    },
+  ],
   aircraft: types.String,
   notes: types.String,
 });

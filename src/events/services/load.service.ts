@@ -19,8 +19,17 @@ export class LoadService {
   ) {
   }
 
-  async getLoads(): Promise<ILoad[]> {
-    return this.loadModel.find().populate('event');
+  async getLoads(eventId: string): Promise<ILoad[]> {
+    const event = await this.eventModel.findOne({ id: eventId }).exec();
+    if (!event) {
+      throw new BadRequestException('Event not found');
+    }
+
+    return this.loadModel
+      .find({ event: event._id })
+      .populate('event')
+      .populate('members')
+      .populate('clients');
   }
 
   async createLoad(createData: CreateLoadInput): Promise<ILoad> {
@@ -30,10 +39,14 @@ export class LoadService {
       date,
       loadNumber,
       aircraft,
+      memberIds,
+      clientIds,
       notes,
     } = createData;
 
     const event = await this.eventModel.findOne({ id: eventId });
+    const members = await this.memberModel.find({ id: { $in: memberIds } }).exec();
+    const clients = await this.clientModel.find({ id: { $in: clientIds } }).exec();
 
     if (!event) {
       throw new BadRequestException(`Event with id: ${eventId} doesnt exists`);
@@ -46,6 +59,8 @@ export class LoadService {
       date,
       loadNumber,
       aircraft,
+      members,
+      clients,
       notes: notes ? notes : null,
     });
 

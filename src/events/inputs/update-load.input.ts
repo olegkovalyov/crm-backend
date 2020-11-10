@@ -27,6 +27,14 @@ export class UpdateLoadInput {
   @IsOptional()
   aircraft?: string;
 
+  @Field(type => [String])
+  @IsOptional()
+  memberIds?: string[];
+
+  @Field(type => [String])
+  @IsOptional()
+  clientIds?: string[];
+
   @Field({ nullable: true })
   @IsOptional()
   notes?: string;

@@ -18,6 +18,7 @@ export class ClientService {
 
   async getClients(filterParams: GetClientsFilterInput): Promise<ClientInterface[]> {
     const conditions = {};
+    console.log(filterParams);
 
     if (filterParams.clientStatuses) {
       conditions['status'] = { $in: filterParams.clientStatuses };

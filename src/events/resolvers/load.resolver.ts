@@ -13,8 +13,8 @@ export class LoadResolver {
   }
 
   @Query(returns => [LoadModel])
-  async getLoads(): Promise<ILoad[]> {
-    return this.loadService.getLoads();
+  async getLoads(@Args('eventId') eventId: string): Promise<ILoad[]> {
+    return this.loadService.getLoads(eventId);
   }
 
   @Mutation(returns => LoadModel)

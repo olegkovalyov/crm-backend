@@ -24,6 +24,12 @@ export class CreateLoadInput {
   @IsNotEmpty()
   aircraft: string;
 
+  @Field(type => [String])
+  memberIds: string[];
+
+  @Field(type => [String])
+  clientIds: string[];
+
   @Field({ nullable: true })
   @IsOptional()
   notes?: string;
