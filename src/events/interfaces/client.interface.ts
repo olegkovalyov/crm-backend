@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
-import { MemberInterface } from '../../members/interfaces/member.interface';
 import { registerEnumType } from '@nestjs/graphql';
+import { MemberModel } from '../../users/models/member.model';
 
 export interface ClientInterface extends Document {
   id: string,
@@ -16,8 +16,8 @@ export interface ClientInterface extends Document {
   address: string;
   withHandCameraVideo: boolean;
   withCameraman: boolean;
-  tm: MemberInterface | null;
-  cameraman: MemberInterface | null;
+  tm: MemberModel;
+  cameraman: MemberModel;
   paymentStatus: PaymentStatus;
   createdAt: Date;
   processedAt: Date | null;

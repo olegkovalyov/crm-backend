@@ -3,16 +3,18 @@ import { ClientResolver } from './resolvers/client.resolver';
 import { ClientService } from './services/client.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ClientSchema } from './schemas/client.schema';
-import { MembersModule } from '../members/membersModule';
 import { EventSchema } from './schemas/event.schema';
 import { EventResolver } from './resolvers/event.resolver';
 import { EventService } from './services/event.service';
 import { LoadService } from './services/load.service';
 import { LoadResolver } from './resolvers/load.resolver';
 import { LoadSchema } from './schemas/load.schema';
+import { CoreModule } from '../core/core.module';
+import { UsersModule } from '../users/usersModule';
 
 @Module({
   imports: [
+    CoreModule,
     MongooseModule.forFeature(
       [
         { name: 'Event', schema: EventSchema },
@@ -20,7 +22,7 @@ import { LoadSchema } from './schemas/load.schema';
         { name: 'Client', schema: ClientSchema },
       ],
     ),
-    MembersModule,
+    UsersModule,
   ],
   providers: [
     EventService,

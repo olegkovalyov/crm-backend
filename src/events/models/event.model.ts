@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { LoadModel } from './load.model';
-import { MemberModel } from '../../members/models/member.model';
+import { MemberModel } from '../../users/models/member.model';
+
 
 @ObjectType()
 export class EventModel {

@@ -11,24 +11,24 @@ export class LoadResolver {
     private readonly loadService: LoadService,
   ) {
   }
-
-  @Query(returns => [LoadModel])
-  async getLoads(@Args('eventId') eventId: string): Promise<ILoad[]> {
-    return this.loadService.getLoads(eventId);
-  }
-
-  @Mutation(returns => LoadModel)
-  async createLoad(@Args('createLoadData') createData: CreateLoadInput): Promise<ILoad> {
-    return this.loadService.createLoad(createData);
-  }
-
-  @Mutation(returns => LoadModel)
-  async updateLoad(@Args('updateLoadData') updateData: UpdateLoadInput): Promise<ILoad> {
-    return this.loadService.updateLoad(updateData);
-  }
-
-  @Mutation(returns => LoadModel, { nullable: true })
-  async removeLoad(@Args('id') id: string) {
-    return this.loadService.removeLoadById(id);
-  }
+  //
+  // @Query(returns => [LoadModel])
+  // async getLoads(@Args('eventId') eventId: string): Promise<ILoad[]> {
+  //   return this.loadService.getLoads(eventId);
+  // }
+  //
+  // @Mutation(returns => LoadModel)
+  // async createLoad(@Args('createLoadData') createData: CreateLoadInput): Promise<ILoad> {
+  //   return this.loadService.createLoad(createData);
+  // }
+  //
+  // @Mutation(returns => LoadModel)
+  // async updateLoad(@Args('updateLoadData') updateData: UpdateLoadInput): Promise<ILoad> {
+  //   return this.loadService.updateLoad(updateData);
+  // }
+  //
+  // @Mutation(returns => LoadModel, { nullable: true })
+  // async removeLoad(@Args('id') id: string) {
+  //   return this.loadService.removeLoadById(id);
+  // }
 }

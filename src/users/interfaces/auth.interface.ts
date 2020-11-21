@@ -1,9 +1,9 @@
-export interface ITokens {
+export interface Tokens {
   accessToken: string,
   refreshToken: string,
 }
 
-export interface IDecodedRefreshToken {
+export interface DecodedRefreshTokenInterface {
   email: string,
   iat: number,
   exp: number

@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
-import { MemberAccessTokenPayloadInterface, MemberRole } from '../../members/interfaces/member.interface';
+import { MemberAccessTokenPayloadInterface, MemberRole } from '../interfaces/member.interface';
 
 @Injectable()
 export class IsAdminOrManifestGuard implements CanActivate {

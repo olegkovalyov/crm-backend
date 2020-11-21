@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { MemberRole, MemberStatus } from '../interfaces/member.interface';
 import { ArrayUnique, IsOptional } from 'class-validator';
+import { MemberRole, MemberStatus } from '../interfaces/member.interface';
 
 @InputType()
 export class GetMembersFilterInput {

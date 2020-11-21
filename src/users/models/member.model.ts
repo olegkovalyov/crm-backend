@@ -1,12 +1,15 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { LicenseType, MemberRole, MemberStatus } from '../interfaces/member.interface';
 
 
 @ObjectType()
 export class MemberModel {
 
-  @Field()
-  id: string;
+  @Field(type => Int)
+  id: number;
+
+  @Field(type => Int)
+  userId: number;
 
   @Field(type => MemberStatus)
   status: MemberStatus;

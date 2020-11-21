@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { MemberModel } from '../../members/models/member.model';
 import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
+import { MemberModel } from '../../users/models/member.model';
 
 @ObjectType()
 export class ClientModel {
