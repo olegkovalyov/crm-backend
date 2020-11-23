@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsDate, IsEmail,
@@ -14,9 +14,9 @@ import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/c
 @InputType()
 export class UpdateClientInput {
 
-  @Field()
+  @Field(type => Int)
   @IsNotEmpty()
-  id: string;
+  id: number;
 
   @Field(type => ClientType)
   @IsOptional()
@@ -89,13 +89,13 @@ export class UpdateClientInput {
   @IsEnum(PaymentStatus)
   paymentStatus?: PaymentStatus;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   @IsOptional()
-  tmId?: string;
+  tmId: number;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   @IsOptional()
-  cameramanId?: string;
+  cameramanId: number;
 
   @Field({ nullable: true })
   @IsOptional()

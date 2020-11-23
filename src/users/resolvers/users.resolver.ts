@@ -23,6 +23,13 @@ import { RandomStringService } from '@akanass/nestjsx-crypto';
 import { ResetPasswordInput } from '../inputs/reset-password.input';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminOrManifestGuard } from '../guards/is-admin-or-manifest-guard.guard';
+import { ClientModel } from '../models/client.model';
+import { CreateClientInput } from '../inputs/create-client.input';
+import { ClientsService } from '../services/clients.service';
+import { Client } from '../entities/client.entity';
+import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
+import { GetClientsFilterInput } from '../inputs/get-clients-filter.input';
+import { UpdateClientInput } from '../inputs/update-client.input';
 
 @Resolver('User')
 export class UsersResolver {
@@ -34,6 +41,7 @@ export class UsersResolver {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly randomStringService: RandomStringService,
+    private readonly clientsService: ClientsService,
   ) {
   }
 
@@ -255,6 +263,41 @@ export class UsersResolver {
     };
   }
 
+
+  @Mutation(returns => ClientModel)
+  async createClient(@Args('createClientData') createData: CreateClientInput): Promise<ClientModel> {
+    const newClient = await this.clientsService.createClient(createData);
+    return this.prepareClient(newClient);
+  }
+
+
+  @Query(returns => ClientModel, { nullable: true })
+  async getClient(@Args('id', { type: () => Int }) id: number): Promise<ClientModel> {
+    const client = await this.clientsService.getClientById(id);
+    if (!client) {
+      throw new BadRequestException('Client not found');
+    }
+    return this.prepareClient(client);
+  }
+
+  @Query(returns => [ClientModel])
+  async getClients(@Args('getClientsFilterInput') getClientsFilterInput: GetClientsFilterInput): Promise<ClientModel[]> {
+    const clients = await this.clientsService.getClients(getClientsFilterInput);
+    return clients.map(client => this.prepareClient(client));
+  }
+
+  @Mutation(returns => ClientModel)
+  async updateClient(@Args('updateClientData') updateData: UpdateClientInput): Promise<ClientModel> {
+    const client = await this.clientsService.updateClient(updateData);
+    return this.prepareClient(client);
+  }
+
+  @Mutation(returns => Boolean)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  async deleteClient(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
+    return this.clientsService.deleteClientById(id);
+  }
+
   prepareMember(member: Member):
     MemberModel {
     return {
@@ -268,6 +311,32 @@ export class UsersResolver {
       licenseType: member.licenseType,
       createdAt: member.createdAt,
       updatedAt: member.updatedAt,
+    };
+  }
+
+  prepareClient(client: Client): ClientModel {
+    return {
+      id: client.id,
+      userId: client.user.id,
+      status: client.status,
+      paymentStatus: client.paymentStatus,
+      type: client.type,
+      gender: client.gender,
+      age: client.age,
+      firstName: client.firstName,
+      lastName: client.lastName,
+      email: client.email,
+      weight: client.weight,
+      phone: client.phone,
+      address: client.address,
+      withHandCameraVideo: client.withHandCameraVideo,
+      withCameraman: client.withCameraman,
+      notes: client.notes,
+      certificate: client.certificate,
+      tm: client.tm,
+      cameraman: client.cameraman,
+      createdAt: client.createdAt,
+      processedAt: client.processedAt,
     };
   }
 }

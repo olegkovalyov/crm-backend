@@ -2,8 +2,8 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { IsEnum } from 'class-validator';
 import { LoadStatus } from '../interfaces/load.interface';
 import { EventModel } from './event.model';
-import { ClientModel } from './client.model';
 import { MemberModel } from '../../users/models/member.model';
+import { ClientModel } from '../../users/models/client.model';
 
 
 @ObjectType()

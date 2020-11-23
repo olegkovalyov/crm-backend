@@ -10,12 +10,10 @@ import { UserType } from '../interfaces/user.interface';
 import { GetMembersFilterInput } from '../inputs/get-members-filter.input';
 import { UpdateMemberInput } from '../inputs/update-member.input';
 import { MemberRole } from '../interfaces/member.interface';
+import { Client } from '../entities/client.entity';
 
 @Injectable({ scope: Scope.REQUEST })
 export class MembersService {
-
-  private membersQueryBuilder: SelectQueryBuilder<Member>;
-  private usersQueryBuilder: SelectQueryBuilder<User>;
   private queryRunner: QueryRunner;
 
   constructor(
@@ -26,38 +24,47 @@ export class MembersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Member)
     private readonly membersRepository: Repository<Member>,
+    @InjectRepository(Client)
+    private readonly clientsRepository: Repository<Client>,
   ) {
-    this.membersQueryBuilder = this.membersRepository.createQueryBuilder('member');
-    this.usersQueryBuilder = this.usersRepository.createQueryBuilder('user');
-    this.queryRunner = this.connection.createQueryRunner();
   }
 
   async getMembers(filterParams: GetMembersFilterInput): Promise<Member[]> {
 
-    this.membersQueryBuilder.leftJoinAndSelect('member.user', 'user');
+    const membersQueryBuilder = this.membersRepository.createQueryBuilder('member');
+
+    membersQueryBuilder.leftJoinAndSelect('member.user', 'user');
     if (filterParams.roles
       || filterParams.statuses
     ) {
+
+      const queryParts = [];
+      const queryParameters = [];
+
       if (filterParams.roles
         && filterParams.roles.length
       ) {
-        this.membersQueryBuilder.where(
-          'member.roles && ARRAY[:...roles]::member_roles_enum[]',
-          { roles: filterParams.roles },
-        );
+        queryParts.push('member.roles && ARRAY[:...roles]::member_roles_enum[]');
+        queryParameters.push({ roles: filterParams.roles });
       }
 
       if (filterParams.statuses
         && filterParams.statuses.length
       ) {
-        this.membersQueryBuilder.where(
-          'member.status IN(:...statuses)',
-          { statuses: filterParams.statuses },
-        );
+        queryParts.push('member.status IN(:...statuses)');
+        queryParameters.push({ statuses: filterParams.statuses });
+      }
+
+      for (let i = 0; i < queryParts.length; i++) {
+        if (i === 0) {
+          membersQueryBuilder.where(queryParts[i], queryParameters[i]);
+        } else {
+          membersQueryBuilder.andWhere(queryParts[i], queryParameters[i]);
+        }
       }
     }
 
-    return this.membersQueryBuilder.getMany();
+    return membersQueryBuilder.getMany();
   }
 
 
@@ -69,6 +76,7 @@ export class MembersService {
       throw new BadRequestException('Member with this email already exists');
     }
 
+    this.queryRunner = this.connection.createQueryRunner();
     await this.queryRunner.connect();
     await this.queryRunner.startTransaction();
 
@@ -100,13 +108,15 @@ export class MembersService {
   }
 
   async getMemberByEmail(email: string): Promise<Member> {
-    return this.membersQueryBuilder.leftJoinAndSelect('member.user', 'user')
+    return this.membersRepository.createQueryBuilder('member')
+      .leftJoinAndSelect('member.user', 'user')
       .where('member.email = :email', { email: email })
       .getOne();
   }
 
   async getMemberById(id: number): Promise<Member> {
-    const member = this.membersQueryBuilder.leftJoinAndSelect('member.user', 'user')
+    const member = this.membersRepository.createQueryBuilder('member')
+      .leftJoinAndSelect('member.user', 'user')
       .where('member.id = :id', { id: id })
       .getOne();
     return member;
@@ -174,29 +184,65 @@ export class MembersService {
     if (!member) {
       throw new BadRequestException(`Member with id: ${id} doesn't exists`);
     }
-    const memberDeleteResult = await getConnection()
-      .createQueryBuilder()
-      .delete()
-      .from(Member)
-      .where('id = :id', { id: id })
-      .execute();
 
-    const userDeleteResult = await getConnection()
-      .createQueryBuilder()
-      .delete()
-      .from(User)
-      .where('id = :id', { id: member.user.id })
-      .execute();
-    if (memberDeleteResult.affected !== 1
-      || userDeleteResult.affected !== 1
-    ) {
+    const clientsWithTm = await this.clientsRepository
+      .createQueryBuilder('client')
+      .where('client.tmId = :tmId', { tmId: id })
+      .getMany();
+
+    const clientsWithCameraman = await this.clientsRepository
+      .createQueryBuilder('client')
+      .where('client.cameramanId = :cameramanId', { cameramanId: id })
+      .getMany();
+
+    this.queryRunner = this.connection.createQueryRunner();
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
+
+    try {
+
+      for (const client of clientsWithTm) {
+        client.tm = null;
+        await this.queryRunner.connection
+          .getRepository(Client)
+          .save(client);
+      }
+
+      for (const client of clientsWithCameraman) {
+        client.cameraman = null;
+        await this.queryRunner.connection
+          .getRepository(Client)
+          .save(client);
+      }
+
+      const memberDeleteResult = await this.queryRunner.connection
+        .createQueryBuilder()
+        .delete()
+        .from(Member)
+        .where('id = :id', { id: id })
+        .execute();
+
+      const userDeleteResult = await this.queryRunner.connection
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where('id = :id', { id: member.user.id })
+        .execute();
+      await this.queryRunner.commitTransaction();
+      return memberDeleteResult.affected == 1
+        && userDeleteResult.affected == 1;
+
+    } catch (e) {
+      await this.queryRunner.rollbackTransaction();
       throw new BadRequestException(`Failed to delete member with id: ${id}`);
+    } finally {
+      await this.queryRunner.release();
     }
-    return true;
   }
 
   async getMembersByRoles(roles: MemberRole[]): Promise<Member[]> {
-    return this.membersQueryBuilder
+    return this.membersRepository
+      .createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
       .where('member.roles && ARRAY[:...roles]::member_roles_enum[]', { roles: roles })
       .getMany();
@@ -228,7 +274,8 @@ export class MembersService {
   }
 
   async getMemberByResetToken(token: string): Promise<Member> {
-    return await this.membersQueryBuilder
+    return await this.membersRepository
+      .createQueryBuilder('member')
       .where('member.resetPasswordToken = :token', { token: token })
       .getOne();
   }

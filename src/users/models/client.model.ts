@@ -1,12 +1,15 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
-import { MemberModel } from '../../users/models/member.model';
+import { UserModel } from './user.model';
 
 @ObjectType()
 export class ClientModel {
 
-  @Field()
-  id: string;
+  @Field( type => Int)
+  id: number;
+
+  @Field( type => Int)
+  userId: number;
 
   @Field(type => ClientType)
   type: ClientType;
@@ -44,24 +47,24 @@ export class ClientModel {
   @Field()
   withCameraman: boolean;
 
+  @Field({ nullable: true })
+  notes: string;
+
+  @Field({ nullable: true })
+  certificate: string;
+
   @Field(type => PaymentStatus)
   paymentStatus: PaymentStatus;
 
-  @Field(type => MemberModel, { nullable: true })
-  tm: MemberModel;
+  @Field(type => UserModel, { nullable: true })
+  tm: UserModel;
 
-  @Field(type => MemberModel, { nullable: true })
-  cameraman: MemberModel;
+  @Field(type => UserModel, { nullable: true })
+  cameraman: UserModel;
 
   @Field()
   createdAt: Date;
 
   @Field({ nullable: true })
   processedAt: Date;
-
-  @Field({ nullable: true })
-  notes: string;
-
-  @Field({ nullable: true })
-  certificate: string;
 }

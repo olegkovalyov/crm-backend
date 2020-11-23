@@ -1,9 +1,6 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Resolver } from '@nestjs/graphql';
 import { EventModel } from '../models/event.model';
 import { EventService } from '../services/event.service';
-import { EventInterface } from '../interfaces/event.interface';
-import { CreateEventInput } from '../inputs/create-event.input';
-import { UpdateEventInput } from '../inputs/update-event.input';
 
 @Resolver(of => EventModel)
 export class EventResolver {

@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsDate, IsEmail,
@@ -10,6 +10,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
+import { In } from 'typeorm';
 
 @InputType()
 export class CreateClientInput {
@@ -81,18 +82,13 @@ export class CreateClientInput {
   @IsEnum(PaymentStatus)
   paymentStatus: PaymentStatus;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   @IsOptional()
-  tmId: string;
+  tmId: number;
 
-  @Field({ nullable: true })
+  @Field(type => Int, { nullable: true })
   @IsOptional()
-  cameramanId: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsDate()
-  processedAt: Date;
+  cameramanId: number;
 
   @Field({ nullable: true })
   @IsOptional()

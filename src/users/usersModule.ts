@@ -8,6 +8,8 @@ import { MembersService } from './services/members.service';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './passport-strategies/jwt.strategy';
 import { RandomStringService } from '@akanass/nestjsx-crypto';
+import { Client } from './entities/client.entity';
+import { ClientsService } from './services/clients.service';
 
 @Module({
   imports: [
@@ -15,15 +17,17 @@ import { RandomStringService } from '@akanass/nestjsx-crypto';
     TypeOrmModule.forFeature([
       User,
       Member,
+      Client,
     ]),
   ],
   exports: [],
   providers: [
     UsersResolver,
     MembersService,
+    ClientsService,
     AuthService,
     JwtStrategy,
-    RandomStringService
+    RandomStringService,
   ],
 })
 export class UsersModule {

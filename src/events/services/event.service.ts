@@ -1,16 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ClientInterface } from '../interfaces/client.interface';
-import { v4 as uuid } from 'uuid';
 import { EventInterface } from '../interfaces/event.interface';
-import { CreateEventInput } from '../inputs/create-event.input';
-import { UpdateEventInput } from '../inputs/update-event.input';
 
 @Injectable()
 export class EventService {
   constructor(
-    @InjectModel('Client') private clientModel: Model<ClientInterface>,
     @InjectModel('Event') private eventModel: Model<EventInterface>,
   ) {
   }
