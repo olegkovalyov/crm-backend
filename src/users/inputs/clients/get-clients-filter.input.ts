@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { ArrayUnique, IsOptional } from 'class-validator';
-import { ClientStatus, PaymentStatus } from '../interfaces/client.interface';
+import { ClientStatus, PaymentStatus } from '../../interfaces/client.interface';
 
 @InputType()
 export class GetClientsFilterInput {

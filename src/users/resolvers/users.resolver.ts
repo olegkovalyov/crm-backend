@@ -1,14 +1,14 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CreateMemberInput } from '../inputs/create-member.input';
+import { CreateMemberInput } from '../inputs/members/create-member.input';
 import { MembersService } from '../services/members.service';
 import { Member } from '../entities/member.entity';
 import { MemberModel } from '../models/member.model';
-import { GetMembersFilterInput } from '../inputs/get-members-filter.input';
+import { GetMembersFilterInput } from '../inputs/members/get-members-filter.input';
 import { BadRequestException, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { UpdateMemberInput } from '../inputs/update-member.input';
+import { UpdateMemberInput } from '../inputs/members/update-member.input';
 import { MemberRole } from '../interfaces/member.interface';
 import { AuthModel } from '../models/auth.model';
-import { LoginInput } from '../inputs/login.input';
+import { LoginInput } from '../inputs/auth/login.input';
 import * as bcrypt from 'bcryptjs';
 import { Response, Request } from 'express';
 import { AuthService } from '../services/auth.service';
@@ -17,19 +17,18 @@ import { ConfigService } from '@nestjs/config';
 import { ServerRequest, ServerResponse } from '../decorators/decorators';
 import { JwtService } from '@nestjs/jwt';
 import { DecodedRefreshTokenInterface } from '../interfaces/auth.interface';
-import { ForgotPasswordInput } from '../inputs/forgot-password.input';
+import { ForgotPasswordInput } from '../inputs/auth/forgot-password.input';
 import { ForgotPasswordModel } from '../models/forgot-password.model';
 import { RandomStringService } from '@akanass/nestjsx-crypto';
-import { ResetPasswordInput } from '../inputs/reset-password.input';
+import { ResetPasswordInput } from '../inputs/auth/reset-password.input';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { IsAdminOrManifestGuard } from '../guards/is-admin-or-manifest-guard.guard';
 import { ClientModel } from '../models/client.model';
-import { CreateClientInput } from '../inputs/create-client.input';
+import { CreateClientInput } from '../inputs/clients/create-client.input';
 import { ClientsService } from '../services/clients.service';
 import { Client } from '../entities/client.entity';
-import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
-import { GetClientsFilterInput } from '../inputs/get-clients-filter.input';
-import { UpdateClientInput } from '../inputs/update-client.input';
+import { GetClientsFilterInput } from '../inputs/clients/get-clients-filter.input';
+import { UpdateClientInput } from '../inputs/clients/update-client.input';
 
 @Resolver('User')
 export class UsersResolver {

@@ -2,15 +2,16 @@ import { BadRequestException, Inject, Injectable, InternalServerErrorException, 
 import { CONTEXT } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { Connection, getConnection, QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
+import { Connection, QueryRunner, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Member } from '../entities/member.entity';
-import { CreateMemberInput } from '../inputs/create-member.input';
+import { CreateMemberInput } from '../inputs/members/create-member.input';
 import { UserType } from '../interfaces/user.interface';
-import { GetMembersFilterInput } from '../inputs/get-members-filter.input';
-import { UpdateMemberInput } from '../inputs/update-member.input';
+import { GetMembersFilterInput } from '../inputs/members/get-members-filter.input';
+import { UpdateMemberInput } from '../inputs/members/update-member.input';
 import { MemberRole } from '../interfaces/member.interface';
 import { Client } from '../entities/client.entity';
+import { MemberModel } from '../models/member.model';
 
 @Injectable({ scope: Scope.REQUEST })
 export class MembersService {
@@ -120,6 +121,22 @@ export class MembersService {
       .where('member.id = :id', { id: id })
       .getOne();
     return member;
+  }
+
+  async getMembersByIds(ids: number[], roles: MemberRole[]): Promise<Member[]> {
+    const queryBuilder = this.membersRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect('member.user', 'user');
+
+    queryBuilder.where('member.id IN(:...ids)', { ids: ids });
+
+    if (roles.length) {
+      queryBuilder.andWhere('member.roles && ARRAY[:...roles]::member_roles_enum[]',
+        {
+          roles: roles,
+        });
+    }
+    return await queryBuilder.getMany();
   }
 
   async updateMember(updateData: UpdateMemberInput): Promise<Member> {
@@ -278,5 +295,20 @@ export class MembersService {
       .createQueryBuilder('member')
       .where('member.resetPasswordToken = :token', { token: token })
       .getOne();
+  }
+
+  transformToGraphQlMemberModel(member: Member): MemberModel {
+    return {
+      id: member.id,
+      userId: member.user.id,
+      status: member.status,
+      firstName: member.firstName,
+      lastName: member.lastName,
+      email: member.email,
+      roles: member.roles,
+      licenseType: member.licenseType,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+    };
   }
 }

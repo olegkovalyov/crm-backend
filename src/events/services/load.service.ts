@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { EventInterface } from '../interfaces/event.interface';
-import { ILoad } from '../interfaces/load.interface';
 
 @Injectable()
 export class LoadService {
   constructor(
-    @InjectModel('Event') private eventModel: Model<EventInterface>,
-    @InjectModel('Load') private loadModel: Model<ILoad>,
+    // @InjectModel('Event') private eventModel: Model<EventInterface>,
   ) {
   }
 

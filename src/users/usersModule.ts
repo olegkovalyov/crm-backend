@@ -20,7 +20,9 @@ import { ClientsService } from './services/clients.service';
       Client,
     ]),
   ],
-  exports: [],
+  exports: [
+    TypeOrmModule
+  ],
   providers: [
     UsersResolver,
     MembersService,

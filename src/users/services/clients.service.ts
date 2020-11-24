@@ -4,10 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Client } from '../entities/client.entity';
 import { UserType } from '../interfaces/user.interface';
-import { CreateClientInput } from '../inputs/create-client.input';
-import { GetClientsFilterInput } from '../inputs/get-clients-filter.input';
-import { UpdateClientInput } from '../inputs/update-client.input';
-import { Member } from '../entities/member.entity';
+import { CreateClientInput } from '../inputs/clients/create-client.input';
+import { GetClientsFilterInput } from '../inputs/clients/get-clients-filter.input';
+import { UpdateClientInput } from '../inputs/clients/update-client.input';
 
 @Injectable()
 export class ClientsService {

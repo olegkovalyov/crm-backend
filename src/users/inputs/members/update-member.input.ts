@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
-import { LicenseType, MemberRole, MemberStatus } from '../interfaces/member.interface';
+import { LicenseType, MemberRole, MemberStatus } from '../../interfaces/member.interface';
 
 @InputType()
 export class UpdateMemberInput {

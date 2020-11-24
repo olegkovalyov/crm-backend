@@ -1,6 +1,10 @@
-import { Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { EventModel } from '../models/event.model';
 import { EventService } from '../services/event.service';
+import { CreateEventInput } from '../inputs/events/create-event.input';
+import { GetEventsFilterInput } from '../inputs/events/get-events-filter.input';
+import { UpdateEventInput } from '../inputs/events/update-event.input';
+import { BadRequestException } from '@nestjs/common';
 
 @Resolver(of => EventModel)
 export class EventResolver {
@@ -8,30 +12,38 @@ export class EventResolver {
     private readonly eventService: EventService,
   ) {
   }
-  //
-  // @Query(returns => [EventModel])
-  // async getEvents(): Promise<EventInterface[]> {
-  //   return this.eventService.getEvents();
-  // }
-  //
-  // @Mutation(returns => EventModel)
-  // async createEvent(@Args('createEventData') createData: CreateEventInput): Promise<EventInterface> {
-  //   return this.eventService.createEvent(createData);
-  // }
-  //
-  // @Mutation(returns => EventModel)
-  // async updateEvent(@Args('updateEventData') updateData: UpdateEventInput): Promise<EventInterface> {
-  //   return this.eventService.updateEvent(updateData);
-  // }
-  //
-  // @Mutation(returns => EventModel, { nullable: true })
-  // async deleteEvent(@Args('id') id: string) {
-  //   return this.eventService.removeEventById(id);
-  // }
-  //
-  // @Query(returns => EventModel, { nullable: true })
-  // async getEvent(@Args('id') id: string): Promise<EventInterface> {
-  //   return this.eventService.getEventById(id);
-  // }
 
+  @Query(returns => [EventModel])
+  async getEvents(@Args('getEventsFilterInput') getEventsFilterInput: GetEventsFilterInput): Promise<EventModel[]> {
+    const events = await this.eventService.getEvents(getEventsFilterInput);
+    return Promise.all(events.map(event => this.eventService.transformToGraphQlEventModel(event)));
+  }
+
+  @Mutation(returns => EventModel)
+  async createEvent(@Args('createEventInput') createEventInput: CreateEventInput): Promise<EventModel> {
+    const event = await this.eventService.createEvent(createEventInput);
+    return this.eventService.transformToGraphQlEventModel(event);
+  }
+
+
+  @Mutation(returns => EventModel)
+  async updateEvent(@Args('updateEventInput') updateData: UpdateEventInput): Promise<EventModel> {
+    const updatedEvent = await this.eventService.updateEvent(updateData);
+    return this.eventService.transformToGraphQlEventModel(updatedEvent);
+  }
+
+  @Mutation(returns => Boolean)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  async deleteEvent(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
+    return this.eventService.deleteEventById(id);
+  }
+
+  @Query(returns => EventModel, { nullable: true })
+  async getEvent(@Args('id', { type: () => Int }) id: number): Promise<EventModel> {
+    const event = await this.eventService.getEventById(id);
+    if (!event) {
+      throw new BadRequestException('Event not found');
+    }
+    return this.eventService.transformToGraphQlEventModel(event);
+  }
 }

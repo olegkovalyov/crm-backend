@@ -1,12 +1,12 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { LoadModel } from './load.model';
 import { MemberModel } from '../../users/models/member.model';
 
 
 @ObjectType()
 export class EventModel {
-  @Field()
-  id: string;
+  @Field(type => Int)
+  id: number;
 
   @Field()
   name: string;
@@ -14,11 +14,11 @@ export class EventModel {
   @Field()
   date: Date;
 
-  @Field(type => [LoadModel])
-  loads: [LoadModel];
+  // @Field(type => [LoadModel])
+  // loads: [LoadModel];
 
-  @Field(type => [MemberModel])
-  staff: [MemberModel];
+  @Field(type => [MemberModel], { nullable: true })
+  staff: MemberModel[];
 
   @Field()
   notes: string;

@@ -9,85 +9,78 @@ import {
   MaxLength, Min,
   MinLength,
 } from 'class-validator';
-import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
+import { ClientStatus, ClientType, Gender, PaymentStatus } from '../../interfaces/client.interface';
+import { In } from 'typeorm';
 
 @InputType()
-export class UpdateClientInput {
-
-  @Field(type => Int)
-  @IsNotEmpty()
-  id: number;
+export class CreateClientInput {
 
   @Field(type => ClientType)
-  @IsOptional()
   @IsEnum(ClientType)
-  type?: ClientType;
+  type: ClientType;
 
   @Field(type => ClientStatus)
-  @IsOptional()
   @IsEnum(ClientStatus)
-  status?: ClientStatus;
+  status: ClientStatus;
 
   @Field(type => Gender)
-  @IsOptional()
   @IsEnum(Gender)
-  gender?: Gender;
+  gender: Gender;
 
   @Field()
-  @IsOptional()
   @IsInt()
   @Min(3)
   @Max(100)
-  age?: number;
+  age: number;
 
   @Field()
-  @IsOptional()
+  @IsNotEmpty()
   @MinLength(3)
   @MaxLength(20)
-  firstName?: string;
+  firstName: string;
 
   @Field()
-  @IsOptional()
+  @IsNotEmpty()
   @MinLength(3)
   @MaxLength(20)
-  lastName?: string;
+  lastName: string;
 
   @Field({ nullable: true })
-  @IsOptional()
   @IsEmail()
-  email?: string;
+  @IsOptional()
+  email: string;
+
 
   @Field()
-  @IsOptional()
+  @IsNotEmpty()
   @IsInt()
-  weight?: number;
+  weight: number;
 
   @Field()
-  @IsOptional()
+  @IsNotEmpty()
   @MinLength(5)
   @MaxLength(20)
-  phone?: string;
+  phone: string;
 
   @Field()
-  @IsOptional()
+  @IsNotEmpty()
   @MinLength(5)
   @MaxLength(200)
-  address?: string;
+  address: string;
 
   @Field()
-  @IsOptional()
+  @IsNotEmpty()
   @IsBoolean()
-  withHandCameraVideo?: boolean;
+  withHandCameraVideo: boolean;
 
   @Field()
-  @IsOptional()
+  @IsNotEmpty()
   @IsBoolean()
-  withCameraman?: boolean;
+  withCameraman: boolean;
 
   @Field(type => PaymentStatus)
-  @IsOptional()
   @IsEnum(PaymentStatus)
-  paymentStatus?: PaymentStatus;
+  paymentStatus: PaymentStatus;
 
   @Field(type => Int, { nullable: true })
   @IsOptional()
@@ -99,14 +92,9 @@ export class UpdateClientInput {
 
   @Field({ nullable: true })
   @IsOptional()
-  @IsDate()
-  processedAt?: Date;
+  notes: string;
 
   @Field({ nullable: true })
   @IsOptional()
-  notes?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  certificate?: string;
+  certificate: string;
 }
