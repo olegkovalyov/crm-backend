@@ -14,7 +14,7 @@ import { Client } from '../entities/client.entity';
 import { MemberModel } from '../models/member.model';
 
 @Injectable({ scope: Scope.REQUEST })
-export class MembersService {
+export class MemberService {
   private queryRunner: QueryRunner;
 
   constructor(
@@ -295,6 +295,14 @@ export class MembersService {
       .createQueryBuilder('member')
       .where('member.resetPasswordToken = :token', { token: token })
       .getOne();
+  }
+
+  async getMemberByUserId(userId: number): Promise<Member> {
+    const member = await this.membersRepository.createQueryBuilder('member')
+      .leftJoinAndSelect('member.user', 'user')
+      .where('member.userId = :userId', { userId: userId })
+      .getOne();
+    return member;
   }
 
   transformToGraphQlMemberModel(member: Member): MemberModel {

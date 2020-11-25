@@ -1,19 +1,17 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { EventSchema } from './schemas/event.schema';
 import { EventResolver } from './resolvers/event.resolver';
 import { EventService } from './services/event.service';
 import { LoadService } from './services/load.service';
 import { LoadResolver } from './resolvers/load.resolver';
-import { LoadSchema } from './schemas/load.schema';
 import { CoreModule } from '../core/core.module';
 import { UsersModule } from '../users/usersModule';
-import { MembersService } from '../users/services/members.service';
+import { MemberService } from '../users/services/member.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
-import { Member } from '../users/entities/member.entity';
-import { Client } from '../users/entities/client.entity';
 import { Event } from './entities/event.entity';
+import { Load } from './entities/load.entity';
+import { ClientService } from '../users/services/client.service';
+import { UserService } from '../users/services/user.service';
+import { Slot } from './entities/slot.entity';
 
 @Module({
   imports: [
@@ -26,6 +24,8 @@ import { Event } from './entities/event.entity';
     // ),
     TypeOrmModule.forFeature([
       Event,
+      Load,
+      Slot,
     ]),
     UsersModule,
   ],
@@ -34,7 +34,9 @@ import { Event } from './entities/event.entity';
     EventResolver,
     LoadService,
     LoadResolver,
-    MembersService,
+    UserService,
+    MemberService,
+    ClientService
   ],
 })
 export class EventsModule {

@@ -3,7 +3,7 @@ import { CONTEXT } from '@nestjs/graphql';
 import { Connection, QueryRunner, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from '../entities/event.entity';
-import { MembersService } from '../../users/services/members.service';
+import { MemberService } from '../../users/services/member.service';
 import { CreateEventInput } from '../inputs/events/create-event.input';
 import { EventModel } from '../models/event.model';
 import { GetEventsFilterInput } from '../inputs/events/get-events-filter.input';
@@ -20,7 +20,7 @@ export class EventService {
     private connection: Connection,
     @InjectRepository(Event)
     private readonly eventsRepository: Repository<Event>,
-    private readonly membersService: MembersService,
+    private readonly membersService: MemberService,
   ) {
   }
 

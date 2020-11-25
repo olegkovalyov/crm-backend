@@ -4,12 +4,13 @@ import { CoreModule } from '../core/core.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Member } from './entities/member.entity';
-import { MembersService } from './services/members.service';
+import { MemberService } from './services/member.service';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './passport-strategies/jwt.strategy';
 import { RandomStringService } from '@akanass/nestjsx-crypto';
 import { Client } from './entities/client.entity';
-import { ClientsService } from './services/clients.service';
+import { ClientService } from './services/client.service';
+import { UserService } from './services/user.service';
 
 @Module({
   imports: [
@@ -25,8 +26,9 @@ import { ClientsService } from './services/clients.service';
   ],
   providers: [
     UsersResolver,
-    MembersService,
-    ClientsService,
+    UserService,
+    MemberService,
+    ClientService,
     AuthService,
     JwtStrategy,
     RandomStringService,

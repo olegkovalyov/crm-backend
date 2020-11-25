@@ -9,7 +9,7 @@ import { GetClientsFilterInput } from '../inputs/clients/get-clients-filter.inpu
 import { UpdateClientInput } from '../inputs/clients/update-client.input';
 
 @Injectable()
-export class ClientsService {
+export class ClientService {
   private queryRunner: QueryRunner;
 
   constructor(
@@ -324,6 +324,14 @@ export class ClientsService {
     } finally {
       await this.queryRunner.release();
     }
+  }
+
+  async getClientByUserId(userId: number): Promise<Client> {
+    const client = await this.clientsRepository.createQueryBuilder('client')
+      .leftJoinAndSelect('client.user', 'user')
+      .where('client.userId = :userId', { userId: userId })
+      .getOne();
+    return client;
   }
 
 }
