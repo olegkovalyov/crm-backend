@@ -2,8 +2,8 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { LoadModel } from '../models/load.model';
 import { LoadService } from '../services/load.service';
 import { CreateLoadInput } from '../inputs/loads/create-load.input';
-import { EventModel } from '../models/event.model';
-import { GetEventsFilterInput } from '../inputs/events/get-events-filter.input';
+import { BadRequestException } from '@nestjs/common';
+import { UpdateLoadInput } from '../inputs/loads/update-load.input';
 
 @Resolver(of => LoadModel)
 export class LoadResolver {
@@ -21,25 +21,31 @@ export class LoadResolver {
     return loadModels;
   }
 
+  @Query(returns => LoadModel, { nullable: true })
+  async getLoad(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
+    const load = await this.loadService.getLoadById(id);
+    console.log(load);
+    if (!load) {
+      throw new BadRequestException('Load not found');
+    }
+    return this.loadService.transformToGraphQlLoadModel(load);
+  }
+
   @Mutation(returns => LoadModel)
   async createLoad(@Args('createLoadInput') createData: CreateLoadInput): Promise<LoadModel> {
     const load = await this.loadService.createLoad(createData);
     return this.loadService.transformToGraphQlLoadModel(load);
   }
 
-  //
-  // @Query(returns => [LoadModel])
-  // async getLoads(@Args('eventId') eventId: string): Promise<ILoad[]> {
-  //   return this.loadService.getLoads(eventId);
-  // }
+  @Mutation(returns => LoadModel)
+  async updateLoad(@Args('updateLoadInput') updateData: UpdateLoadInput): Promise<LoadModel> {
+    const updatedLoad = await this.loadService.updateLoad(updateData);
+    return this.loadService.transformToGraphQlLoadModel(updatedLoad);
+  }
 
-  // @Mutation(returns => LoadModel)
-  // async updateLoad(@Args('updateLoadData') updateData: UpdateLoadInput): Promise<ILoad> {
-  //   return this.loadService.updateLoad(updateData);
-  // }
-  //
-  // @Mutation(returns => LoadModel, { nullable: true })
-  // async removeLoad(@Args('id') id: string) {
-  //   return this.loadService.removeLoadById(id);
-  // }
+  @Mutation(returns => Boolean)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  async deleteLoad(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
+    return this.loadService.deleteLoadById(id);
+  }
 }
