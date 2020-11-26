@@ -48,7 +48,7 @@ export class UsersResolver {
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getMembers(@Args('getMembersFilterInput') getMembersFilterInput: GetMembersFilterInput): Promise<MemberModel[]> {
     const members = await this.memberService.getMembers(getMembersFilterInput);
-    return members.map(member => this.prepareMember(member));
+    return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
   }
 
   @Query(returns => MemberModel, { nullable: true })
@@ -58,21 +58,21 @@ export class UsersResolver {
     if (!member) {
       throw new BadRequestException('Member not found');
     }
-    return this.prepareMember(member);
+    return this.memberService.transformToGraphQlMemberModel(member);
   }
 
   @Mutation(returns => MemberModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async createMember(@Args('createMemberInput') createMemberInput: CreateMemberInput): Promise<MemberModel> {
     const member = await this.memberService.createMember(createMemberInput);
-    return this.prepareMember(member);
+    return this.memberService.transformToGraphQlMemberModel(member);
   }
 
   @Mutation(returns => MemberModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async updateMember(@Args('updateMemberData') updateMemberData: UpdateMemberInput): Promise<MemberModel> {
+  async updateMember(@Args('updateMemberInput') updateMemberData: UpdateMemberInput): Promise<MemberModel> {
     const updatedMember = await this.memberService.updateMember(updateMemberData);
-    return this.prepareMember(updatedMember);
+    return this.memberService.transformToGraphQlMemberModel(updatedMember);
   }
 
   @Mutation(returns => Boolean)
@@ -89,7 +89,7 @@ export class UsersResolver {
       MemberRole.CAMERAMAN,
       MemberRole.PACKER,
     ]);
-    return members.map(member => this.prepareMember(member));
+    return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
   }
 
   @Mutation(returns => AuthModel)
@@ -116,7 +116,7 @@ export class UsersResolver {
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
     return {
-      payload: this.prepareMember(member),
+      payload: this.memberService.transformToGraphQlMemberModel(member),
       accessToken,
     };
   }
@@ -148,7 +148,7 @@ export class UsersResolver {
     });
 
     return {
-      payload: this.prepareMember(member),
+      payload: this.memberService.transformToGraphQlMemberModel(member),
       accessToken,
     };
   }
@@ -181,7 +181,7 @@ export class UsersResolver {
     await this.memberService.updateRefreshToken(member, newRefreshToken);
     res.cookie('refreshToken', newRefreshToken);
     return {
-      payload: this.prepareMember(member),
+      payload: this.memberService.transformToGraphQlMemberModel(member),
       accessToken,
     };
   }
@@ -196,8 +196,8 @@ export class UsersResolver {
   }
 
   @Mutation(returns => ForgotPasswordModel)
-  async forgotPassword(@Args('forgotPasswordData') forgotPasswordInput: ForgotPasswordInput) {
-    const member = await this.memberService.getMemberByEmail(forgotPasswordInput.email);
+  async forgotPassword(@Args('forgotPasswordInput') forgotPasswordData: ForgotPasswordInput) {
+    const member = await this.memberService.getMemberByEmail(forgotPasswordData.email);
 
     if (!member) {
       throw new UnauthorizedException('Email is invalid');
@@ -228,18 +228,18 @@ export class UsersResolver {
 
   @Mutation(returns => AuthModel)
   async resetPassword(
-    @Args('resetPasswordData') input: ResetPasswordInput,
+    @Args('resetPasswordInput') resetPasswordData: ResetPasswordInput,
     @ServerResponse() res: Response,
   ) {
 
-    const member = await this.memberService.getMemberByResetToken(input.token);
+    const member = await this.memberService.getMemberByResetToken(resetPasswordData.token);
     if (!member
       || Date.now() > (new Date(member.resetPasswordExpirationDate)).getTime()
     ) {
       throw new UnauthorizedException('Member not found or token is expired');
     }
 
-    await this.memberService.updateResetPasswordInfo(member, null, input.password);
+    await this.memberService.updateResetPasswordInfo(member, null, resetPasswordData.password);
 
     const accessToken = await this.authService.generateAccessToken(member);
     const refreshToken = await this.authService.generateRefreshToken(member);
@@ -264,9 +264,9 @@ export class UsersResolver {
 
 
   @Mutation(returns => ClientModel)
-  async createClient(@Args('createClientData') createData: CreateClientInput): Promise<ClientModel> {
-    const newClient = await this.clientService.createClient(createData);
-    return this.prepareClient(newClient);
+  async createClient(@Args('createClientInput') createClientData: CreateClientInput): Promise<ClientModel> {
+    const newClient = await this.clientService.createClient(createClientData);
+    return this.clientService.transformToGraphQlClientModel(newClient);
   }
 
 
@@ -276,66 +276,24 @@ export class UsersResolver {
     if (!client) {
       throw new BadRequestException('Client not found');
     }
-    return this.prepareClient(client);
+    return this.clientService.transformToGraphQlClientModel(client);
   }
 
   @Query(returns => [ClientModel])
   async getClients(@Args('getClientsFilterInput') getClientsFilterInput: GetClientsFilterInput): Promise<ClientModel[]> {
     const clients = await this.clientService.getClients(getClientsFilterInput);
-    return clients.map(client => this.prepareClient(client));
+    return clients.map(client => this.clientService.transformToGraphQlClientModel(client));
   }
 
   @Mutation(returns => ClientModel)
-  async updateClient(@Args('updateClientData') updateData: UpdateClientInput): Promise<ClientModel> {
+  async updateClient(@Args('updateClientInput') updateData: UpdateClientInput): Promise<ClientModel> {
     const client = await this.clientService.updateClient(updateData);
-    return this.prepareClient(client);
+    return this.clientService.transformToGraphQlClientModel(client);
   }
 
   @Mutation(returns => Boolean)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async deleteClient(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
     return this.clientService.deleteClientById(id);
-  }
-
-  prepareMember(member: Member):
-    MemberModel {
-    return {
-      id: member.id,
-      userId: member.user.id,
-      status: member.status,
-      firstName: member.firstName,
-      lastName: member.lastName,
-      email: member.email,
-      roles: member.roles,
-      licenseType: member.licenseType,
-      createdAt: member.createdAt,
-      updatedAt: member.updatedAt,
-    };
-  }
-
-  prepareClient(client: Client): ClientModel {
-    return {
-      id: client.id,
-      userId: client.user.id,
-      status: client.status,
-      paymentStatus: client.paymentStatus,
-      type: client.type,
-      gender: client.gender,
-      age: client.age,
-      firstName: client.firstName,
-      lastName: client.lastName,
-      email: client.email,
-      weight: client.weight,
-      phone: client.phone,
-      address: client.address,
-      withHandCameraVideo: client.withHandCameraVideo,
-      withCameraman: client.withCameraman,
-      notes: client.notes,
-      certificate: client.certificate,
-      tm: client.tm,
-      cameraman: client.cameraman,
-      createdAt: client.createdAt,
-      processedAt: client.processedAt,
-    };
   }
 }

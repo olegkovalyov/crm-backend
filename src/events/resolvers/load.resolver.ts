@@ -24,7 +24,6 @@ export class LoadResolver {
   @Query(returns => LoadModel, { nullable: true })
   async getLoad(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
     const load = await this.loadService.getLoadById(id);
-    console.log(load);
     if (!load) {
       throw new BadRequestException('Load not found');
     }

@@ -17,7 +17,7 @@ export class EventModel {
   // @Field(type => [LoadModel])
   // loads: [LoadModel];
 
-  @Field(type => [MemberModel], { nullable: true })
+  @Field(type => [MemberModel])
   staff: MemberModel[];
 
   @Field()

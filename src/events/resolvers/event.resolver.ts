@@ -14,14 +14,14 @@ export class EventResolver {
   }
 
   @Query(returns => [EventModel])
-  async getEvents(@Args('getEventsFilterInput') getEventsFilterInput: GetEventsFilterInput): Promise<EventModel[]> {
-    const events = await this.eventService.getEvents(getEventsFilterInput);
+  async getEvents(@Args('getEventsFilterInput') getEventsFilterData: GetEventsFilterInput): Promise<EventModel[]> {
+    const events = await this.eventService.getEvents(getEventsFilterData);
     return Promise.all(events.map(event => this.eventService.transformToGraphQlEventModel(event)));
   }
 
   @Mutation(returns => EventModel)
-  async createEvent(@Args('createEventInput') createEventInput: CreateEventInput): Promise<EventModel> {
-    const event = await this.eventService.createEvent(createEventInput);
+  async createEvent(@Args('createEventInput') createEventData: CreateEventInput): Promise<EventModel> {
+    const event = await this.eventService.createEvent(createEventData);
     return this.eventService.transformToGraphQlEventModel(event);
   }
 

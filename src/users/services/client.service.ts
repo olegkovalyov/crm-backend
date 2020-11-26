@@ -7,6 +7,9 @@ import { UserType } from '../interfaces/user.interface';
 import { CreateClientInput } from '../inputs/clients/create-client.input';
 import { GetClientsFilterInput } from '../inputs/clients/get-clients-filter.input';
 import { UpdateClientInput } from '../inputs/clients/update-client.input';
+import { Member } from '../entities/member.entity';
+import { MemberModel } from '../models/member.model';
+import { ClientModel } from '../models/client.model';
 
 @Injectable()
 export class ClientService {
@@ -332,6 +335,32 @@ export class ClientService {
       .where('client.userId = :userId', { userId: userId })
       .getOne();
     return client;
+  }
+
+  transformToGraphQlClientModel(client: Client): ClientModel {
+    return {
+      id: client.id,
+      userId: client.user.id,
+      status: client.status,
+      paymentStatus: client.paymentStatus,
+      type: client.type,
+      gender: client.gender,
+      age: client.age,
+      firstName: client.firstName,
+      lastName: client.lastName,
+      email: client.email,
+      weight: client.weight,
+      phone: client.phone,
+      address: client.address,
+      withHandCameraVideo: client.withHandCameraVideo,
+      withCameraman: client.withCameraman,
+      notes: client.notes,
+      certificate: client.certificate,
+      tm: client.tm,
+      cameraman: client.cameraman,
+      createdAt: client.createdAt,
+      processedAt: client.processedAt,
+    };
   }
 
 }
