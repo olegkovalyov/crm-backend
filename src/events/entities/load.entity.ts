@@ -7,7 +7,7 @@ export class Load {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Event)
+  @ManyToOne(() => Event, { onDelete: 'CASCADE' })
   @JoinColumn()
   event: Event;
 

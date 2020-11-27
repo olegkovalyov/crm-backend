@@ -8,6 +8,8 @@ import { CreateEventInput } from '../inputs/events/create-event.input';
 import { EventModel } from '../models/event.model';
 import { GetEventsFilterInput } from '../inputs/events/get-events-filter.input';
 import { UpdateEventInput } from '../inputs/events/update-event.input';
+import { Load } from '../entities/load.entity';
+import { Slot } from '../entities/slot.entity';
 
 @Injectable()
 export class EventService {
@@ -20,6 +22,8 @@ export class EventService {
     private connection: Connection,
     @InjectRepository(Event)
     private readonly eventsRepository: Repository<Event>,
+    @InjectRepository(Load)
+    private readonly loadRepository: Repository<Load>,
     private readonly membersService: MemberService,
   ) {
   }
@@ -51,6 +55,7 @@ export class EventService {
         }
       }
     }
+    eventsQueryBuilder.orderBy('event.date', 'DESC');
 
     return eventsQueryBuilder.getMany();
   }
@@ -111,25 +116,14 @@ export class EventService {
       throw new BadRequestException(`Event with id: ${id} doesn't exists`);
     }
 
-    this.queryRunner = this.connection.createQueryRunner();
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
+    const deleteResult = await this.eventsRepository
+      .createQueryBuilder('event')
+      .delete()
+      .from(Event)
+      .where('id = :id', { id: id })
+      .execute();
 
-    try {
-      const eventDeleteResult = await this.queryRunner.connection
-        .createQueryBuilder()
-        .delete()
-        .from(Event)
-        .where('id = :id', { id: id })
-        .execute();
-      await this.queryRunner.commitTransaction();
-      return eventDeleteResult.affected === 1;
-    } catch (e) {
-      await this.queryRunner.rollbackTransaction();
-      throw new BadRequestException(`Failed to delete event with id: ${id}`);
-    } finally {
-      await this.queryRunner.release();
-    }
+    return deleteResult.affected === 1;
   }
 
   async getEventById(id: number): Promise<Event> {

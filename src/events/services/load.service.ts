@@ -36,10 +36,15 @@ export class LoadService {
   }
 
   async getLoads(eventId: number): Promise<Load[]> {
+    const event = await this.eventService.getEventById(eventId);
+    if (!event) {
+      throw new BadRequestException(`Event with id: ${eventId} doesnt exists`);
+    }
     return this.loadRepository
       .createQueryBuilder('load')
       .leftJoinAndSelect('load.event', 'event')
       .where('load.eventId = :eventId', { eventId: eventId })
+      .orderBy('load.order', 'ASC')
       .getMany();
   }
 
@@ -59,7 +64,6 @@ export class LoadService {
       throw new BadRequestException(`Event with id: ${eventId} doesnt exists`);
     }
 
-    const slotIds = await this.saveSlots(slots);
 
     const load = new Load();
     load.event = event;
@@ -67,9 +71,12 @@ export class LoadService {
     load.date = date;
     load.aircraft = aircraft;
     load.notes = notes;
-    load.slotIds = slotIds;
+    load.slotIds = [];
     load.order = order;
+    await this.loadRepository.save(load);
 
+    const slotIds = await this.saveSlots(slots, load);
+    load.slotIds = slotIds;
     return await this.loadRepository.save(load);
   }
 
@@ -141,7 +148,9 @@ export class LoadService {
       currentLoad.status = status;
     }
 
-    if (order) {
+    if (order !== undefined
+      && order !== null
+    ) {
       currentLoad.order = order;
     }
 
@@ -159,19 +168,20 @@ export class LoadService {
 
     if (slots) {
       await this.removeSlotsByIds(currentLoad.slotIds);
-      currentLoad.slotIds= await this.saveSlots(slots);
+      currentLoad.slotIds = await this.saveSlots(slots, currentLoad);
     }
 
     return this.loadRepository.save(currentLoad);
   }
 
-  private async saveSlots(slots: SlotInput[]): Promise<number[]> {
+  private async saveSlots(slots: SlotInput[], load: Load): Promise<number[]> {
     const slotIds = await Promise.all(slots.map(async slotInputData => {
       const user = await this.userService.getUserById(slotInputData.userId);
       if (!user) {
         throw new BadRequestException(`User with id: ${slotInputData.userId} doesnt exists`);
       }
       const slot = new Slot();
+      slot.load = load;
       slot.user = user;
       slot.description = slotInputData.description;
       await this.slotRepository.save(slot);
@@ -192,26 +202,14 @@ export class LoadService {
       throw new BadRequestException(`Load with id: ${id} doesn't exists`);
     }
 
-    this.queryRunner = this.connection.createQueryRunner();
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
+    const deleteResult = await this.loadRepository
+      .createQueryBuilder('load')
+      .delete()
+      .from(Load)
+      .where('id = :id', { id: id })
+      .execute();
 
-    try {
-      await this.removeSlotsByIds(load.slotIds);
-      const loadDeleteResult = await this.queryRunner.connection
-        .createQueryBuilder()
-        .delete()
-        .from(Load)
-        .where('id = :id', { id: id })
-        .execute();
-      await this.queryRunner.commitTransaction();
-      return loadDeleteResult.affected === 1;
-    } catch (e) {
-      await this.queryRunner.rollbackTransaction();
-      throw new BadRequestException(`Failed to delete load with id: ${id}`);
-    } finally {
-      await this.queryRunner.release();
-    }
+    return deleteResult.affected === 1;
   }
 
 }

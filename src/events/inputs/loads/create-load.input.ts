@@ -25,7 +25,6 @@ export class CreateLoadInput {
   slots?: SlotInput[];
 
   @Field()
-  @IsNotEmpty()
   aircraft: string;
 
   @Field({ nullable: true })

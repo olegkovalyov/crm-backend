@@ -30,13 +30,13 @@ import { Slot } from './entities/slot.entity';
     UsersModule,
   ],
   providers: [
-    EventService,
     EventResolver,
-    LoadService,
-    LoadResolver,
     UserService,
+    ClientService,
+    LoadService,
+    EventService,
+    LoadResolver,
     MemberService,
-    ClientService
   ],
 })
 export class EventsModule {

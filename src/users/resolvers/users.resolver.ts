@@ -1,7 +1,6 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateMemberInput } from '../inputs/members/create-member.input';
 import { MemberService } from '../services/member.service';
-import { Member } from '../entities/member.entity';
 import { MemberModel } from '../models/member.model';
 import { GetMembersFilterInput } from '../inputs/members/get-members-filter.input';
 import { BadRequestException, UnauthorizedException, UseGuards } from '@nestjs/common';
