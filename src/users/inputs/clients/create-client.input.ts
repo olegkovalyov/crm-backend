@@ -9,15 +9,14 @@ import {
   MaxLength, Min,
   MinLength,
 } from 'class-validator';
-import { ClientStatus, ClientType, Gender, PaymentStatus } from '../../interfaces/client.interface';
-import { In } from 'typeorm';
+import { ClientStatus, ClientRole, Gender, PaymentStatus } from '../../interfaces/client.interface';
 
 @InputType()
 export class CreateClientInput {
 
-  @Field(type => ClientType)
-  @IsEnum(ClientType)
-  type: ClientType;
+  @Field(type => ClientRole)
+  @IsEnum(ClientRole)
+  type: ClientRole;
 
   @Field(type => ClientStatus)
   @IsEnum(ClientStatus)

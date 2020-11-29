@@ -9,7 +9,7 @@ import {
   MaxLength, Min,
   MinLength,
 } from 'class-validator';
-import { ClientStatus, ClientType, Gender, PaymentStatus } from '../../interfaces/client.interface';
+import { ClientStatus, ClientRole, Gender, PaymentStatus } from '../../interfaces/client.interface';
 
 @InputType()
 export class UpdateClientInput {
@@ -18,10 +18,10 @@ export class UpdateClientInput {
   @IsNotEmpty()
   id: number;
 
-  @Field(type => ClientType)
+  @Field(type => ClientRole)
   @IsOptional()
-  @IsEnum(ClientType)
-  type?: ClientType;
+  @IsEnum(ClientRole)
+  type?: ClientRole;
 
   @Field(type => ClientStatus)
   @IsOptional()

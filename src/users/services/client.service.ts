@@ -26,6 +26,7 @@ export class ClientService {
 
   async getClients(filterParams: GetClientsFilterInput): Promise<Client[]> {
 
+    console.log(filterParams);
     const clientsQueryBuilder = this.clientsRepository.createQueryBuilder('client');
 
     clientsQueryBuilder.leftJoinAndSelect('client.user', 'user');
@@ -54,13 +55,13 @@ export class ClientService {
       }
 
       if (filterParams.createdAtMin) {
-        queryParts.push('client.createdAt >= :date ');
-        queryParameters.push({ date: filterParams.createdAtMin });
+        queryParts.push('client.createdAt >= :dateMin ');
+        queryParameters.push({ dateMin: filterParams.createdAtMin });
       }
 
       if (filterParams.createdAtMax) {
-        queryParts.push('client.createdAt <= :date ');
-        queryParameters.push({ date: filterParams.createdAtMax });
+        queryParts.push('client.createdAt < :dateMax ');
+        queryParameters.push({ dateMax: filterParams.createdAtMax });
       }
 
       for (let i = 0; i < queryParts.length; i++) {

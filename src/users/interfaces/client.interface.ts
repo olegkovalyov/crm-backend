@@ -1,13 +1,13 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-export enum ClientType {
+export enum ClientRole {
   AS_A_PASSENGER = 'AS_A_PASSENGER',
   TANDEM = 'TANDEM',
   STATIC_LINE = 'STATIC_LINE',
 }
 
-registerEnumType(ClientType, {
-  name: 'ClientType',
+registerEnumType(ClientRole, {
+  name: 'ClientRole',
 });
 
 export enum ClientStatus {

@@ -6,7 +6,7 @@ import {
   OneToOne, CreateDateColumn, ManyToOne,
 } from 'typeorm';
 import { User } from './user.entity';
-import { ClientStatus, ClientType, Gender, PaymentStatus } from '../interfaces/client.interface';
+import { ClientStatus, ClientRole, Gender, PaymentStatus } from '../interfaces/client.interface';
 
 @Entity()
 export class Client {
@@ -19,10 +19,10 @@ export class Client {
 
   @Column({
     type: 'enum',
-    enum: ClientType,
+    enum: ClientRole,
     nullable: true,
   })
-  type: ClientType;
+  type: ClientRole;
 
   @Column({
     type: 'enum',

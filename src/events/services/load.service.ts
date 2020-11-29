@@ -51,7 +51,6 @@ export class LoadService {
   async createLoad(createData: CreateLoadInput): Promise<Load> {
     const {
       eventId,
-      order,
       status,
       date,
       slots,
@@ -64,51 +63,48 @@ export class LoadService {
       throw new BadRequestException(`Event with id: ${eventId} doesnt exists`);
     }
 
-
-    const load = new Load();
-    load.event = event;
-    load.status = status;
-    load.date = date;
-    load.aircraft = aircraft;
-    load.notes = notes;
-    load.slotIds = [];
-    load.order = order;
-    await this.loadRepository.save(load);
-
-    const slotIds = await this.saveSlots(slots, load);
-    load.slotIds = slotIds;
-    return await this.loadRepository.save(load);
+    try {
+      let load = new Load();
+      load.event = event;
+      load.status = status;
+      load.date = date;
+      load.aircraft = aircraft;
+      load.notes = notes;
+      load.order = (await this.getLoads(eventId)).length;
+      load = await this.loadRepository.save(load);
+      load.slots = await this.saveSlots(slots, load);
+      return await this.loadRepository.save(load);
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException('Failed to create load');
+    }
   }
 
   async getLoadById(id: number): Promise<Load> {
     const load = await this.loadRepository
       .createQueryBuilder('load')
       .leftJoinAndSelect('load.event', 'event')
+      .leftJoinAndSelect('load.slots', 'slots')
       .where('load.id = :id', { id: id })
       .getOne();
+    //  const load = await this.loadRepository.findOne({ id: id });
     return load;
   }
 
   async transformToGraphQlLoadModel(loadEntity: Load): Promise<LoadModel> {
+    console.log(loadEntity);
     const eventModel = await this.eventService.transformToGraphQlEventModel(loadEntity.event);
-
-    let slots: Slot[] = [];
-    if (loadEntity.slotIds.length) {
-      slots = await this.slotRepository.createQueryBuilder('slot')
-        .leftJoinAndSelect('slot.user', 'user')
-        .where('slot.id IN(:...ids)', { ids: loadEntity.slotIds })
-        .getMany();
-    }
 
     let slotModels: SlotModel[] = [];
 
-    if (slots
-      && slots.length
-    ) {
-      slotModels = slots.map(slot => {
+    if (loadEntity.slots.length) {
+      slotModels = loadEntity.slots.map(slot => {
         return {
-          userId: slot.user.id,
+          userId: slot.userId,
+          firstName: slot.firstName,
+          lastName: slot.lastName,
           description: slot.description,
+          role: slot.role,
         };
       });
     }
@@ -167,30 +163,29 @@ export class LoadService {
     }
 
     if (slots) {
-      await this.removeSlotsByIds(currentLoad.slotIds);
-      currentLoad.slotIds = await this.saveSlots(slots, currentLoad);
+      // await this.removeSlotsByIds(currentLoad.slotIds);
+      // currentLoad.slotIds = await this.saveSlots(slots, currentLoad);
     }
 
     return this.loadRepository.save(currentLoad);
   }
 
-  private async saveSlots(slots: SlotInput[], load: Load): Promise<number[]> {
-    const slotIds = await Promise.all(slots.map(async slotInputData => {
-      const user = await this.userService.getUserById(slotInputData.userId);
-      if (!user) {
-        throw new BadRequestException(`User with id: ${slotInputData.userId} doesnt exists`);
-      }
+  private async saveSlots(slotsInput: SlotInput[], load: Load): Promise<Slot[]> {
+    const slots = await Promise.all(slotsInput.map(async slotInputData => {
       const slot = new Slot();
       slot.load = load;
-      slot.user = user;
+      slot.firstName = slotInputData.firstName;
+      slot.lastName = slotInputData.lastName;
+      slot.userId = slotInputData.userId;
       slot.description = slotInputData.description;
+      slot.role = slotInputData.role;
       await this.slotRepository.save(slot);
-      return slot.id;
+      return slot;
     }));
-    return slotIds;
+    return slots;
   }
 
-  private async removeSlotsByIds(slotIds: number[]): Promise<void> {
+  async removeSlotsByIds(slotIds: number[]): Promise<void> {
     for (const slotId of slotIds) {
       await this.slotRepository.delete({ id: slotId });
     }
@@ -209,7 +204,19 @@ export class LoadService {
       .where('id = :id', { id: id })
       .execute();
 
+    await this.reorderLoads(load.event.id);
+
     return deleteResult.affected === 1;
+  }
+
+  async reorderLoads(eventId: number) {
+    const loads = await this.getLoads(eventId);
+    let i = 0;
+    for (const currentLoad of loads) {
+      currentLoad.order = i;
+      i++;
+      await this.loadRepository.save(currentLoad);
+    }
   }
 
 }

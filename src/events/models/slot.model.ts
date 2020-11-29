@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { UserRole } from '../../users/interfaces/user.interface';
 
 @ObjectType()
 export class SlotModel {
@@ -6,5 +7,14 @@ export class SlotModel {
   userId: number;
 
   @Field()
+  firstName: string;
+
+  @Field()
+  lastName: string;
+
+  @Field()
   description: string;
+
+  @Field(type => UserRole)
+  role: typeof UserRole;
 }
