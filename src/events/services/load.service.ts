@@ -12,7 +12,10 @@ import { SlotModel } from '../models/slot.model';
 import { UserService } from '../../users/services/user.service';
 import { Slot } from '../entities/slot.entity';
 import { UpdateLoadInput } from '../inputs/loads/update-load.input';
-import { SlotInput } from '../inputs/loads/slot.input';
+import { CreateSlotInput } from '../inputs/loads/create-slot.input';
+import { UserType } from '../../users/interfaces/user.interface';
+import { MemberRole } from '../../users/interfaces/member.interface';
+import { ClientRole } from '../../users/interfaces/client.interface';
 
 @Injectable()
 export class LoadService {
@@ -43,6 +46,7 @@ export class LoadService {
     return this.loadRepository
       .createQueryBuilder('load')
       .leftJoinAndSelect('load.event', 'event')
+      .leftJoinAndSelect('load.slots', 'slots')
       .where('load.eventId = :eventId', { eventId: eventId })
       .orderBy('load.order', 'ASC')
       .getMany();
@@ -53,7 +57,6 @@ export class LoadService {
       eventId,
       status,
       date,
-      slots,
       aircraft,
       notes,
     } = createData;
@@ -64,15 +67,14 @@ export class LoadService {
     }
 
     try {
-      let load = new Load();
+      const load = new Load();
       load.event = event;
       load.status = status;
       load.date = date;
       load.aircraft = aircraft;
       load.notes = notes;
       load.order = (await this.getLoads(eventId)).length;
-      load = await this.loadRepository.save(load);
-      load.slots = await this.saveSlots(slots, load);
+      load.slots = [];
       return await this.loadRepository.save(load);
     } catch (e) {
       console.log(e);
@@ -91,8 +93,17 @@ export class LoadService {
     return load;
   }
 
+  async getSlotById(id: number): Promise<Slot> {
+    const slot = await this.slotRepository
+      .createQueryBuilder('slot')
+      .leftJoinAndSelect('slot.load', 'load')
+      .where('slot.id = :id', { id: id })
+      .getOne();
+    //  const load = await this.loadRepository.findOne({ id: id });
+    return slot;
+  }
+
   async transformToGraphQlLoadModel(loadEntity: Load): Promise<LoadModel> {
-    console.log(loadEntity);
     const eventModel = await this.eventService.transformToGraphQlEventModel(loadEntity.event);
 
     let slotModels: SlotModel[] = [];
@@ -100,6 +111,7 @@ export class LoadService {
     if (loadEntity.slots.length) {
       slotModels = loadEntity.slots.map(slot => {
         return {
+          id: slot.id,
           userId: slot.userId,
           firstName: slot.firstName,
           lastName: slot.lastName,
@@ -127,7 +139,6 @@ export class LoadService {
       id,
       status,
       date,
-      slots,
       aircraft,
       order,
       notes,
@@ -162,32 +173,72 @@ export class LoadService {
       currentLoad.notes = notes;
     }
 
-    if (slots) {
-      // await this.removeSlotsByIds(currentLoad.slotIds);
-      // currentLoad.slotIds = await this.saveSlots(slots, currentLoad);
-    }
-
     return this.loadRepository.save(currentLoad);
   }
 
-  private async saveSlots(slotsInput: SlotInput[], load: Load): Promise<Slot[]> {
-    const slots = await Promise.all(slotsInput.map(async slotInputData => {
-      const slot = new Slot();
-      slot.load = load;
-      slot.firstName = slotInputData.firstName;
-      slot.lastName = slotInputData.lastName;
-      slot.userId = slotInputData.userId;
-      slot.description = slotInputData.description;
-      slot.role = slotInputData.role;
+  async createSlot(slotData: CreateSlotInput): Promise<Load> {
+    const load = await this.getLoadById(slotData.loadId);
+    if (!load) {
+      throw new BadRequestException(`Load with id: ${slotData.loadId} doesnt exists`);
+    }
+
+    const user = await this.userService.getUserById(slotData.userId);
+    if (!user) {
+      throw new BadRequestException(`User with id: ${slotData.userId} doesnt exists`);
+    }
+
+    if (user.userType === UserType.MEMBER) {
+      const userData = await this.memberService.getMemberByUserId(user.id);
+      if (!userData.roles.includes(slotData.role as unknown as MemberRole)) {
+        throw new BadRequestException(`Invalid role`);
+      }
+    }
+
+    if (user.userType === UserType.CLIENT) {
+      const userData = await this.clientService.getClientByUserId(user.id);
+      if (userData.role !== slotData.role as unknown as ClientRole) {
+        throw new BadRequestException(`Invalid role`);
+      }
+    }
+
+    const slot = new Slot();
+    slot.userId = slotData.userId;
+    slot.firstName = slotData.firstName;
+    slot.lastName = slotData.lastName;
+    slot.role = slotData.role;
+    slot.description = slotData.description;
+    slot.load = load;
+
+    try {
       await this.slotRepository.save(slot);
-      return slot;
-    }));
-    return slots;
+      load.slots.push(slot);
+      return await this.loadRepository.save(load);
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException(`Failed to add slot`);
+    }
   }
 
-  async removeSlotsByIds(slotIds: number[]): Promise<void> {
-    for (const slotId of slotIds) {
-      await this.slotRepository.delete({ id: slotId });
+  async deleteSlotById(id: number): Promise<Load> {
+    const slot = await this.getSlotById(id);
+    if (!slot) {
+      throw new BadRequestException(`Slot with id: ${id} doesn't exists`);
+    }
+
+    try {
+      await this.loadRepository
+        .createQueryBuilder('slot')
+        .delete()
+        .from(Slot)
+        .where('id = :id', { id: id })
+        .execute();
+
+      const load = await this.getLoadById(slot.load.id);
+      load.slots = load.slots.filter(slot => slot.id !== id);
+      return await this.loadRepository.save(load);
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException(`Failed to delete slot`);
     }
   }
 
@@ -208,6 +259,7 @@ export class LoadService {
 
     return deleteResult.affected === 1;
   }
+
 
   async reorderLoads(eventId: number) {
     const loads = await this.getLoads(eventId);

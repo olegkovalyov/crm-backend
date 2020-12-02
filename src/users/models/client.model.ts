@@ -12,7 +12,7 @@ export class ClientModel {
   userId: number;
 
   @Field(type => ClientRole)
-  type: ClientRole;
+  role: ClientRole;
 
   @Field(type => ClientStatus)
   status: ClientStatus;

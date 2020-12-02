@@ -21,7 +21,7 @@ export class UpdateClientInput {
   @Field(type => ClientRole)
   @IsOptional()
   @IsEnum(ClientRole)
-  type?: ClientRole;
+  role?: ClientRole;
 
   @Field(type => ClientStatus)
   @IsOptional()

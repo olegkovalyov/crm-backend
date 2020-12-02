@@ -22,7 +22,7 @@ export class Client {
     enum: ClientRole,
     nullable: true,
   })
-  type: ClientRole;
+  role: ClientRole;
 
   @Column({
     type: 'enum',

@@ -4,6 +4,7 @@ import { LoadService } from '../services/load.service';
 import { CreateLoadInput } from '../inputs/loads/create-load.input';
 import { BadRequestException } from '@nestjs/common';
 import { UpdateLoadInput } from '../inputs/loads/update-load.input';
+import { CreateSlotInput } from '../inputs/loads/create-slot.input';
 
 @Resolver(of => LoadModel)
 export class LoadResolver {
@@ -39,6 +40,19 @@ export class LoadResolver {
   @Mutation(returns => LoadModel)
   async updateLoad(@Args('updateLoadInput') updateData: UpdateLoadInput): Promise<LoadModel> {
     const updatedLoad = await this.loadService.updateLoad(updateData);
+    return this.loadService.transformToGraphQlLoadModel(updatedLoad);
+  }
+
+  @Mutation(returns => LoadModel)
+  async createSlot(@Args('createSlotInput') slotInput: CreateSlotInput): Promise<LoadModel> {
+    const updatedLoad = await this.loadService.createSlot(slotInput);
+    return this.loadService.transformToGraphQlLoadModel(updatedLoad);
+  }
+
+  @Mutation(returns => LoadModel)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  async deleteSlot(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
+    const updatedLoad = await this.loadService.deleteSlotById(id);
     return this.loadService.transformToGraphQlLoadModel(updatedLoad);
   }
 

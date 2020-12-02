@@ -1,7 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsDate, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { LoadStatus } from '../../interfaces/load.interface';
-import { SlotInput } from './slot.input';
 
 @InputType()
 export class CreateLoadInput {
@@ -20,9 +19,6 @@ export class CreateLoadInput {
   @Field()
   @IsDate()
   date: Date;
-
-  @Field(type => [SlotInput])
-  slots?: SlotInput[];
 
   @Field()
   aircraft: string;

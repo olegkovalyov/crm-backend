@@ -3,6 +3,10 @@ import { UserRole } from '../../users/interfaces/user.interface';
 
 @ObjectType()
 export class SlotModel {
+
+  @Field(type => Int)
+  id: number;
+
   @Field(type => Int)
   userId: number;
 

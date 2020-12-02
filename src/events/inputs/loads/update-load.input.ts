@@ -1,12 +1,11 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsDate, IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { LoadStatus } from '../../interfaces/load.interface';
-import { SlotInput } from './slot.input';
 
 @InputType()
 export class UpdateLoadInput {
 
-  @Field(type=> Int)
+  @Field(type => Int)
   @IsNotEmpty()
   id: number;
 
@@ -23,10 +22,6 @@ export class UpdateLoadInput {
   @IsOptional()
   @IsDate()
   date?: Date;
-
-  @Field(type => [SlotInput])
-  @IsOptional()
-  slots?: SlotInput[];
 
   @Field()
   @IsOptional()

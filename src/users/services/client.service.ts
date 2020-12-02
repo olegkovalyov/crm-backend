@@ -78,7 +78,7 @@ export class ClientService {
 
   async createClient(createClientInput: CreateClientInput): Promise<Client> {
     const {
-      type,
+      role,
       status,
       gender,
       age,
@@ -113,7 +113,7 @@ export class ClientService {
 
       const newClient = new Client();
       newClient.user = user;
-      newClient.type = type;
+      newClient.role = role;
       newClient.status = status;
       newClient.paymentStatus = paymentStatus;
       newClient.gender = gender;
@@ -180,7 +180,7 @@ export class ClientService {
   async updateClient(updateData: UpdateClientInput): Promise<Client> {
     const {
       id,
-      type,
+      role,
       status,
       gender,
       age,
@@ -210,8 +210,8 @@ export class ClientService {
       client.status = status;
     }
 
-    if (type) {
-      client.type = type;
+    if (role) {
+      client.role = role;
     }
 
     if (age) {
@@ -344,7 +344,7 @@ export class ClientService {
       userId: client.user.id,
       status: client.status,
       paymentStatus: client.paymentStatus,
-      type: client.type,
+      role: client.role,
       gender: client.gender,
       age: client.age,
       firstName: client.firstName,

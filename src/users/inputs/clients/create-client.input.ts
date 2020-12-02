@@ -16,7 +16,7 @@ export class CreateClientInput {
 
   @Field(type => ClientRole)
   @IsEnum(ClientRole)
-  type: ClientRole;
+  role: ClientRole;
 
   @Field(type => ClientStatus)
   @IsEnum(ClientStatus)
