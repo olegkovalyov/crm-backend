@@ -94,6 +94,11 @@ export class Client {
   createdAt: Date;
 
   @Column({
+    default: false,
+  })
+  isAssigned: boolean;
+
+  @Column({
     nullable: true,
   })
   processedAt: Date;

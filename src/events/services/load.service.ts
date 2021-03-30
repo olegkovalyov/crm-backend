@@ -16,6 +16,7 @@ import { CreateSlotInput } from '../inputs/loads/create-slot.input';
 import { UserType } from '../../users/interfaces/user.interface';
 import { MemberRole } from '../../users/interfaces/member.interface';
 import { ClientRole } from '../../users/interfaces/client.interface';
+import { UpdateClientInput } from '../../users/inputs/clients/update-client.input';
 
 @Injectable()
 export class LoadService {
@@ -133,6 +134,17 @@ export class LoadService {
     };
   }
 
+  async transformToGraphQlSlotModel(slotEntity: Slot): Promise<SlotModel> {
+    return {
+      id: slotEntity.id,
+      userId: slotEntity.userId,
+      firstName: slotEntity.firstName,
+      lastName: slotEntity.lastName,
+      role: slotEntity.role,
+      description: slotEntity.description,
+    };
+  }
+
 
   async updateLoad(updateData: UpdateLoadInput): Promise<Load> {
     const {
@@ -176,7 +188,7 @@ export class LoadService {
     return this.loadRepository.save(currentLoad);
   }
 
-  async createSlot(slotData: CreateSlotInput): Promise<Load> {
+  async createSlot(slotData: CreateSlotInput): Promise<Slot> {
     const load = await this.getLoadById(slotData.loadId);
     if (!load) {
       throw new BadRequestException(`Load with id: ${slotData.loadId} doesnt exists`);
@@ -188,17 +200,18 @@ export class LoadService {
     }
 
     if (user.userType === UserType.MEMBER) {
-      const userData = await this.memberService.getMemberByUserId(user.id);
-      if (!userData.roles.includes(slotData.role as unknown as MemberRole)) {
+      const member = await this.memberService.getMemberByUserId(user.id);
+      if (!member.roles.includes(slotData.role as unknown as MemberRole)) {
         throw new BadRequestException(`Invalid role`);
       }
     }
 
     if (user.userType === UserType.CLIENT) {
-      const userData = await this.clientService.getClientByUserId(user.id);
-      if (userData.role !== slotData.role as unknown as ClientRole) {
+      const client = await this.clientService.getClientByUserId(user.id);
+      if (client.role !== slotData.role as unknown as ClientRole) {
         throw new BadRequestException(`Invalid role`);
       }
+      await this.clientService.setAssignedStatus(client);
     }
 
     const slot = new Slot();
@@ -212,14 +225,15 @@ export class LoadService {
     try {
       await this.slotRepository.save(slot);
       load.slots.push(slot);
-      return await this.loadRepository.save(load);
+      await this.loadRepository.save(load);
+      return slot;
     } catch (e) {
       console.log(e);
       throw new BadRequestException(`Failed to add slot`);
     }
   }
 
-  async deleteSlotById(id: number): Promise<Load> {
+  async deleteSlotById(id: number): Promise<boolean> {
     const slot = await this.getSlotById(id);
     if (!slot) {
       throw new BadRequestException(`Slot with id: ${id} doesn't exists`);
@@ -233,9 +247,15 @@ export class LoadService {
         .where('id = :id', { id: id })
         .execute();
 
+      const client = await this.clientService.getClientByUserId(slot.userId);
+      if (client) {
+        await this.clientService.deleteAssignedStatus(client);
+      }
+
       const load = await this.getLoadById(slot.load.id);
       load.slots = load.slots.filter(slot => slot.id !== id);
-      return await this.loadRepository.save(load);
+      await this.loadRepository.save(load);
+      return true;
     } catch (e) {
       console.log(e);
       throw new BadRequestException(`Failed to delete slot`);

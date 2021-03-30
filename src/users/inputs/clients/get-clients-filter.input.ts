@@ -17,6 +17,10 @@ export class GetClientsFilterInput {
 
   @Field()
   @IsOptional()
+  isAssigned?: boolean;
+
+  @Field()
+  @IsOptional()
   createdAtMin?: Date;
 
   @Field()

@@ -25,8 +25,6 @@ export class ClientService {
   }
 
   async getClients(filterParams: GetClientsFilterInput): Promise<Client[]> {
-
-    console.log(filterParams);
     const clientsQueryBuilder = this.clientsRepository.createQueryBuilder('client');
 
     clientsQueryBuilder.leftJoinAndSelect('client.user', 'user');
@@ -34,6 +32,8 @@ export class ClientService {
     clientsQueryBuilder.leftJoinAndSelect('client.cameraman', 'cameraman');
     if (filterParams.clientStatuses
       || filterParams.paymentStatuses
+      || (filterParams.isAssigned !== null
+        && filterParams.isAssigned !== undefined)
       || filterParams.createdAtMax
       || filterParams.createdAtMin
     ) {
@@ -52,6 +52,13 @@ export class ClientService {
       ) {
         queryParts.push('client.paymentStatus IN(:...paymentStatuses)');
         queryParameters.push({ paymentStatuses: filterParams.paymentStatuses });
+      }
+
+      if (filterParams.isAssigned !== null
+        && filterParams.isAssigned !== undefined
+      ) {
+        queryParts.push('client.isAssigned =:isAssigned');
+        queryParameters.push({ isAssigned: filterParams.isAssigned });
       }
 
       if (filterParams.createdAtMin) {
@@ -336,6 +343,16 @@ export class ClientService {
       .where('client.userId = :userId', { userId: userId })
       .getOne();
     return client;
+  }
+
+  async setAssignedStatus(client: Client): Promise<Client> {
+    client.isAssigned = true;
+    return await this.clientsRepository.save(client);
+  }
+
+  async deleteAssignedStatus(client: Client): Promise<Client> {
+    client.isAssigned = false;
+    return await this.clientsRepository.save(client);
   }
 
   transformToGraphQlClientModel(client: Client): ClientModel {

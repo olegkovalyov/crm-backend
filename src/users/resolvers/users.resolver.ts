@@ -46,6 +46,7 @@ export class UsersResolver {
   @Query(returns => [MemberModel])
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getMembers(@Args('getMembersFilterInput') getMembersFilterInput: GetMembersFilterInput): Promise<MemberModel[]> {
+    console.log('fetching members...');
     const members = await this.memberService.getMembers(getMembersFilterInput);
     return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
   }
@@ -157,7 +158,8 @@ export class UsersResolver {
     @ServerResponse() res: Response,
     @ServerRequest() req: Request,
   ): Promise<AuthModel> {
-    const refreshToken = req.cookies['refreshToken'];
+    const refreshToken = req.headers.refreshtoken as string;
+    // console.log(refreshToken);
     if (!refreshToken) {
       res.clearCookie('refreshToken');
       throw new UnauthorizedException('Member not found or session is expired');

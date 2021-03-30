@@ -5,6 +5,7 @@ import { CreateLoadInput } from '../inputs/loads/create-load.input';
 import { BadRequestException } from '@nestjs/common';
 import { UpdateLoadInput } from '../inputs/loads/update-load.input';
 import { CreateSlotInput } from '../inputs/loads/create-slot.input';
+import { SlotModel } from '../models/slot.model';
 
 @Resolver(of => LoadModel)
 export class LoadResolver {
@@ -15,6 +16,7 @@ export class LoadResolver {
 
   @Query(returns => [LoadModel])
   async getLoads(@Args('eventId', { type: () => Int }) eventId: number): Promise<LoadModel[]> {
+    // throw new BadRequestException('Failed to get loads');
     const loadEntities = await this.loadService.getLoads(eventId);
     const loadModels = await Promise.all(
       loadEntities.map(loadEntity => this.loadService.transformToGraphQlLoadModel(loadEntity)),
@@ -33,6 +35,7 @@ export class LoadResolver {
 
   @Mutation(returns => LoadModel)
   async createLoad(@Args('createLoadInput') createData: CreateLoadInput): Promise<LoadModel> {
+    throw new BadRequestException('Failed to create load');
     const load = await this.loadService.createLoad(createData);
     return this.loadService.transformToGraphQlLoadModel(load);
   }
@@ -43,17 +46,18 @@ export class LoadResolver {
     return this.loadService.transformToGraphQlLoadModel(updatedLoad);
   }
 
-  @Mutation(returns => LoadModel)
-  async createSlot(@Args('createSlotInput') slotInput: CreateSlotInput): Promise<LoadModel> {
-    const updatedLoad = await this.loadService.createSlot(slotInput);
-    return this.loadService.transformToGraphQlLoadModel(updatedLoad);
+  @Mutation(returns => SlotModel)
+  async createSlot(@Args('createSlotInput') slotInput: CreateSlotInput): Promise<SlotModel> {
+    throw new BadRequestException('Failed to create slot');
+    const slot = await this.loadService.createSlot(slotInput);
+    return this.loadService.transformToGraphQlSlotModel(slot);
   }
 
-  @Mutation(returns => LoadModel)
+  @Mutation(returns => Boolean)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteSlot(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
-    const updatedLoad = await this.loadService.deleteSlotById(id);
-    return this.loadService.transformToGraphQlLoadModel(updatedLoad);
+  async deleteSlot(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
+    throw new BadRequestException('Failed to delete slot');
+    return await this.loadService.deleteSlotById(id);
   }
 
   @Mutation(returns => Boolean)
