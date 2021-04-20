@@ -146,7 +146,6 @@ export class MemberService {
       firstName,
       lastName,
       email,
-      password,
       roles,
       licenseType,
     } = updateData;
@@ -164,13 +163,6 @@ export class MemberService {
         throw new BadRequestException(`Member with email: ${email} already exists`);
       }
       member.email = email;
-    }
-
-    if (password) {
-      const newSalt = await bcrypt.genSalt();
-      const newPasswordHash = await bcrypt.hash(password, newSalt);
-      member.passwordSalt = newSalt;
-      member.passwordHash = newPasswordHash;
     }
 
     if (status) {
@@ -202,36 +194,11 @@ export class MemberService {
       throw new BadRequestException(`Member with id: ${id} doesn't exists`);
     }
 
-    const clientsWithTm = await this.clientsRepository
-      .createQueryBuilder('client')
-      .where('client.tmId = :tmId', { tmId: id })
-      .getMany();
-
-    const clientsWithCameraman = await this.clientsRepository
-      .createQueryBuilder('client')
-      .where('client.cameramanId = :cameramanId', { cameramanId: id })
-      .getMany();
-
     this.queryRunner = this.connection.createQueryRunner();
     await this.queryRunner.connect();
     await this.queryRunner.startTransaction();
 
     try {
-
-      for (const client of clientsWithTm) {
-        client.tm = null;
-        await this.queryRunner.connection
-          .getRepository(Client)
-          .save(client);
-      }
-
-      for (const client of clientsWithCameraman) {
-        client.cameraman = null;
-        await this.queryRunner.connection
-          .getRepository(Client)
-          .save(client);
-      }
-
       const memberDeleteResult = await this.queryRunner.connection
         .createQueryBuilder()
         .delete()

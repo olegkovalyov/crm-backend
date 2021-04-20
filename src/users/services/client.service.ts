@@ -1,15 +1,13 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Connection, QueryRunner, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
-import { Client } from '../entities/client.entity';
-import { UserType } from '../interfaces/user.interface';
-import { CreateClientInput } from '../inputs/clients/create-client.input';
-import { GetClientsFilterInput } from '../inputs/clients/get-clients-filter.input';
-import { UpdateClientInput } from '../inputs/clients/update-client.input';
-import { Member } from '../entities/member.entity';
-import { MemberModel } from '../models/member.model';
-import { ClientModel } from '../models/client.model';
+import {BadRequestException, Injectable, InternalServerErrorException} from '@nestjs/common';
+import {Connection, QueryRunner, Repository} from 'typeorm';
+import {InjectRepository} from '@nestjs/typeorm';
+import {User} from '../entities/user.entity';
+import {Client} from '../entities/client.entity';
+import {UserType} from '../interfaces/user.interface';
+import {CreateClientInput} from '../inputs/clients/create-client.input';
+import {GetClientsFilterInput} from '../inputs/clients/get-clients-filter.input';
+import {UpdateClientInput} from '../inputs/clients/update-client.input';
+import {ClientModel} from '../models/client.model';
 
 @Injectable()
 export class ClientService {
@@ -30,8 +28,7 @@ export class ClientService {
     clientsQueryBuilder.leftJoinAndSelect('client.user', 'user');
     clientsQueryBuilder.leftJoinAndSelect('client.tm', 'tm');
     clientsQueryBuilder.leftJoinAndSelect('client.cameraman', 'cameraman');
-    if (filterParams.clientStatuses
-      || filterParams.paymentStatuses
+    if (filterParams.clientStatusOptions
       || (filterParams.isAssigned !== null
         && filterParams.isAssigned !== undefined)
       || filterParams.createdAtMax
@@ -40,35 +37,28 @@ export class ClientService {
       const queryParts = [];
       const queryParameters = [];
 
-      if (filterParams.clientStatuses
-        && filterParams.clientStatuses.length
+      if (filterParams.clientStatusOptions
+        && filterParams.clientStatusOptions.length
       ) {
         queryParts.push('client.status IN(:...clientStatuses)');
-        queryParameters.push({ clientStatuses: filterParams.clientStatuses });
-      }
-
-      if (filterParams.paymentStatuses
-        && filterParams.paymentStatuses.length
-      ) {
-        queryParts.push('client.paymentStatus IN(:...paymentStatuses)');
-        queryParameters.push({ paymentStatuses: filterParams.paymentStatuses });
+        queryParameters.push({clientStatuses: filterParams.clientStatusOptions});
       }
 
       if (filterParams.isAssigned !== null
         && filterParams.isAssigned !== undefined
       ) {
         queryParts.push('client.isAssigned =:isAssigned');
-        queryParameters.push({ isAssigned: filterParams.isAssigned });
+        queryParameters.push({isAssigned: filterParams.isAssigned});
       }
 
       if (filterParams.createdAtMin) {
         queryParts.push('client.createdAt >= :dateMin ');
-        queryParameters.push({ dateMin: filterParams.createdAtMin });
+        queryParameters.push({dateMin: filterParams.createdAtMin});
       }
 
       if (filterParams.createdAtMax) {
         queryParts.push('client.createdAt < :dateMax ');
-        queryParameters.push({ dateMax: filterParams.createdAtMax });
+        queryParameters.push({dateMax: filterParams.createdAtMax});
       }
 
       for (let i = 0; i < queryParts.length; i++) {
@@ -97,9 +87,6 @@ export class ClientService {
       address,
       withHandCameraVideo,
       withCameraman,
-      paymentStatus,
-      tmId,
-      cameramanId,
       notes,
       certificate,
     } = createClientInput;
@@ -122,7 +109,6 @@ export class ClientService {
       newClient.user = user;
       newClient.role = role;
       newClient.status = status;
-      newClient.paymentStatus = paymentStatus;
       newClient.gender = gender;
       newClient.age = age;
       newClient.weight = weight;
@@ -135,26 +121,6 @@ export class ClientService {
       newClient.notes = notes;
       newClient.withCameraman = withCameraman;
       newClient.withHandCameraVideo = withHandCameraVideo;
-
-      if (tmId) {
-        const tm = await this.usersRepository
-          .createQueryBuilder('user')
-          .where('user.id = :id', { id: tmId })
-          .getOne();
-        if (tm) {
-          newClient.tm = tm;
-        }
-      }
-
-      if (cameramanId) {
-        const cameraman = await this.usersRepository
-          .createQueryBuilder('user')
-          .where('user.id = :id', { id: cameramanId })
-          .getOne();
-        if (cameraman) {
-          newClient.cameraman = cameraman;
-        }
-      }
 
       const result = await this.queryRunner.manager.save(newClient);
       await this.queryRunner.commitTransaction();
@@ -170,7 +136,7 @@ export class ClientService {
   async getClientByEmail(email: string): Promise<Client> {
     return this.clientsRepository.createQueryBuilder('client')
       .leftJoinAndSelect('client.user', 'user')
-      .where('client.email = :email', { email: email })
+      .where('client.email = :email', {email: email})
       .getOne();
   }
 
@@ -179,7 +145,7 @@ export class ClientService {
       .leftJoinAndSelect('client.user', 'user')
       .leftJoinAndSelect('client.tm', 'tm')
       .leftJoinAndSelect('client.cameraman', 'cameraman')
-      .where('client.id = :id', { id: id })
+      .where('client.id = :id', {id: id})
       .getOne();
     return client;
   }
@@ -199,10 +165,6 @@ export class ClientService {
       address,
       withHandCameraVideo,
       withCameraman,
-      paymentStatus,
-      tmId,
-      cameramanId,
-      processedAt,
       notes,
       certificate,
     } = updateData;
@@ -265,31 +227,6 @@ export class ClientService {
       client.withCameraman = withCameraman;
     }
 
-    if (paymentStatus) {
-      client.paymentStatus = paymentStatus;
-    }
-
-
-    if (tmId) {
-      const tm = await this.usersRepository
-        .createQueryBuilder('user')
-        .where('user.id = :id', { id: tmId })
-        .getOne();
-      client.tm = tm;
-    }
-
-    if (cameramanId) {
-      const cameraman = await this.usersRepository
-        .createQueryBuilder('user')
-        .where('user.id = :id', { id: cameramanId })
-        .getOne();
-      client.cameraman = cameraman;
-    }
-
-    if (processedAt) {
-      client.processedAt = processedAt;
-    }
-
     if (notes) {
       client.notes = notes;
     }
@@ -316,14 +253,14 @@ export class ClientService {
         .createQueryBuilder()
         .delete()
         .from(Client)
-        .where('id = :id', { id: id })
+        .where('id = :id', {id: id})
         .execute();
 
       const userDeleteResult = await this.queryRunner.connection
         .createQueryBuilder()
         .delete()
         .from(User)
-        .where('id = :id', { id: client.user.id })
+        .where('id = :id', {id: client.user.id})
         .execute();
       await this.queryRunner.commitTransaction();
       return clientDeleteResult.affected == 1
@@ -340,7 +277,7 @@ export class ClientService {
   async getClientByUserId(userId: number): Promise<Client> {
     const client = await this.clientsRepository.createQueryBuilder('client')
       .leftJoinAndSelect('client.user', 'user')
-      .where('client.userId = :userId', { userId: userId })
+      .where('client.userId = :userId', {userId: userId})
       .getOne();
     return client;
   }
@@ -360,7 +297,6 @@ export class ClientService {
       id: client.id,
       userId: client.user.id,
       status: client.status,
-      paymentStatus: client.paymentStatus,
       role: client.role,
       gender: client.gender,
       age: client.age,
@@ -374,9 +310,8 @@ export class ClientService {
       withCameraman: client.withCameraman,
       notes: client.notes,
       certificate: client.certificate,
-      tm: client.tm,
-      cameraman: client.cameraman,
       createdAt: client.createdAt,
+      updatedAt: client.updatedAt,
       processedAt: client.processedAt,
     };
   }

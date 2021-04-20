@@ -1,4 +1,4 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import {Field, InputType, Int} from '@nestjs/graphql';
 import {
   IsBoolean,
   IsDate, IsEmail,
@@ -9,7 +9,7 @@ import {
   MaxLength, Min,
   MinLength,
 } from 'class-validator';
-import { ClientStatus, ClientRole, Gender, PaymentStatus } from '../../interfaces/client.interface';
+import {ClientStatus, ClientRole, Gender} from '../../interfaces/client.interface';
 
 @InputType()
 export class UpdateClientInput {
@@ -52,7 +52,7 @@ export class UpdateClientInput {
   @MaxLength(20)
   lastName?: string;
 
-  @Field({ nullable: true })
+  @Field({nullable: true})
   @IsOptional()
   @IsEmail()
   email?: string;
@@ -84,29 +84,11 @@ export class UpdateClientInput {
   @IsBoolean()
   withCameraman?: boolean;
 
-  @Field(type => PaymentStatus)
-  @IsOptional()
-  @IsEnum(PaymentStatus)
-  paymentStatus?: PaymentStatus;
-
-  @Field(type => Int, { nullable: true })
-  @IsOptional()
-  tmId: number;
-
-  @Field(type => Int, { nullable: true })
-  @IsOptional()
-  cameramanId: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsDate()
-  processedAt?: Date;
-
-  @Field({ nullable: true })
+  @Field({nullable: true})
   @IsOptional()
   notes?: string;
 
-  @Field({ nullable: true })
+  @Field({nullable: true})
   @IsOptional()
   certificate?: string;
 }

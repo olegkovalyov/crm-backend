@@ -32,12 +32,6 @@ export class UpdateMemberInput {
   @IsEmail()
   email?: string;
 
-  @Field()
-  @IsOptional()
-  @MinLength(6)
-  @MaxLength(20)
-  password?: string;
-
   @Field(type => [MemberRole])
   @IsOptional()
   roles?: MemberRole[];

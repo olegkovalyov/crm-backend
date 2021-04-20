@@ -1,6 +1,6 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { ArrayUnique, IsOptional } from 'class-validator';
-import { ClientStatus, PaymentStatus } from '../../interfaces/client.interface';
+import {Field, InputType} from '@nestjs/graphql';
+import {ArrayUnique, IsOptional} from 'class-validator';
+import {ClientStatus} from '../../interfaces/client.interface';
 
 @InputType()
 export class GetClientsFilterInput {
@@ -8,12 +8,7 @@ export class GetClientsFilterInput {
   @Field(type => [ClientStatus])
   @IsOptional()
   @ArrayUnique()
-  clientStatuses?: ClientStatus[];
-
-  @Field(type => [PaymentStatus])
-  @IsOptional()
-  @ArrayUnique()
-  paymentStatuses?: PaymentStatus[];
+  clientStatusOptions?: ClientStatus[];
 
   @Field()
   @IsOptional()

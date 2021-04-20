@@ -3,10 +3,10 @@ import {
   Column,
   PrimaryGeneratedColumn,
   JoinColumn,
-  OneToOne, CreateDateColumn, ManyToOne,
+  OneToOne, CreateDateColumn, ManyToOne, UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
-import { ClientStatus, ClientRole, Gender, PaymentStatus } from '../interfaces/client.interface';
+import {User} from './user.entity';
+import {ClientStatus, ClientRole, Gender} from '../interfaces/client.interface';
 
 @Entity()
 export class Client {
@@ -66,13 +66,6 @@ export class Client {
   withCameraman: boolean;
 
   @Column({
-    type: 'enum',
-    enum: PaymentStatus,
-    nullable: true,
-  })
-  paymentStatus: PaymentStatus;
-
-  @Column({
     nullable: true,
   })
   notes: string;
@@ -92,6 +85,9 @@ export class Client {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @Column({
     default: false,

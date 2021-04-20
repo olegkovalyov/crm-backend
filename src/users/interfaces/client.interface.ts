@@ -11,9 +11,8 @@ registerEnumType(ClientRole, {
 });
 
 export enum ClientStatus {
-  ACTIVE = 'ACTIVE',
+  PENDING = 'ACTIVE',
   PROCESSED = 'PROCESSED',
-  REFUSED = 'REFUSED'
 }
 
 registerEnumType(ClientStatus, {
@@ -27,14 +26,4 @@ export enum Gender {
 
 registerEnumType(Gender, {
   name: 'Gender',
-});
-
-export enum PaymentStatus {
-  PAID = 'PAID',
-  NOT_PAID = 'NOT_PAID',
-  REFUNDED = 'REFUNDED',
-}
-
-registerEnumType(PaymentStatus, {
-  name: 'PaymentStatus',
 });
