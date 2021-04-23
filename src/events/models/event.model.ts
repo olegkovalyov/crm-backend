@@ -1,6 +1,4 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { LoadModel } from './load.model';
-import { MemberModel } from '../../users/models/member.model';
 
 
 @ObjectType()
@@ -9,17 +7,11 @@ export class EventModel {
   id: number;
 
   @Field()
-  name: string;
+  title: string;
 
   @Field()
-  date: Date;
-
-  // @Field(type => [LoadModel])
-  // loads: [LoadModel];
-
-  @Field(type => [MemberModel])
-  staff: MemberModel[];
+  startDate: Date;
 
   @Field()
-  notes: string;
+  endDate: Date;
 }

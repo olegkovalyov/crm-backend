@@ -1,15 +1,14 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
-import { Connection, QueryRunner, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Event } from '../entities/event.entity';
-import { MemberService } from '../../users/services/member.service';
-import { CreateEventInput } from '../inputs/events/create-event.input';
-import { EventModel } from '../models/event.model';
-import { GetEventsFilterInput } from '../inputs/events/get-events-filter.input';
-import { UpdateEventInput } from '../inputs/events/update-event.input';
-import { Load } from '../entities/load.entity';
-import { Slot } from '../entities/slot.entity';
+import {BadRequestException, Inject, Injectable} from '@nestjs/common';
+import {CONTEXT} from '@nestjs/graphql';
+import {Connection, QueryRunner, Repository} from 'typeorm';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Event} from '../entities/event.entity';
+import {MemberService} from '../../users/services/member.service';
+import {CreateEventInput} from '../inputs/events/create-event.input';
+import {EventModel} from '../models/event.model';
+import {GetEventsFilterInput} from '../inputs/events/get-events-filter.input';
+import {UpdateEventInput} from '../inputs/events/update-event.input';
+import {Load} from '../entities/load.entity';
 
 @Injectable()
 export class EventService {
@@ -38,13 +37,13 @@ export class EventService {
       const queryParameters = [];
 
       if (filterParams.dateMin) {
-        queryParts.push('client.dateMin >= :date ');
-        queryParameters.push({ date: filterParams.dateMin });
+        queryParts.push('event.startDate >= :date ');
+        queryParameters.push({date: filterParams.dateMin});
       }
 
       if (filterParams.dateMax) {
-        queryParts.push('client.dateMax <= :date ');
-        queryParameters.push({ date: filterParams.dateMax });
+        queryParts.push('event.endDate <= :date ');
+        queryParameters.push({date: filterParams.dateMax});
       }
 
       for (let i = 0; i < queryParts.length; i++) {
@@ -55,34 +54,30 @@ export class EventService {
         }
       }
     }
-    eventsQueryBuilder.orderBy('event.date', 'DESC');
+    eventsQueryBuilder.orderBy('event.startDate', 'DESC');
 
     return eventsQueryBuilder.getMany();
   }
 
   async createEvent(createData: CreateEventInput): Promise<Event> {
     const {
-      name,
-      date,
-      notes,
-      staffIds,
+      title,
+      startDate,
+      endDate,
     } = createData;
     const event = new Event();
-    event.name = name;
-    event.date = date;
-    event.staffIds = staffIds;
-    event.notes = notes;
+    event.title = title;
+    event.startDate = startDate;
+    event.endDate = endDate;
     return await this.eventsRepository.save(event);
   }
-
 
   async updateEvent(updateData: UpdateEventInput): Promise<Event> {
     const {
       id,
-      name,
-      date,
-      notes,
-      staffIds,
+      title,
+      startDate,
+      endDate,
     } = updateData;
 
     const currentEvent = await this.getEventById(id);
@@ -91,20 +86,16 @@ export class EventService {
       throw new BadRequestException(`Event with id: ${id} doesnt exists`);
     }
 
-    if (name) {
-      currentEvent.name = name;
+    if (title) {
+      currentEvent.title = title;
     }
 
-    if (date) {
-      currentEvent.date = date;
+    if (startDate) {
+      currentEvent.startDate = startDate;
     }
 
-    if (staffIds) {
-      currentEvent.staffIds = staffIds;
-    }
-
-    if (notes) {
-      currentEvent.notes = notes;
+    if (endDate) {
+      currentEvent.endDate = endDate;
     }
 
     return this.eventsRepository.save(currentEvent);
@@ -120,7 +111,7 @@ export class EventService {
       .createQueryBuilder('event')
       .delete()
       .from(Event)
-      .where('id = :id', { id: id })
+      .where('id = :id', {id: id})
       .execute();
 
     return deleteResult.affected === 1;
@@ -129,26 +120,18 @@ export class EventService {
   async getEventById(id: number): Promise<Event> {
     const event = await this.eventsRepository
       .createQueryBuilder('event')
-      .where('event.id = :id', { id: id })
+      .where('event.id = :id', {id: id})
       .getOne();
     return event;
   }
 
   async transformToGraphQlEventModel(event: Event): Promise<EventModel> {
-    let staff = [];
-    if (event.staffIds
-      && event.staffIds.length
-    ) {
-      const members = await this.membersService.getMembersByIds(event.staffIds, []);
-      staff = members.map(member => this.membersService.transformToGraphQlMemberModel(member));
-    }
 
     return {
       id: event.id,
-      name: event.name,
-      staff: staff,
-      date: event.date,
-      notes: event.notes,
+      title: event.title,
+      startDate: event.startDate,
+      endDate: event.endDate,
     };
   }
 }

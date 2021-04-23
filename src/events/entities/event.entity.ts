@@ -6,17 +6,11 @@ export class Event {
   id: number;
 
   @Column()
-  name: string;
-
-  @Column({
-    type: 'int',
-    array: true,
-  })
-  staffIds: number[];
+  title: string;
 
   @Column()
-  notes: string;
+  startDate: Date;
 
   @Column()
-  date: Date;
+  endDate: Date;
 }
