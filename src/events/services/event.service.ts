@@ -101,7 +101,7 @@ export class EventService {
     return this.eventsRepository.save(currentEvent);
   }
 
-  async deleteEventById(id: number): Promise<boolean> {
+  async deleteEventById(id: number): Promise<EventModel> {
     const event = await this.getEventById(id);
     if (!event) {
       throw new BadRequestException(`Event with id: ${id} doesn't exists`);
@@ -114,7 +114,10 @@ export class EventService {
       .where('id = :id', {id: id})
       .execute();
 
-    return deleteResult.affected === 1;
+    if (deleteResult.affected !== 1) {
+      throw new BadRequestException(`Failed to delete event with id: ${id}`);
+    }
+    return event;
   }
 
   async getEventById(id: number): Promise<Event> {

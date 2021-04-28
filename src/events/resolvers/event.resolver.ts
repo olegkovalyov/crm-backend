@@ -15,12 +15,14 @@ export class EventResolver {
 
   @Query(returns => [EventModel])
   async getEvents(@Args('getEventsFilterInput') getEventsFilterData: GetEventsFilterInput): Promise<EventModel[]> {
+    // throw new BadRequestException('Failed to load events');
     const events = await this.eventService.getEvents(getEventsFilterData);
     return Promise.all(events.map(event => this.eventService.transformToGraphQlEventModel(event)));
   }
 
   @Mutation(returns => EventModel)
   async createEvent(@Args('createEventInput') createEventData: CreateEventInput): Promise<EventModel> {
+    // throw new BadRequestException('item already exist');
     const event = await this.eventService.createEvent(createEventData);
     return this.eventService.transformToGraphQlEventModel(event);
   }
@@ -32,10 +34,11 @@ export class EventResolver {
     return this.eventService.transformToGraphQlEventModel(updatedEvent);
   }
 
-  @Mutation(returns => Boolean)
+  @Mutation(returns => EventModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteEvent(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
-    return this.eventService.deleteEventById(id);
+  async deleteEvent(@Args('id', { type: () => Int }) id: number): Promise<EventModel> {
+    const deletedEvent =  await this.eventService.deleteEventById(id);
+    return this.eventService.transformToGraphQlEventModel(deletedEvent);
   }
 
   @Query(returns => EventModel, { nullable: true })
