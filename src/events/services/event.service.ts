@@ -64,11 +64,13 @@ export class EventService {
       title,
       startDate,
       endDate,
+      notes,
     } = createData;
     const event = new Event();
     event.title = title;
     event.startDate = startDate;
     event.endDate = endDate;
+    event.notes = notes;
     return await this.eventsRepository.save(event);
   }
 
@@ -78,6 +80,7 @@ export class EventService {
       title,
       startDate,
       endDate,
+      notes,
     } = updateData;
 
     const currentEvent = await this.getEventById(id);
@@ -96,6 +99,10 @@ export class EventService {
 
     if (endDate) {
       currentEvent.endDate = endDate;
+    }
+
+    if (notes) {
+      currentEvent.notes = notes;
     }
 
     return this.eventsRepository.save(currentEvent);
@@ -135,6 +142,7 @@ export class EventService {
       title: event.title,
       startDate: event.startDate,
       endDate: event.endDate,
+      notes: event.notes,
     };
   }
 }

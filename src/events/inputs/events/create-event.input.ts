@@ -17,4 +17,8 @@ export class CreateEventInput {
   @Field()
   @IsDate()
   endDate: Date;
+
+  @Field()
+  @IsNotEmpty()
+  notes: string;
 }

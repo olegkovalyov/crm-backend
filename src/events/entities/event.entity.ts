@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity()
 export class Event {
@@ -13,4 +13,7 @@ export class Event {
 
   @Column()
   endDate: Date;
+
+  @Column()
+  notes: string;
 }

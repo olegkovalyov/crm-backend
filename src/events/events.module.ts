@@ -16,12 +16,6 @@ import { Slot } from './entities/slot.entity';
 @Module({
   imports: [
     CoreModule,
-    // MongooseModule.forFeature(
-    //   [
-    //     { name: 'Event', schema: EventSchema },
-    //     { name: 'Load', schema: LoadSchema },
-    //   ],
-    // ),
     TypeOrmModule.forFeature([
       Event,
       Load,
