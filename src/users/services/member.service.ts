@@ -1,19 +1,19 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, Scope } from '@nestjs/common';
-import { CONTEXT } from '@nestjs/graphql';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
-import { Connection, QueryRunner, Repository } from 'typeorm';
+import {BadRequestException, Inject, Injectable, InternalServerErrorException, Scope} from '@nestjs/common';
+import {CONTEXT} from '@nestjs/graphql';
+import {InjectRepository} from '@nestjs/typeorm';
+import {User} from '../entities/user.entity';
+import {Connection, QueryRunner, Repository} from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { Member } from '../entities/member.entity';
-import { CreateMemberInput } from '../inputs/members/create-member.input';
-import { UserType } from '../interfaces/user.interface';
-import { GetMembersFilterInput } from '../inputs/members/get-members-filter.input';
-import { UpdateMemberInput } from '../inputs/members/update-member.input';
-import { MemberRole } from '../interfaces/member.interface';
-import { Client } from '../entities/client.entity';
-import { MemberModel } from '../models/member.model';
+import {Member} from '../entities/member.entity';
+import {CreateMemberInput} from '../inputs/members/create-member.input';
+import {UserType} from '../interfaces/user.interface';
+import {GetMembersFilterInput} from '../inputs/members/get-members-filter.input';
+import {UpdateMemberInput} from '../inputs/members/update-member.input';
+import {MemberRole} from '../interfaces/member.interface';
+import {Client} from '../entities/client.entity';
+import {MemberModel} from '../models/member.model';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable({scope: Scope.REQUEST})
 export class MemberService {
   private queryRunner: QueryRunner;
 
@@ -46,14 +46,14 @@ export class MemberService {
         && filterParams.roles.length
       ) {
         queryParts.push('member.roles && ARRAY[:...roles]::member_roles_enum[]');
-        queryParameters.push({ roles: filterParams.roles });
+        queryParameters.push({roles: filterParams.roles});
       }
 
       if (filterParams.statuses
         && filterParams.statuses.length
       ) {
         queryParts.push('member.status IN(:...statuses)');
-        queryParameters.push({ statuses: filterParams.statuses });
+        queryParameters.push({statuses: filterParams.statuses});
       }
 
       for (let i = 0; i < queryParts.length; i++) {
@@ -68,9 +68,8 @@ export class MemberService {
     return membersQueryBuilder.getMany();
   }
 
-
   async createMember(createMemberInput: CreateMemberInput): Promise<Member> {
-    const { status, firstName, lastName, email, password, roles, licenseType } = createMemberInput;
+    const {status, firstName, lastName, email, password, roles, licenseType} = createMemberInput;
 
     const member = await this.getMemberByEmail(email);
     if (member) {
@@ -111,14 +110,14 @@ export class MemberService {
   async getMemberByEmail(email: string): Promise<Member> {
     return this.membersRepository.createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
-      .where('member.email = :email', { email: email })
+      .where('member.email = :email', {email: email})
       .getOne();
   }
 
   async getMemberById(id: number): Promise<Member> {
     const member = this.membersRepository.createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
-      .where('member.id = :id', { id: id })
+      .where('member.id = :id', {id: id})
       .getOne();
     return member;
   }
@@ -128,7 +127,7 @@ export class MemberService {
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user');
 
-    queryBuilder.where('member.id IN(:...ids)', { ids: ids });
+    queryBuilder.where('member.id IN(:...ids)', {ids: ids});
 
     if (roles.length) {
       queryBuilder.andWhere('member.roles && ARRAY[:...roles]::member_roles_enum[]',
@@ -188,7 +187,7 @@ export class MemberService {
     return this.membersRepository.save(member);
   }
 
-  async deleteMemberById(id: number): Promise<boolean> {
+  async deleteMemberById(id: number): Promise<Member> {
     const member = await this.getMemberById(id);
     if (!member) {
       throw new BadRequestException(`Member with id: ${id} doesn't exists`);
@@ -203,19 +202,22 @@ export class MemberService {
         .createQueryBuilder()
         .delete()
         .from(Member)
-        .where('id = :id', { id: id })
+        .where('id = :id', {id: id})
         .execute();
 
       const userDeleteResult = await this.queryRunner.connection
         .createQueryBuilder()
         .delete()
         .from(User)
-        .where('id = :id', { id: member.user.id })
+        .where('id = :id', {id: member.user.id})
         .execute();
       await this.queryRunner.commitTransaction();
-      return memberDeleteResult.affected == 1
-        && userDeleteResult.affected == 1;
-
+      if (memberDeleteResult.affected !== 1
+        && userDeleteResult.affected !== 1
+      ) {
+        throw new BadRequestException(`Failed to delete member with id: ${id}`);
+      }
+      return member;
     } catch (e) {
       await this.queryRunner.rollbackTransaction();
       throw new BadRequestException(`Failed to delete member with id: ${id}`);
@@ -228,7 +230,7 @@ export class MemberService {
     return this.membersRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
-      .where('member.roles && ARRAY[:...roles]::member_roles_enum[]', { roles: roles })
+      .where('member.roles && ARRAY[:...roles]::member_roles_enum[]', {roles: roles})
       .getMany();
   }
 
@@ -236,7 +238,6 @@ export class MemberService {
     member.refreshToken = refreshToken;
     await this.membersRepository.save(member);
   }
-
 
   async updateResetPasswordInfo(member: Member, token: string, password: string = null): Promise<void> {
 
@@ -260,14 +261,14 @@ export class MemberService {
   async getMemberByResetToken(token: string): Promise<Member> {
     return await this.membersRepository
       .createQueryBuilder('member')
-      .where('member.resetPasswordToken = :token', { token: token })
+      .where('member.resetPasswordToken = :token', {token: token})
       .getOne();
   }
 
   async getMemberByUserId(userId: number): Promise<Member> {
     const member = await this.membersRepository.createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
-      .where('member.userId = :userId', { userId: userId })
+      .where('member.userId = :userId', {userId: userId})
       .getOne();
     return member;
   }

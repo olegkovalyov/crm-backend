@@ -1,33 +1,33 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CreateMemberInput } from '../inputs/members/create-member.input';
-import { MemberService } from '../services/member.service';
-import { MemberModel } from '../models/member.model';
-import { GetMembersFilterInput } from '../inputs/members/get-members-filter.input';
-import { BadRequestException, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { UpdateMemberInput } from '../inputs/members/update-member.input';
-import { MemberRole } from '../interfaces/member.interface';
-import { AuthModel } from '../models/auth.model';
-import { LoginInput } from '../inputs/auth/login.input';
+import {Args, Int, Mutation, Query, Resolver} from '@nestjs/graphql';
+import {CreateMemberInput} from '../inputs/members/create-member.input';
+import {MemberService} from '../services/member.service';
+import {MemberModel} from '../models/member.model';
+import {GetMembersFilterInput} from '../inputs/members/get-members-filter.input';
+import {BadRequestException, UnauthorizedException, UseGuards} from '@nestjs/common';
+import {UpdateMemberInput} from '../inputs/members/update-member.input';
+import {MemberRole} from '../interfaces/member.interface';
+import {AuthModel} from '../models/auth.model';
+import {LoginInput} from '../inputs/auth/login.input';
 import * as bcrypt from 'bcryptjs';
-import { Response, Request } from 'express';
-import { AuthService } from '../services/auth.service';
-import { MailerService } from '@nestjs-modules/mailer';
-import { ConfigService } from '@nestjs/config';
-import { ServerRequest, ServerResponse } from '../decorators/decorators';
-import { JwtService } from '@nestjs/jwt';
-import { DecodedRefreshTokenInterface } from '../interfaces/auth.interface';
-import { ForgotPasswordInput } from '../inputs/auth/forgot-password.input';
-import { ForgotPasswordModel } from '../models/forgot-password.model';
-import { RandomStringService } from '@akanass/nestjsx-crypto';
-import { ResetPasswordInput } from '../inputs/auth/reset-password.input';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { IsAdminOrManifestGuard } from '../guards/is-admin-or-manifest-guard.guard';
-import { ClientModel } from '../models/client.model';
-import { CreateClientInput } from '../inputs/clients/create-client.input';
-import { ClientService } from '../services/client.service';
-import { Client } from '../entities/client.entity';
-import { GetClientsFilterInput } from '../inputs/clients/get-clients-filter.input';
-import { UpdateClientInput } from '../inputs/clients/update-client.input';
+import {Response, Request} from 'express';
+import {AuthService} from '../services/auth.service';
+import {MailerService} from '@nestjs-modules/mailer';
+import {ConfigService} from '@nestjs/config';
+import {ServerRequest, ServerResponse} from '../decorators/decorators';
+import {JwtService} from '@nestjs/jwt';
+import {DecodedRefreshTokenInterface} from '../interfaces/auth.interface';
+import {ForgotPasswordInput} from '../inputs/auth/forgot-password.input';
+import {ForgotPasswordModel} from '../models/forgot-password.model';
+import {RandomStringService} from '@akanass/nestjsx-crypto';
+import {ResetPasswordInput} from '../inputs/auth/reset-password.input';
+import {JwtAuthGuard} from '../guards/jwt-auth.guard';
+import {IsAdminOrManifestGuard} from '../guards/is-admin-or-manifest-guard.guard';
+import {ClientModel} from '../models/client.model';
+import {CreateClientInput} from '../inputs/clients/create-client.input';
+import {ClientService} from '../services/client.service';
+import {Client} from '../entities/client.entity';
+import {GetClientsFilterInput} from '../inputs/clients/get-clients-filter.input';
+import {UpdateClientInput} from '../inputs/clients/update-client.input';
 
 @Resolver('User')
 export class UsersResolver {
@@ -51,9 +51,9 @@ export class UsersResolver {
     return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
   }
 
-  @Query(returns => MemberModel, { nullable: true })
+  @Query(returns => MemberModel, {nullable: true})
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async getMember(@Args('id', { type: () => Int }) id: number): Promise<MemberModel> {
+  async getMember(@Args('id', {type: () => Int}) id: number): Promise<MemberModel> {
     const member = await this.memberService.getMemberById(id);
     if (!member) {
       throw new BadRequestException('Member not found');
@@ -75,13 +75,14 @@ export class UsersResolver {
     return this.memberService.transformToGraphQlMemberModel(updatedMember);
   }
 
-  @Mutation(returns => Boolean)
+  @Mutation(returns => MemberModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteMember(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
-    return this.memberService.deleteMemberById(id);
+  async deleteMember(@Args('id', {type: () => Int}) id: number): Promise<MemberModel> {
+    const member = await this.memberService.deleteMemberById(id);
+    return this.memberService.transformToGraphQlMemberModel(member);
   }
 
-  @Query(returns => [MemberModel], { nullable: true })
+  @Query(returns => [MemberModel], {nullable: true})
   async getStaff(): Promise<MemberModel[]> {
     const members = await this.memberService.getMembersByRoles([
       MemberRole.TM,
@@ -97,7 +98,7 @@ export class UsersResolver {
     @Args('loginInput') input: LoginInput,
     @ServerResponse() res: Response,
   ): Promise<AuthModel> {
-    const { email, password } = input;
+    const {email, password} = input;
     const member = await this.memberService.getMemberByEmail(email);
 
     if (!member) {
@@ -114,13 +115,12 @@ export class UsersResolver {
 
     await this.memberService.updateRefreshToken(member, refreshToken);
 
-    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    res.cookie('refreshToken', refreshToken, {httpOnly: true});
     return {
       payload: this.memberService.transformToGraphQlMemberModel(member),
       accessToken,
     };
   }
-
 
   @Mutation(returns => AuthModel)
   async register(
@@ -134,7 +134,7 @@ export class UsersResolver {
 
     await this.memberService.updateRefreshToken(member, refreshToken);
 
-    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    res.cookie('refreshToken', refreshToken, {httpOnly: true});
 
     await this.mailerService.sendMail({
       to: member.email,
@@ -245,7 +245,7 @@ export class UsersResolver {
     const accessToken = await this.authService.generateAccessToken(member);
     const refreshToken = await this.authService.generateRefreshToken(member);
 
-    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    res.cookie('refreshToken', refreshToken, {httpOnly: true});
 
     await this.mailerService.sendMail({
       to: member.email,
@@ -263,16 +263,14 @@ export class UsersResolver {
     };
   }
 
-
   @Mutation(returns => ClientModel)
   async createClient(@Args('createClientInput') createClientData: CreateClientInput): Promise<ClientModel> {
     const newClient = await this.clientService.createClient(createClientData);
     return this.clientService.transformToGraphQlClientModel(newClient);
   }
 
-
-  @Query(returns => ClientModel, { nullable: true })
-  async getClient(@Args('id', { type: () => Int }) id: number): Promise<ClientModel> {
+  @Query(returns => ClientModel, {nullable: true})
+  async getClient(@Args('id', {type: () => Int}) id: number): Promise<ClientModel> {
     const client = await this.clientService.getClientById(id);
     if (!client) {
       throw new BadRequestException('Client not found');
@@ -292,9 +290,10 @@ export class UsersResolver {
     return this.clientService.transformToGraphQlClientModel(client);
   }
 
-  @Mutation(returns => Boolean)
+  @Mutation(returns => ClientModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteClient(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
-    return this.clientService.deleteClientById(id);
+  async deleteClient(@Args('id', {type: () => Int}) id: number): Promise<ClientModel> {
+    const client = await this.clientService.deleteClientById(id);
+    return this.clientService.transformToGraphQlClientModel(client);
   }
 }

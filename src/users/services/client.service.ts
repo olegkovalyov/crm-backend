@@ -238,7 +238,7 @@ export class ClientService {
     return this.clientsRepository.save(client);
   }
 
-  async deleteClientById(id: number): Promise<boolean> {
+  async deleteClientById(id: number): Promise<Client> {
     const client = await this.getClientById(id);
     if (!client) {
       throw new BadRequestException(`Client with id: ${id} doesn't exists`);
@@ -263,9 +263,12 @@ export class ClientService {
         .where('id = :id', {id: client.user.id})
         .execute();
       await this.queryRunner.commitTransaction();
-      return clientDeleteResult.affected == 1
-        && userDeleteResult.affected == 1;
-
+      if (clientDeleteResult.affected !== 1
+        && userDeleteResult.affected !== 1
+      ) {
+        throw new BadRequestException(`Failed to delete client with id: ${id}`);
+      }
+      return client;
     } catch (e) {
       await this.queryRunner.rollbackTransaction();
       throw new BadRequestException(`Failed to delete client with id: ${id}`);

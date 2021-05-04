@@ -25,6 +25,6 @@ export class UpdateEventInput {
   endDate?: Date;
 
   @Field()
-  @IsNotEmpty()
+  @IsOptional()
   notes?: string;
 }
