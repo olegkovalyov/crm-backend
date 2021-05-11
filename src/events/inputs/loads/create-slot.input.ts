@@ -1,5 +1,6 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
-import { UserRole } from '../../../users/interfaces/user.interface';
+import {Field, InputType, Int} from '@nestjs/graphql';
+import {IsEnum, IsOptional} from 'class-validator';
+import {SlotType} from '../../interfaces/slot.interface';
 
 @InputType()
 export class CreateSlotInput {
@@ -7,18 +8,14 @@ export class CreateSlotInput {
   @Field(type => Int)
   loadId: number;
 
-  @Field(type => Int)
-  userId: number;
+  @Field(type => SlotType)
+  @IsEnum(SlotType)
+  type: SlotType;
 
-  @Field()
-  firstName: string;
+  @Field(type => [Int])
+  userIds: number[];
 
-  @Field()
-  lastName: string;
-
-  @Field(type => UserRole)
-  role: typeof UserRole;
-
-  @Field()
-  description: string;
+  @Field({nullable: true})
+  @IsOptional()
+  notes?: string;
 }

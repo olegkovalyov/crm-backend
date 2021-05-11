@@ -1,9 +1,7 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { IsEnum } from 'class-validator';
-import { LoadStatus } from '../interfaces/load.interface';
-import { EventModel } from './event.model';
-import { SlotModel } from './slot.model';
-
+import {Field, Int, ObjectType} from '@nestjs/graphql';
+import {IsEnum} from 'class-validator';
+import {LoadStatus} from '../interfaces/load.interface';
+import {EventModel} from './event.model';
 
 @ObjectType()
 export class LoadModel {
@@ -15,21 +13,18 @@ export class LoadModel {
   event: EventModel;
 
   @Field(type => Int)
-  order: number;
+  capacity: number;
 
   @Field(type => LoadStatus)
   @IsEnum(LoadStatus)
   status: LoadStatus;
 
-  @Field()
-  date: Date;
+  @Field(type => Int, {nullable: true})
+  order?: number;
 
-  @Field(type => [SlotModel])
-  slots: SlotModel[];
+  @Field(type => Int)
+  time: number;
 
-  @Field()
-  aircraft: string;
-
-  @Field({ nullable: true })
+  @Field({nullable: true})
   notes?: string;
 }

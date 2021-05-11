@@ -1,52 +1,36 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne, OneToMany } from 'typeorm';
-import { LoadStatus } from '../interfaces/load.interface';
-import { Event } from './event.entity';
-import { Slot } from './slot.entity';
+import {Entity, Column, PrimaryGeneratedColumn, ManyToOne} from 'typeorm';
+import {LoadStatus} from '../interfaces/load.interface';
+import {Event} from './event.entity';
 
 @Entity()
 export class Load {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Event, { onDelete: 'CASCADE', eager: true })
-  @JoinColumn()
+  @ManyToOne(() => Event)
   event: Event;
 
   @Column()
-  order: number;
+  capacity: number;
 
   @Column({
     type: 'enum',
     enum: LoadStatus,
-    nullable: true,
   })
   status: LoadStatus;
 
-  @Column()
-  date: Date;
-
-  // @Column({
-  //   type: 'int',
-  //   array: true,
-  //   nullable: true,
-  // })
-  // slotIds: number[];
-
-  @OneToMany(
-    () => Slot,
-    slot => slot.load,
-    { onDelete: 'CASCADE', eager: true },
-  )
-  @JoinColumn()
-  slots: Slot[];
+  @Column({
+    nullable: true,
+  })
+  order?: number;
 
   @Column({
     nullable: true,
   })
-  aircraft: string;
+  time: number;
 
   @Column({
     nullable: true,
   })
-  notes: string;
+  notes?: string;
 }

@@ -24,6 +24,7 @@ export class LoadResolver {
     return loadModels;
   }
 
+
   @Query(returns => LoadModel, { nullable: true })
   async getLoad(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
     const load = await this.loadService.getLoadById(id);
@@ -35,7 +36,6 @@ export class LoadResolver {
 
   @Mutation(returns => LoadModel)
   async createLoad(@Args('createLoadInput') createData: CreateLoadInput): Promise<LoadModel> {
-    throw new BadRequestException('Failed to create load');
     const load = await this.loadService.createLoad(createData);
     return this.loadService.transformToGraphQlLoadModel(load);
   }
@@ -46,23 +46,28 @@ export class LoadResolver {
     return this.loadService.transformToGraphQlLoadModel(updatedLoad);
   }
 
-  @Mutation(returns => SlotModel)
-  async createSlot(@Args('createSlotInput') slotInput: CreateSlotInput): Promise<SlotModel> {
-    throw new BadRequestException('Failed to create slot');
-    const slot = await this.loadService.createSlot(slotInput);
-    return this.loadService.transformToGraphQlSlotModel(slot);
+  @Mutation(returns => LoadModel)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  async deleteLoad(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
+    const deletedLoad =  await this.loadService.deleteLoadById(id);
+    return this.loadService.transformToGraphQlLoadModel(deletedLoad);
   }
 
-  @Mutation(returns => Boolean)
-  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteSlot(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
-    throw new BadRequestException('Failed to delete slot');
-    return await this.loadService.deleteSlotById(id);
-  }
-
-  @Mutation(returns => Boolean)
-  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteLoad(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
-    return this.loadService.deleteLoadById(id);
-  }
+  //
+  //
+  //
+  // @Mutation(returns => SlotModel)
+  // async createSlot(@Args('createSlotInput') slotInput: CreateSlotInput): Promise<SlotModel> {
+  //   throw new BadRequestException('Failed to create slot');
+  //   const slot = await this.loadService.createSlot(slotInput);
+  //   return this.loadService.transformToGraphQlSlotModel(slot);
+  // }
+  //
+  // @Mutation(returns => Boolean)
+  // // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  // async deleteSlot(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
+  //   throw new BadRequestException('Failed to delete slot');
+  //   return await this.loadService.deleteSlotById(id);
+  // }
+  //
 }

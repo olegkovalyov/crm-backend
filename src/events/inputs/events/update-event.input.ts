@@ -24,7 +24,7 @@ export class UpdateEventInput {
   @IsDate()
   endDate?: Date;
 
-  @Field()
+  @Field({nullable: true})
   @IsOptional()
   notes?: string;
 }

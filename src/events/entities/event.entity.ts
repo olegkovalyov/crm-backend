@@ -14,6 +14,8 @@ export class Event {
   @Column()
   endDate: Date;
 
-  @Column()
-  notes: string;
+  @Column({
+    nullable: true,
+  })
+  notes?: string;
 }

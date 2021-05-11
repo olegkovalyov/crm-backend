@@ -15,6 +15,6 @@ export class EventModel {
   @Field()
   endDate: Date;
 
-  @Field()
-  notes: string;
+  @Field({nullable: true})
+  notes?: string;
 }
