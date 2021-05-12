@@ -1,11 +1,9 @@
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { LoadModel } from '../models/load.model';
-import { LoadService } from '../services/load.service';
-import { CreateLoadInput } from '../inputs/loads/create-load.input';
-import { BadRequestException } from '@nestjs/common';
-import { UpdateLoadInput } from '../inputs/loads/update-load.input';
-import { CreateSlotInput } from '../inputs/loads/create-slot.input';
-import { SlotModel } from '../models/slot.model';
+import {Args, Int, Mutation, Query, Resolver} from '@nestjs/graphql';
+import {LoadModel} from '../models/load.model';
+import {LoadService} from '../services/load.service';
+import {CreateLoadInput} from '../inputs/loads/create-load.input';
+import {BadRequestException} from '@nestjs/common';
+import {UpdateLoadInput} from '../inputs/loads/update-load.input';
 
 @Resolver(of => LoadModel)
 export class LoadResolver {
@@ -15,7 +13,7 @@ export class LoadResolver {
   }
 
   @Query(returns => [LoadModel])
-  async getLoads(@Args('eventId', { type: () => Int }) eventId: number): Promise<LoadModel[]> {
+  async getLoads(@Args('eventId', {type: () => Int}) eventId: number): Promise<LoadModel[]> {
     // throw new BadRequestException('Failed to get loads');
     const loadEntities = await this.loadService.getLoads(eventId);
     const loadModels = await Promise.all(
@@ -24,9 +22,8 @@ export class LoadResolver {
     return loadModels;
   }
 
-
-  @Query(returns => LoadModel, { nullable: true })
-  async getLoad(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
+  @Query(returns => LoadModel, {nullable: true})
+  async getLoad(@Args('id', {type: () => Int}) id: number): Promise<LoadModel> {
     const load = await this.loadService.getLoadById(id);
     if (!load) {
       throw new BadRequestException('Load not found');
@@ -48,26 +45,8 @@ export class LoadResolver {
 
   @Mutation(returns => LoadModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteLoad(@Args('id', { type: () => Int }) id: number): Promise<LoadModel> {
-    const deletedLoad =  await this.loadService.deleteLoadById(id);
+  async deleteLoad(@Args('id', {type: () => Int}) id: number): Promise<LoadModel> {
+    const deletedLoad = await this.loadService.deleteLoadById(id);
     return this.loadService.transformToGraphQlLoadModel(deletedLoad);
   }
-
-  //
-  //
-  //
-  // @Mutation(returns => SlotModel)
-  // async createSlot(@Args('createSlotInput') slotInput: CreateSlotInput): Promise<SlotModel> {
-  //   throw new BadRequestException('Failed to create slot');
-  //   const slot = await this.loadService.createSlot(slotInput);
-  //   return this.loadService.transformToGraphQlSlotModel(slot);
-  // }
-  //
-  // @Mutation(returns => Boolean)
-  // // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  // async deleteSlot(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
-  //   throw new BadRequestException('Failed to delete slot');
-  //   return await this.loadService.deleteSlotById(id);
-  // }
-  //
 }

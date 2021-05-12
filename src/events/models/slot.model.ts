@@ -1,5 +1,5 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { UserRole } from '../../users/interfaces/user.interface';
+import {Field, Int, ObjectType} from '@nestjs/graphql';
+import {SlotType} from '../interfaces/slot.interface';
 
 @ObjectType()
 export class SlotModel {
@@ -8,17 +8,14 @@ export class SlotModel {
   id: number;
 
   @Field(type => Int)
-  userId: number;
+  loadId: number;
 
-  @Field()
-  firstName: string;
+  @Field(type => SlotType)
+  type: SlotType;
 
-  @Field()
-  lastName: string;
+  @Field(type => [Int])
+  userIds: number[];
 
-  @Field()
-  description: string;
-
-  @Field(type => UserRole)
-  role: typeof UserRole;
+  @Field({nullable: true})
+  notes?: string;
 }

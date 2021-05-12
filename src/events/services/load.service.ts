@@ -8,14 +8,9 @@ import {ClientService} from '../../users/services/client.service';
 import {CreateLoadInput} from '../inputs/loads/create-load.input';
 import {EventService} from './event.service';
 import {LoadModel} from '../models/load.model';
-import {SlotModel} from '../models/slot.model';
 import {UserService} from '../../users/services/user.service';
 import {Slot} from '../entities/slot.entity';
 import {UpdateLoadInput} from '../inputs/loads/update-load.input';
-import {CreateSlotInput} from '../inputs/loads/create-slot.input';
-import {UserType} from '../../users/interfaces/user.interface';
-import {MemberRole} from '../../users/interfaces/member.interface';
-import {ClientRole} from '../../users/interfaces/client.interface';
 
 @Injectable()
 export class LoadService {
@@ -179,107 +174,5 @@ export class LoadService {
       notes: loadEntity.notes,
     };
   }
-
-  //
-  //
-  //
-  // async getSlotById(id: number): Promise<Slot> {
-  //   const slot = await this.slotRepository
-  //     .createQueryBuilder('slot')
-  //     .leftJoinAndSelect('slot.load', 'load')
-  //     .where('slot.id = :id', { id: id })
-  //     .getOne();
-  //   //  const load = await this.loadRepository.findOne({ id: id });
-  //   return slot;
-  // }
-  //
-  //
-  // async transformToGraphQlSlotModel(slotEntity: Slot): Promise<SlotModel> {
-  //   return {
-  //     id: slotEntity.id,
-  //     userId: slotEntity.userId,
-  //     firstName: slotEntity.firstName,
-  //     lastName: slotEntity.lastName,
-  //     role: slotEntity.role,
-  //     description: slotEntity.description,
-  //   };
-  // }
-  //
-  //
-  //
-  // async deleteSlotById(id: number): Promise<boolean> {
-  //   const slot = await this.getSlotById(id);
-  //   if (!slot) {
-  //     throw new BadRequestException(`Slot with id: ${id} doesn't exists`);
-  //   }
-  //
-  //   try {
-  //     await this.loadRepository
-  //       .createQueryBuilder('slot')
-  //       .delete()
-  //       .from(Slot)
-  //       .where('id = :id', { id: id })
-  //       .execute();
-  //
-  //     const client = await this.clientService.getClientByUserId(slot.userId);
-  //     if (client) {
-  //       await this.clientService.deleteAssignedStatus(client);
-  //     }
-  //
-  //     const load = await this.getLoadById(slot.load.id);
-  //     load.slots = load.slots.filter(slot => slot.id !== id);
-  //     await this.loadRepository.save(load);
-  //     return true;
-  //   } catch (e) {
-  //     console.log(e);
-  //     throw new BadRequestException(`Failed to delete slot`);
-  //   }
-  // }
-  //
-  //
-  // async createSlot(slotData: CreateSlotInput): Promise<Slot> {
-  //   const load = await this.getLoadById(slotData.loadId);
-  //   if (!load) {
-  //     throw new BadRequestException(`Load with id: ${slotData.loadId} doesnt exists`);
-  //   }
-  //
-  //   const user = await this.userService.getUserById(slotData.userId);
-  //   if (!user) {
-  //     throw new BadRequestException(`User with id: ${slotData.userId} doesnt exists`);
-  //   }
-  //
-  //   if (user.userType === UserType.MEMBER) {
-  //     const member = await this.memberService.getMemberByUserId(user.id);
-  //     if (!member.roles.includes(slotData.role as unknown as MemberRole)) {
-  //       throw new BadRequestException(`Invalid role`);
-  //     }
-  //   }
-  //
-  //   if (user.userType === UserType.CLIENT) {
-  //     const client = await this.clientService.getClientByUserId(user.id);
-  //     if (client.role !== slotData.role as unknown as ClientRole) {
-  //       throw new BadRequestException(`Invalid role`);
-  //     }
-  //     await this.clientService.setAssignedStatus(client);
-  //   }
-  //
-  //   const slot = new Slot();
-  //   slot.userId = slotData.userId;
-  //   slot.firstName = slotData.firstName;
-  //   slot.lastName = slotData.lastName;
-  //   slot.role = slotData.role;
-  //   slot.description = slotData.description;
-  //   slot.load = load;
-  //
-  //   try {
-  //     await this.slotRepository.save(slot);
-  //     load.slots.push(slot);
-  //     await this.loadRepository.save(load);
-  //     return slot;
-  //   } catch (e) {
-  //     console.log(e);
-  //     throw new BadRequestException(`Failed to add slot`);
-  //   }
-  // }
 
 }

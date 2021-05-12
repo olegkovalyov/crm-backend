@@ -1,13 +1,14 @@
-import {Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, ManyToOne} from 'typeorm';
 import {SlotType} from '../interfaces/slot.interface';
+import {Load} from './load.entity';
 
 @Entity()
 export class Slot {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  loadId: number;
+  @ManyToOne(() => Load)
+  load: Load;
 
   @Column({
     type: 'enum',
@@ -21,5 +22,5 @@ export class Slot {
   @Column({
     nullable: true,
   })
-  notes: string;
+  notes?: string;
 }
