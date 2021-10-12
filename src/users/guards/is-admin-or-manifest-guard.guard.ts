@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
-import { MemberAccessTokenPayloadInterface, MemberRole } from '../interfaces/member.interface';
+import { MemberAccessTokenPayloadInterface, UserRole } from '../interfaces/user.interface';
 
 @Injectable()
 export class IsAdminOrManifestGuard implements CanActivate {
@@ -17,8 +17,8 @@ export class IsAdminOrManifestGuard implements CanActivate {
     const ctx = GqlExecutionContext.create(context);
     const token = ctx.getContext().req.header('authorization').slice(7);
     const decodedToken = this.jwtService.decode(token) as MemberAccessTokenPayloadInterface;
-    return decodedToken.roles.includes(MemberRole.ADMIN)
-      || decodedToken.roles.includes(MemberRole.MANIFEST);
+    return decodedToken.roles.includes(UserRole.ADMIN)
+      || decodedToken.roles.includes(UserRole.MANIFEST);
   }
 }
 

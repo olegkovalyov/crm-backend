@@ -1,18 +1,50 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { MemberRole } from './member.interface';
-import { ClientRole } from './client.interface';
 
-export enum UserType {
-  MEMBER = 'Member',
-  CLIENT = 'Client'
+
+export interface MemberAccessTokenPayloadInterface {
+  id: string,
+  status: string,
+  firstName: string,
+  lastName: string,
+  email: string,
+  roles: UserRole[],
+  iat: number,
+  exp: number,
 }
 
-registerEnumType(UserType, {
-  name: 'UserType',
+export enum UserRole {
+  STUDENT = 'STUDENT',
+  SKYDIVER = 'SKYDIVER',
+  COACH = 'COACH',
+  CAMERAMAN = 'CAMERAMAN',
+  TM = 'TM',
+  PACKER = 'PACKER',
+  RIGGER = 'RIGGER',
+  MANIFEST = 'MANIFEST',
+  ADMIN = 'ADMIN',
+}
+
+export enum LicenseType {
+  NONE = 'NONE',
+  A = 'A',
+  B = 'B',
+  C = 'C',
+  D = 'D',
+}
+
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  BLOCKED = 'BLOCKED'
+}
+
+registerEnumType(UserStatus, {
+  name: 'MemberStatus',
 });
 
-export const UserRole = Object.assign({}, MemberRole, ClientRole);
+registerEnumType(LicenseType, {
+  name: 'LicenseType',
+});
 
 registerEnumType(UserRole, {
-  name: 'UserRole',
+  name: 'MemberRole',
 });

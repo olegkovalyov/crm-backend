@@ -1,4 +1,5 @@
-import {Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, OneToMany} from 'typeorm';
+import {Load} from './load.entity';
 
 @Entity()
 export class Event {
@@ -18,4 +19,7 @@ export class Event {
     nullable: true,
   })
   notes?: string;
+
+  @OneToMany(() => Load, load => load.event )
+  loads: Load[];
 }

@@ -1,13 +1,13 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { ArrayNotEmpty, ArrayUnique, IsEmail, IsEnum, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
-import { LicenseType, MemberRole, MemberStatus } from '../../interfaces/member.interface';
+import {LicenseType, UserRole, UserStatus} from '../../interfaces/user.interface';
 
 @InputType()
-export class CreateMemberInput {
-  @Field(type => MemberStatus)
+export class CreateUserInput {
+  @Field(type => UserStatus)
   @IsNotEmpty()
-  @IsEnum(MemberStatus)
-  status: MemberStatus;
+  @IsEnum(UserStatus)
+  status: UserStatus;
 
   @Field()
   @IsNotEmpty()
@@ -32,10 +32,10 @@ export class CreateMemberInput {
   @MaxLength(20)
   password: string;
 
-  @Field(type => [MemberRole])
+  @Field(type => [UserRole])
   @ArrayNotEmpty()
   @ArrayUnique()
-  roles: MemberRole[];
+  roles: UserRole[];
 
   @Field(type => LicenseType)
   @IsNotEmpty()

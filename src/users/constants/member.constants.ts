@@ -1,13 +1,13 @@
-import { MemberRole } from '../interfaces/member.interface';
+import { UserRole } from '../interfaces/user.interface';
 
 export const availableMemberRoles = [
-  MemberRole.ADMIN,
-  MemberRole.SKYDIVER,
-  MemberRole.COACH,
-  MemberRole.MANIFEST,
-  MemberRole.CAMERAMAN,
-  MemberRole.PACKER,
-  MemberRole.RIGGER,
-  MemberRole.STUDENT,
-  MemberRole.TM,
+  UserRole.ADMIN,
+  UserRole.SKYDIVER,
+  UserRole.COACH,
+  UserRole.MANIFEST,
+  UserRole.CAMERAMAN,
+  UserRole.PACKER,
+  UserRole.RIGGER,
+  UserRole.STUDENT,
+  UserRole.TM,
 ];

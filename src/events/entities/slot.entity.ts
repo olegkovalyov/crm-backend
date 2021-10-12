@@ -7,9 +7,6 @@ export class Slot {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Load)
-  load: Load;
-
   @Column({
     type: 'enum',
     enum: SlotType,
@@ -23,4 +20,9 @@ export class Slot {
     nullable: true,
   })
   notes?: string;
+
+  @ManyToOne(() => Load, load => load.slots, {
+    onDelete: 'CASCADE'
+  })
+  load: Load;
 }

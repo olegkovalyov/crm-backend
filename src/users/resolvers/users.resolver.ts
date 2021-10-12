@@ -1,11 +1,11 @@
 import {Args, Int, Mutation, Query, Resolver} from '@nestjs/graphql';
-import {CreateMemberInput} from '../inputs/members/create-member.input';
-import {MemberService} from '../services/member.service';
+import {CreateUserInput} from '../inputs/user/create-user.input';
+import {UserService} from '../services/user.service';
 import {MemberModel} from '../models/member.model';
-import {GetMembersFilterInput} from '../inputs/members/get-members-filter.input';
-import {BadRequestException, UnauthorizedException, UseGuards} from '@nestjs/common';
-import {UpdateMemberInput} from '../inputs/members/update-member.input';
-import {MemberRole} from '../interfaces/member.interface';
+import {GetUsersInput} from '../inputs/user/get-users.input';
+import {BadRequestException, UnauthorizedException} from '@nestjs/common';
+import {UpdateUserInput} from '../inputs/user/update-user.input';
+import {UserRole} from '../interfaces/user.interface';
 import {AuthModel} from '../models/auth.model';
 import {LoginInput} from '../inputs/auth/login.input';
 import * as bcrypt from 'bcryptjs';
@@ -20,12 +20,9 @@ import {ForgotPasswordInput} from '../inputs/auth/forgot-password.input';
 import {ForgotPasswordModel} from '../models/forgot-password.model';
 import {RandomStringService} from '@akanass/nestjsx-crypto';
 import {ResetPasswordInput} from '../inputs/auth/reset-password.input';
-import {JwtAuthGuard} from '../guards/jwt-auth.guard';
-import {IsAdminOrManifestGuard} from '../guards/is-admin-or-manifest-guard.guard';
 import {ClientModel} from '../models/client.model';
 import {CreateClientInput} from '../inputs/clients/create-client.input';
 import {ClientService} from '../services/client.service';
-import {Client} from '../entities/client.entity';
 import {GetClientsFilterInput} from '../inputs/clients/get-clients-filter.input';
 import {UpdateClientInput} from '../inputs/clients/update-client.input';
 
@@ -33,7 +30,7 @@ import {UpdateClientInput} from '../inputs/clients/update-client.input';
 export class UsersResolver {
 
   constructor(
-    private readonly memberService: MemberService,
+    private readonly memberService: UserService,
     private readonly authService: AuthService,
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
@@ -45,9 +42,9 @@ export class UsersResolver {
 
   @Query(returns => [MemberModel])
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async getMembers(@Args('getMembersFilterInput') getMembersFilterInput: GetMembersFilterInput): Promise<MemberModel[]> {
+  async getMembers(@Args('getMembersFilterInput') getMembersFilterInput: GetUsersInput): Promise<MemberModel[]> {
     console.log('fetching members...');
-    const members = await this.memberService.getMembers(getMembersFilterInput);
+    const members = await this.memberService.getUsers(getMembersFilterInput);
     return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
   }
 
@@ -63,14 +60,14 @@ export class UsersResolver {
 
   @Mutation(returns => MemberModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async createMember(@Args('createMemberInput') createMemberInput: CreateMemberInput): Promise<MemberModel> {
-    const member = await this.memberService.createMember(createMemberInput);
+  async createMember(@Args('createMemberInput') createMemberInput: CreateUserInput): Promise<MemberModel> {
+    const member = await this.memberService.createUser(createMemberInput);
     return this.memberService.transformToGraphQlMemberModel(member);
   }
 
   @Mutation(returns => MemberModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async updateMember(@Args('updateMemberInput') updateMemberData: UpdateMemberInput): Promise<MemberModel> {
+  async updateMember(@Args('updateMemberInput') updateMemberData: UpdateUserInput): Promise<MemberModel> {
     const updatedMember = await this.memberService.updateMember(updateMemberData);
     return this.memberService.transformToGraphQlMemberModel(updatedMember);
   }
@@ -85,10 +82,10 @@ export class UsersResolver {
   @Query(returns => [MemberModel], {nullable: true})
   async getStaff(): Promise<MemberModel[]> {
     const members = await this.memberService.getMembersByRoles([
-      MemberRole.TM,
-      MemberRole.COACH,
-      MemberRole.CAMERAMAN,
-      MemberRole.PACKER,
+      UserRole.TM,
+      UserRole.COACH,
+      UserRole.CAMERAMAN,
+      UserRole.PACKER,
     ]);
     return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
   }
@@ -124,10 +121,10 @@ export class UsersResolver {
 
   @Mutation(returns => AuthModel)
   async register(
-    @Args('registerInput') input: CreateMemberInput,
+    @Args('registerInput') input: CreateUserInput,
     @ServerResponse() res: Response,
   ): Promise<AuthModel> {
-    const member = await this.memberService.createMember(input);
+    const member = await this.memberService.createUser(input);
 
     const accessToken = await this.authService.generateAccessToken(member);
     const refreshToken = await this.authService.generateRefreshToken(member);
@@ -136,16 +133,16 @@ export class UsersResolver {
 
     res.cookie('refreshToken', refreshToken, {httpOnly: true});
 
-    await this.mailerService.sendMail({
-      to: member.email,
-      from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
-      subject: 'Welcome to Skydive CRM',
-      template: 'welcome',
-      context: {
-        username: `${member.firstName} ${member.lastName}`,
-        login: `${member.email}`,
-      },
-    });
+    // await this.mailerService.sendMail({
+    //   to: member.email,
+    //   from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
+    //   subject: 'Welcome to Skydive CRM',
+    //   template: 'welcome',
+    //   context: {
+    //     username: `${member.firstName} ${member.lastName}`,
+    //     login: `${member.email}`,
+    //   },
+    // });
 
     return {
       payload: this.memberService.transformToGraphQlMemberModel(member),
@@ -209,16 +206,16 @@ export class UsersResolver {
       charset: 'alphabetic',
     }).toPromise();
 
-    await this.mailerService.sendMail({
-      to: member.email,
-      from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
-      subject: 'Reset password',
-      template: 'forgot-password',
-      context: {
-        link: this.configService.get('FRONTEND_HOST') + '/reset-password/' + token,
-        username: `${member.firstName} ${member.lastName}`,
-      },
-    });
+    // await this.mailerService.sendMail({
+    //   to: member.email,
+    //   from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
+    //   subject: 'Reset password',
+    //   template: 'forgot-password',
+    //   context: {
+    //     link: this.configService.get('FRONTEND_HOST') + '/reset-password/' + token,
+    //     username: `${member.firstName} ${member.lastName}`,
+    //   },
+    // });
 
     await this.memberService.updateResetPasswordInfo(member, token);
 
@@ -247,15 +244,15 @@ export class UsersResolver {
 
     res.cookie('refreshToken', refreshToken, {httpOnly: true});
 
-    await this.mailerService.sendMail({
-      to: member.email,
-      from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
-      subject: 'Your password successfully changes',
-      template: 'reset-password',
-      context: {
-        username: `${member.firstName} ${member.lastName}`,
-      },
-    });
+    // await this.mailerService.sendMail({
+    //   to: member.email,
+    //   from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
+    //   subject: 'Your password successfully changes',
+    //   template: 'reset-password',
+    //   context: {
+    //     username: `${member.firstName} ${member.lastName}`,
+    //   },
+    // });
 
     return {
       user: member,

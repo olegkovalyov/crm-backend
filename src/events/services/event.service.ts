@@ -1,9 +1,7 @@
-import {BadRequestException, Inject, Injectable} from '@nestjs/common';
-import {CONTEXT} from '@nestjs/graphql';
-import {Connection, QueryRunner, Repository} from 'typeorm';
+import {Injectable} from '@nestjs/common';
+import {Connection, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Event} from '../entities/event.entity';
-import {MemberService} from '../../users/services/member.service';
 import {CreateEventInput} from '../inputs/events/create-event.input';
 import {EventModel} from '../models/event.model';
 import {GetEventsFilterInput} from '../inputs/events/get-events-filter.input';
@@ -13,17 +11,10 @@ import {Load} from '../entities/load.entity';
 @Injectable()
 export class EventService {
 
-  private queryRunner: QueryRunner;
-
   constructor(
-    @Inject(CONTEXT)
-    private readonly context,
     private connection: Connection,
     @InjectRepository(Event)
     private readonly eventsRepository: Repository<Event>,
-    @InjectRepository(Load)
-    private readonly loadRepository: Repository<Load>,
-    private readonly membersService: MemberService,
   ) {
   }
 
@@ -74,65 +65,50 @@ export class EventService {
     return await this.eventsRepository.save(event);
   }
 
-  async updateEvent(updateData: UpdateEventInput): Promise<Event> {
+  async updateEvent(event: Event, updateData: UpdateEventInput): Promise<Event> {
     const {
-      id,
       title,
       startDate,
       endDate,
       notes,
     } = updateData;
 
-    const currentEvent = await this.getEventById(id);
-
-    if (!currentEvent) {
-      throw new BadRequestException(`Event with id: ${id} doesnt exists`);
-    }
-
     if (title) {
-      currentEvent.title = title;
+      event.title = title;
     }
 
     if (startDate) {
-      currentEvent.startDate = startDate;
+      event.startDate = startDate;
     }
 
     if (endDate) {
-      currentEvent.endDate = endDate;
+      event.endDate = endDate;
     }
 
     if (notes) {
-      currentEvent.notes = notes;
+      event.notes = notes;
     }
 
-    return this.eventsRepository.save(currentEvent);
+    return await this.eventsRepository.save(event);
   }
 
-  async deleteEventById(id: number): Promise<EventModel> {
-    const event = await this.getEventById(id);
-    if (!event) {
-      throw new BadRequestException(`Event with id: ${id} doesn't exists`);
-    }
-
-    const deleteResult = await this.eventsRepository
-      .createQueryBuilder('event')
+  async deleteEventById(id: number): Promise<boolean> {
+    const deleteResult = await this.connection
+      .createQueryBuilder()
+      .relation(Load, 'load')
       .delete()
       .from(Event)
       .where('id = :id', {id: id})
       .execute();
-
-    if (deleteResult.affected !== 1) {
-      throw new BadRequestException(`Failed to delete event with id: ${id}`);
-    }
-    return event;
+    return deleteResult.affected === 1;
   }
 
-  async getEventById(id: number): Promise<Event> {
+  async getEventById(id: number): Promise<Event | null> {
     const event = await this.eventsRepository
       .createQueryBuilder('event')
       .where('event.id = :id', {id: id})
       .getOne();
-    return event;
+    return (event !== undefined) ? event : null;
   }
 
   async transformToGraphQlEventModel(event: Event): Promise<EventModel> {

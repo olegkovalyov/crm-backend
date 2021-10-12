@@ -7,9 +7,6 @@ export class SlotModel {
   @Field(type => Int)
   id: number;
 
-  @Field(type => Int)
-  loadId: number;
-
   @Field(type => SlotType)
   type: SlotType;
 

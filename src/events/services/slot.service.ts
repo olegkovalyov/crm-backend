@@ -1,65 +1,77 @@
-import {BadRequestException, Inject, Injectable} from '@nestjs/common';
-import {CONTEXT} from '@nestjs/graphql';
-import {Connection, QueryRunner, Repository} from 'typeorm';
+import {BadRequestException, forwardRef, Inject, Injectable, Scope} from '@nestjs/common';
+import {Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
-import {MemberService} from '../../users/services/member.service';
 import {Load} from '../entities/load.entity';
-import {ClientService} from '../../users/services/client.service';
-import {EventService} from './event.service';
 import {SlotModel} from '../models/slot.model';
 import {UserService} from '../../users/services/user.service';
 import {Slot} from '../entities/slot.entity';
 import {CreateSlotInput} from '../inputs/slots/create-slot.input';
 import {LoadService} from './load.service';
+import {SlotType} from '../interfaces/slot.interface';
+import {SlotValidatorService} from './slot-validator.service';
 
-@Injectable()
+@Injectable({scope: Scope.REQUEST})
 export class SlotService {
 
-  private queryRunner: QueryRunner;
-
   constructor(
-    // @InjectModel('Event') private eventModel: Model<EventInterface>,
-    @Inject(CONTEXT)
-    private readonly context,
-    private connection: Connection,
     @InjectRepository(Load)
     private readonly loadRepository: Repository<Load>,
     @InjectRepository(Slot)
     private readonly slotRepository: Repository<Slot>,
-    private readonly memberService: MemberService,
-    private readonly clientService: ClientService,
-    private readonly eventService: EventService,
+    @Inject(forwardRef(() => LoadService))
     private readonly loadService: LoadService,
     private readonly userService: UserService,
+    private readonly slotValidatorService: SlotValidatorService,
   ) {
   }
 
-  async createSlot(slotData: CreateSlotInput): Promise<Slot> {
-    const load = await this.loadService.getLoadById(slotData.loadId);
-    if (!load) {
-      throw new BadRequestException(`Load with id: ${slotData.loadId} doesnt exists`);
-    }
-
-    const users = await this.userService.getUsersByIds(slotData.userIds);
-    if (users.length !== slotData.userIds.length) {
-      const userIds = users.map((user) => user.id);
-      const inactiveUserIds = slotData.userIds.filter(x => !userIds.includes(x));
-      throw new BadRequestException(`Users with id's: ${inactiveUserIds.join(',')} doesnt exists`);
-    }
+  async createSlot(slotData: CreateSlotInput, load: Load): Promise<Slot> {
+    //
+    // switch (slotData.type) {
+    //   case SlotType.SPORT:
+    //   case SlotType.HOP_ON_HOP_OFF:
+    //     await this.slotValidatorService.validateSportSlot(users, load);
+    //     break;
+    //   case SlotType.TM_WITH_CAMERAMAN:
+    //     await this.slotValidatorService.validateTandemSlot(users, load, true);
+    //     break;
+    //   case SlotType.TM_WITHOUT_CAMERAMAN:
+    //     await this.slotValidatorService.validateTandemSlot(users, load, false);
+    //     break;
+    //   case SlotType.STATIC_LINE:
+    //     await this.slotValidatorService.validateStaticLineSlot(users, load);
+    //     break;
+    //   case SlotType.AFF_ONE_INSTRUCTOR:
+    //     await this.slotValidatorService.validateAffSlot(users, load, false);
+    //     break;
+    //   case SlotType.AFF_TWO_INSTRUCTORS:
+    //     await this.slotValidatorService.validateAffSlot(users, load, true);
+    //     break;
+    //   case SlotType.COACHED_JUMP:
+    //     await this.slotValidatorService.validateCoachedJumpSlot(users, load);
+    //     break;
+    //   case SlotType.PASSENGER:
+    //     await this.slotValidatorService.validatePassengerSlot(users, load);
+    //     break;
+    //   default:
+    //     break;
+    // }
 
     const slot = new Slot();
+
     slot.type = slotData.type;
     slot.load = load;
     slot.userIds = slotData.userIds;
     slot.notes = slotData.notes;
+    await this.slotRepository.save(slot);
+    return slot;
 
-    try {
-      await this.slotRepository.save(slot);
-      return slot;
-    } catch (e) {
-      console.log(e);
-      throw new BadRequestException(`Failed to create slot`);
-    }
+    // try {
+    //   await this.slotRepository.save(slot);
+    //   return slot;
+    // } catch (e) {
+    //   throw new BadRequestException(`Failed to create slot`);
+    // }
   }
 
   async getSlots(loadId: number): Promise<Slot[]> {
@@ -93,7 +105,7 @@ export class SlotService {
       return slot;
     } catch (e) {
       console.log(e);
-      throw new BadRequestException(`Failed to delete slot`);
+      throw new BadRequestException(`Failed to delete slot with id: ${id}`);
     }
   }
 
@@ -107,9 +119,9 @@ export class SlotService {
   }
 
   async transformToGraphQlSlotModel(slotEntity: Slot): Promise<SlotModel> {
+    console.log(slotEntity);
     return {
       id: slotEntity.id,
-      loadId: slotEntity.load.id,
       type: slotEntity.type,
       userIds: slotEntity.userIds,
       notes: slotEntity.notes,

@@ -1,14 +1,12 @@
-import {Entity, Column, PrimaryGeneratedColumn, ManyToOne} from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany} from 'typeorm';
 import {LoadStatus} from '../interfaces/load.interface';
 import {Event} from './event.entity';
+import {Slot} from './slot.entity';
 
 @Entity()
 export class Load {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => Event)
-  event: Event;
 
   @Column()
   capacity: number;
@@ -33,4 +31,12 @@ export class Load {
     nullable: true,
   })
   notes?: string;
+
+  @ManyToOne(() => Event, event => event.loads, {
+    onDelete: 'CASCADE'
+  })
+  event: Event;
+
+  @OneToMany(() => Slot, slot => slot.load)
+  slots: Slot[];
 }

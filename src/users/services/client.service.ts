@@ -3,7 +3,6 @@ import {Connection, QueryRunner, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {User} from '../entities/user.entity';
 import {Client} from '../entities/client.entity';
-import {UserType} from '../interfaces/user.interface';
 import {CreateClientInput} from '../inputs/clients/create-client.input';
 import {GetClientsFilterInput} from '../inputs/clients/get-clients-filter.input';
 import {UpdateClientInput} from '../inputs/clients/update-client.input';
@@ -102,7 +101,6 @@ export class ClientService {
 
     try {
       const user = new User();
-      user.userType = UserType.CLIENT;
       await this.queryRunner.manager.save(user);
 
       const newClient = new Client();
