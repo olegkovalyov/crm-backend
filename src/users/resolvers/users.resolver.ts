@@ -1,7 +1,7 @@
 import {Args, Int, Mutation, Query, Resolver} from '@nestjs/graphql';
 import {CreateUserInput} from '../inputs/user/create-user.input';
 import {UserService} from '../services/user.service';
-import {MemberModel} from '../models/member.model';
+import {UserModel} from '../models/user.model';
 import {GetUsersInput} from '../inputs/user/get-users.input';
 import {BadRequestException, UnauthorizedException} from '@nestjs/common';
 import {UpdateUserInput} from '../inputs/user/update-user.input';
@@ -25,69 +25,113 @@ import {CreateClientInput} from '../inputs/clients/create-client.input';
 import {ClientService} from '../services/client.service';
 import {GetClientsFilterInput} from '../inputs/clients/get-clients-filter.input';
 import {UpdateClientInput} from '../inputs/clients/update-client.input';
+import {GraphqlService} from '../services/graphql.service';
+import {NotifyService} from '../services/notify.service';
 
 @Resolver('User')
 export class UsersResolver {
 
   constructor(
-    private readonly memberService: UserService,
+    private readonly userService: UserService,
     private readonly authService: AuthService,
     private readonly mailerService: MailerService,
+    private readonly notifyService: NotifyService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly randomStringService: RandomStringService,
     private readonly clientService: ClientService,
+    private readonly graphQlService: GraphqlService,
   ) {
   }
 
-  @Query(returns => [MemberModel])
-  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async getMembers(@Args('getMembersFilterInput') getMembersFilterInput: GetUsersInput): Promise<MemberModel[]> {
-    console.log('fetching members...');
-    const members = await this.memberService.getUsers(getMembersFilterInput);
-    return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
+  @Mutation(returns => AuthModel)
+  async register(
+    @Args('registerInput') input: CreateUserInput,
+    @ServerResponse() res: Response,
+  ): Promise<AuthModel> {
+    // Fill user data
+    const user = await this.userService.createUser(input);
+    const userInfo = await this.userService.createUserInfo(input, user);
+
+    // Produce auth
+    const accessToken = await this.authService.generateAccessToken(user);
+    const refreshToken = await this.authService.generateRefreshToken(user);
+    await this.userService.updateRefreshToken(user, refreshToken);
+    res.cookie('refreshToken', refreshToken, {httpOnly: true});
+
+    // Notify about success registration
+    await this.notifyService.notifyUserRegistration(
+      user.email,
+      userInfo.firstName,
+      userInfo.lastName,
+    );
+
+    // Transform response to graphql model
+    const payload = this.graphQlService.constructUserModel(user, userInfo);
+
+    return {
+      payload,
+      accessToken,
+    };
   }
 
-  @Query(returns => MemberModel, {nullable: true})
+
+
+
+
+
+
+
+
+
+  @Query(returns => [UserModel])
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async getMember(@Args('id', {type: () => Int}) id: number): Promise<MemberModel> {
-    const member = await this.memberService.getMemberById(id);
+  async getMembers(@Args('getMembersFilterInput') getMembersFilterInput: GetUsersInput): Promise<UserModel[]> {
+    console.log('fetching members...');
+    const members = await this.userService.getUsers(getMembersFilterInput);
+    return members.map(member => this.userService.transformToGraphQlMemberModel(member));
+  }
+
+  @Query(returns => UserModel, {nullable: true})
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  async getMember(@Args('id', {type: () => Int}) id: number): Promise<UserModel> {
+    const member = await this.userService.getMemberById(id);
     if (!member) {
       throw new BadRequestException('Member not found');
     }
-    return this.memberService.transformToGraphQlMemberModel(member);
+    return this.userService.transformToGraphQlMemberModel(member);
   }
 
-  @Mutation(returns => MemberModel)
+  @Mutation(returns => UserModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async createMember(@Args('createMemberInput') createMemberInput: CreateUserInput): Promise<MemberModel> {
-    const member = await this.memberService.createUser(createMemberInput);
-    return this.memberService.transformToGraphQlMemberModel(member);
+  async createMember(@Args('createMemberInput') createMemberInput: CreateUserInput): Promise<UserModel> {
+    const member = await this.userService.createUser(createMemberInput);
+    return this.userService.transformToGraphQlMemberModel(member);
   }
 
-  @Mutation(returns => MemberModel)
+  @Mutation(returns => UserModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async updateMember(@Args('updateMemberInput') updateMemberData: UpdateUserInput): Promise<MemberModel> {
-    const updatedMember = await this.memberService.updateMember(updateMemberData);
-    return this.memberService.transformToGraphQlMemberModel(updatedMember);
+  async updateMember(@Args('updateMemberInput') updateMemberData: UpdateUserInput): Promise<UserModel> {
+    const updatedMember = await this.userService.updateMember(updateMemberData);
+    return this.userService.transformToGraphQlMemberModel(updatedMember);
   }
 
-  @Mutation(returns => MemberModel)
+  @Mutation(returns => UserModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
-  async deleteMember(@Args('id', {type: () => Int}) id: number): Promise<MemberModel> {
-    const member = await this.memberService.deleteMemberById(id);
-    return this.memberService.transformToGraphQlMemberModel(member);
+  async deleteMember(@Args('id', {type: () => Int}) id: number): Promise<UserModel> {
+    const member = await this.userService.deleteMemberById(id);
+    return this.userService.transformToGraphQlMemberModel(member);
   }
 
-  @Query(returns => [MemberModel], {nullable: true})
-  async getStaff(): Promise<MemberModel[]> {
-    const members = await this.memberService.getMembersByRoles([
+  @Query(returns => [UserModel], {nullable: true})
+  async getStaff(): Promise<UserModel[]> {
+    const members = await this.userService.getMembersByRoles([
       UserRole.TM,
       UserRole.COACH,
       UserRole.CAMERAMAN,
       UserRole.PACKER,
     ]);
-    return members.map(member => this.memberService.transformToGraphQlMemberModel(member));
+    return members.map(member => this.userService.transformToGraphQlMemberModel(member));
   }
 
   @Mutation(returns => AuthModel)
@@ -96,7 +140,7 @@ export class UsersResolver {
     @ServerResponse() res: Response,
   ): Promise<AuthModel> {
     const {email, password} = input;
-    const member = await this.memberService.getMemberByEmail(email);
+    const member = await this.userService.getUserByEmail(email);
 
     if (!member) {
       throw new UnauthorizedException('Email or password are invalid');
@@ -110,42 +154,11 @@ export class UsersResolver {
     const accessToken = await this.authService.generateAccessToken(member);
     const refreshToken = await this.authService.generateRefreshToken(member);
 
-    await this.memberService.updateRefreshToken(member, refreshToken);
+    await this.userService.updateRefreshToken(member, refreshToken);
 
     res.cookie('refreshToken', refreshToken, {httpOnly: true});
     return {
-      payload: this.memberService.transformToGraphQlMemberModel(member),
-      accessToken,
-    };
-  }
-
-  @Mutation(returns => AuthModel)
-  async register(
-    @Args('registerInput') input: CreateUserInput,
-    @ServerResponse() res: Response,
-  ): Promise<AuthModel> {
-    const member = await this.memberService.createUser(input);
-
-    const accessToken = await this.authService.generateAccessToken(member);
-    const refreshToken = await this.authService.generateRefreshToken(member);
-
-    await this.memberService.updateRefreshToken(member, refreshToken);
-
-    res.cookie('refreshToken', refreshToken, {httpOnly: true});
-
-    // await this.mailerService.sendMail({
-    //   to: member.email,
-    //   from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
-    //   subject: 'Welcome to Skydive CRM',
-    //   template: 'welcome',
-    //   context: {
-    //     username: `${member.firstName} ${member.lastName}`,
-    //     login: `${member.email}`,
-    //   },
-    // });
-
-    return {
-      payload: this.memberService.transformToGraphQlMemberModel(member),
+      payload: this.userService.transformToGraphQlMemberModel(member),
       accessToken,
     };
   }
@@ -156,7 +169,6 @@ export class UsersResolver {
     @ServerRequest() req: Request,
   ): Promise<AuthModel> {
     const refreshToken = req.headers.refreshtoken as string;
-    // console.log(refreshToken);
     if (!refreshToken) {
       res.clearCookie('refreshToken');
       throw new UnauthorizedException('Member not found or session is expired');
@@ -168,7 +180,7 @@ export class UsersResolver {
       throw new UnauthorizedException('Member not found or session is expired');
     }
 
-    const member = await this.memberService.getMemberByEmail((decodedData as DecodedRefreshTokenInterface).email);
+    const member = await this.userService.getUserByEmail((decodedData as DecodedRefreshTokenInterface).email);
     if (!member) {
       res.clearCookie('refreshToken');
       throw new UnauthorizedException('Member not found or session is expired');
@@ -176,10 +188,10 @@ export class UsersResolver {
 
     const accessToken = await this.authService.generateAccessToken(member);
     const newRefreshToken = await this.authService.generateRefreshToken(member);
-    await this.memberService.updateRefreshToken(member, newRefreshToken);
+    await this.userService.updateRefreshToken(member, newRefreshToken);
     res.cookie('refreshToken', newRefreshToken);
     return {
-      payload: this.memberService.transformToGraphQlMemberModel(member),
+      payload: this.userService.transformToGraphQlMemberModel(member),
       accessToken,
     };
   }
@@ -195,7 +207,7 @@ export class UsersResolver {
 
   @Mutation(returns => ForgotPasswordModel)
   async forgotPassword(@Args('forgotPasswordInput') forgotPasswordData: ForgotPasswordInput) {
-    const member = await this.memberService.getMemberByEmail(forgotPasswordData.email);
+    const member = await this.userService.getUserByEmail(forgotPasswordData.email);
 
     if (!member) {
       throw new UnauthorizedException('Email is invalid');
@@ -217,7 +229,7 @@ export class UsersResolver {
     //   },
     // });
 
-    await this.memberService.updateResetPasswordInfo(member, token);
+    await this.userService.updateResetPasswordInfo(member, token);
 
     return {
       wasSentEmail: true,
@@ -230,14 +242,14 @@ export class UsersResolver {
     @ServerResponse() res: Response,
   ) {
 
-    const member = await this.memberService.getMemberByResetToken(resetPasswordData.token);
+    const member = await this.userService.getMemberByResetToken(resetPasswordData.token);
     if (!member
       || Date.now() > (new Date(member.resetPasswordExpirationDate)).getTime()
     ) {
       throw new UnauthorizedException('Member not found or token is expired');
     }
 
-    await this.memberService.updateResetPasswordInfo(member, null, resetPasswordData.password);
+    await this.userService.updateResetPasswordInfo(member, null, resetPasswordData.password);
 
     const accessToken = await this.authService.generateAccessToken(member);
     const refreshToken = await this.authService.generateRefreshToken(member);

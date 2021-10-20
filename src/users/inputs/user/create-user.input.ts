@@ -4,6 +4,17 @@ import {LicenseType, UserRole, UserStatus} from '../../interfaces/user.interface
 
 @InputType()
 export class CreateUserInput {
+  @Field()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @Field()
+  @IsNotEmpty()
+  @MinLength(6)
+  @MaxLength(20)
+  password: string;
+
   @Field(type => UserStatus)
   @IsNotEmpty()
   @IsEnum(UserStatus)
@@ -20,17 +31,6 @@ export class CreateUserInput {
   @MinLength(3)
   @MaxLength(20)
   lastName: string;
-
-  @Field()
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @Field()
-  @IsNotEmpty()
-  @MinLength(6)
-  @MaxLength(20)
-  password: string;
 
   @Field(type => [UserRole])
   @ArrayNotEmpty()

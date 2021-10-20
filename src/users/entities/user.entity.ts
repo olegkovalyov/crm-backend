@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import {UserStatus} from '../interfaces/user.interface';
 
 @Entity()
 export class User {
@@ -13,6 +14,23 @@ export class User {
 
   @Column()
   email: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
+
+  @Column({
+    nullable: true,
+  })
+  passwordSalt: string;
+
+  @Column({
+    nullable: true,
+  })
+  passwordHash: string;
 
   @Column({
     nullable: true,
@@ -28,16 +46,6 @@ export class User {
     nullable: true,
   })
   refreshToken: string;
-
-  @Column({
-    nullable: true,
-  })
-  passwordHash: string;
-
-  @Column({
-    nullable: true,
-  })
-  passwordSalt: string;
 
   @CreateDateColumn()
   createdAt: Date;

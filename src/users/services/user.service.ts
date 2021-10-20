@@ -1,5 +1,4 @@
-import {BadRequestException, Inject, Injectable, InternalServerErrorException, Scope} from '@nestjs/common';
-import {CONTEXT} from '@nestjs/graphql';
+import {BadRequestException, Injectable, InternalServerErrorException, Scope} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Connection, QueryRunner, Repository} from 'typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -8,28 +7,27 @@ import {CreateUserInput} from '../inputs/user/create-user.input';
 import {GetUsersInput} from '../inputs/user/get-users.input';
 import {UpdateUserInput} from '../inputs/user/update-user.input';
 import {LicenseType, UserRole, UserStatus} from '../interfaces/user.interface';
-import {MemberModel} from '../models/member.model';
+import {UserModel} from '../models/user.model';
+import {UserInfo} from '../entities/user-info.entity';
 
 @Injectable({scope: Scope.REQUEST})
 export class UserService {
   private queryRunner: QueryRunner;
 
   constructor(
-    @Inject(CONTEXT)
-    private readonly context,
     private connection: Connection,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    @InjectRepository(User)
-    private readonly membersRepository: Repository<User>,
+    @InjectRepository(UserInfo)
+    private readonly userInfoRepository: Repository<UserInfo>,
   ) {
   }
 
   async getUsers(filterParams: GetUsersInput): Promise<User[]> {
 
-    const membersQueryBuilder = this.membersRepository.createQueryBuilder('member');
+    const usersQueryBuilder = this.usersRepository.createQueryBuilder('member');
 
-    membersQueryBuilder.leftJoinAndSelect('member.user', 'user');
+    usersQueryBuilder.leftJoinAndSelect('member.user', 'user');
     if (filterParams.roles
       || filterParams.statuses
     ) {
@@ -53,57 +51,59 @@ export class UserService {
 
       for (let i = 0; i < queryParts.length; i++) {
         if (i === 0) {
-          membersQueryBuilder.where(queryParts[i], queryParameters[i]);
+          usersQueryBuilder.where(queryParts[i], queryParameters[i]);
         } else {
-          membersQueryBuilder.andWhere(queryParts[i], queryParameters[i]);
+          usersQueryBuilder.andWhere(queryParts[i], queryParameters[i]);
         }
       }
     }
 
-    return membersQueryBuilder.getMany();
+    return usersQueryBuilder.getMany();
   }
 
-  async createUser(createMemberInput: CreateUserInput): Promise<User> {
-    const {email, password} = createMemberInput;
+  async createUser(input: CreateUserInput): Promise<User> {
+    const {email, password, status} = input;
 
-    const member = await this.getMemberByEmail(email);
-    if (member) {
-      throw new BadRequestException('Member with this email already exists');
+    const alreadyExist = await this.usersRepository.findOne({email: email});
+    if (alreadyExist) {
+      throw new BadRequestException('User with this email already exists');
     }
 
-    this.queryRunner = this.connection.createQueryRunner();
-    await this.queryRunner.connect();
-    await this.queryRunner.startTransaction();
+    const user = new User();
+    const salt = await bcrypt.genSalt();
+    user.email = email;
+    user.status = status;
+    user.passwordHash = await bcrypt.hash(password, salt);
+    user.passwordSalt = salt;
 
     try {
-      const user = new User();
-      await this.queryRunner.manager.save(user);
-      const salt = await bcrypt.genSalt();
-
-      const newMember = new User();
-      newMember.email = email;
-      newMember.passwordHash = await bcrypt.hash(password, salt);
-      newMember.passwordSalt = salt;
-      const result = await this.queryRunner.manager.save(newMember);
-      await this.queryRunner.commitTransaction();
-      return result;
+      return this.usersRepository.save(user);
     } catch (e) {
-      await this.queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('Failed to create member');
-    } finally {
-      await this.queryRunner.release();
+      throw new InternalServerErrorException('Failed to create user');
     }
   }
 
-  async getMemberByEmail(email: string): Promise<User> {
-    return this.membersRepository.createQueryBuilder('member')
-      .leftJoinAndSelect('member.user', 'user')
-      .where('member.email = :email', {email: email})
-      .getOne();
+  async createUserInfo(input: CreateUserInput, user: User): Promise<UserInfo> {
+    const {firstName, lastName, roles, licenseType} = input;
+    const userInfo = new UserInfo();
+    userInfo.user = user;
+    userInfo.firstName = firstName;
+    userInfo.lastName = lastName;
+    userInfo.roles = roles;
+    userInfo.licenseType = licenseType;
+    try {
+      return this.userInfoRepository.save(userInfo);
+    } catch (e) {
+      throw new InternalServerErrorException('Failed to create user info');
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
+    return this.usersRepository.findOne({email: email});
   }
 
   async getMemberById(id: number): Promise<User> {
-    const member = this.membersRepository.createQueryBuilder('member')
+    const member = this.usersRepository.createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
       .where('member.id = :id', {id: id})
       .getOne();
@@ -111,7 +111,7 @@ export class UserService {
   }
 
   async getMembersByIds(ids: number[], roles: UserRole[]): Promise<User[]> {
-    const queryBuilder = this.membersRepository
+    const queryBuilder = this.usersRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user');
 
@@ -143,7 +143,7 @@ export class UserService {
     }
 
     if (email) {
-      const memberWithEmail = await this.getMemberByEmail(email);
+      const memberWithEmail = await this.getUserByEmail(email);
       if (memberWithEmail
         && memberWithEmail.id !== id
       ) {
@@ -152,7 +152,7 @@ export class UserService {
       member.email = email;
     }
 
-    return this.membersRepository.save(member);
+    return this.usersRepository.save(member);
   }
 
   async deleteMemberById(id: number): Promise<User> {
@@ -195,16 +195,16 @@ export class UserService {
   }
 
   async getMembersByRoles(roles: UserRole[]): Promise<User[]> {
-    return this.membersRepository
+    return this.usersRepository
       .createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
       .where('member.roles && ARRAY[:...roles]::member_roles_enum[]', {roles: roles})
       .getMany();
   }
 
-  async updateRefreshToken(member: User, refreshToken: string | null): Promise<void> {
-    member.refreshToken = refreshToken;
-    await this.membersRepository.save(member);
+  async updateRefreshToken(user: User, refreshToken: string | null): Promise<void> {
+    user.refreshToken = refreshToken;
+    await this.usersRepository.save(user);
   }
 
   async updateResetPasswordInfo(member: User, token: string, password: string = null): Promise<void> {
@@ -223,28 +223,27 @@ export class UserService {
       member.passwordSalt = newSalt;
       member.passwordHash = newPasswordHash;
     }
-    await this.membersRepository.save(member);
+    await this.usersRepository.save(member);
   }
 
   async getMemberByResetToken(token: string): Promise<User> {
-    return await this.membersRepository
+    return await this.usersRepository
       .createQueryBuilder('member')
       .where('member.resetPasswordToken = :token', {token: token})
       .getOne();
   }
 
   async getMemberByUserId(userId: number): Promise<User> {
-    const member = await this.membersRepository.createQueryBuilder('member')
+    const member = await this.usersRepository.createQueryBuilder('member')
       .leftJoinAndSelect('member.user', 'user')
       .where('member.userId = :userId', {userId: userId})
       .getOne();
     return member;
   }
 
-  transformToGraphQlMemberModel(member: User): MemberModel {
+  transformToGraphQlMemberModel(member: User): UserModel {
     return {
       id: member.id,
-      userId: 1,
       status: UserStatus.ACTIVE,
       firstName: '',
       lastName: '',

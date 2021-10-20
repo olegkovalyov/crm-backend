@@ -43,7 +43,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           from: configService.get<string>('MAIL_DEFAUL_FROM'),
         },
         template: {
-          dir: __dirname + '/../../email-templates',
+          dir: process.cwd() + '/email-templates/',
           adapter: new PugAdapter(),
           options: {
             strict: true,

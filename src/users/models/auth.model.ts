@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { MemberModel } from './member.model';
+import { UserModel } from './user.model';
 
 @ObjectType()
 export class AuthModel {
-  @Field(type => MemberModel, { nullable: true })
-  payload: MemberModel;
+  @Field(type => UserModel, { nullable: true })
+  payload: UserModel;
 
   @Field({ nullable: true })
   accessToken: string;

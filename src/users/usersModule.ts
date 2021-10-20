@@ -11,6 +11,8 @@ import {Client} from './entities/client.entity';
 import {ClientService} from './services/client.service';
 import {UserService} from './services/user.service';
 import {UserValidatorService} from './services/user-validator.service';
+import {GraphqlService} from './services/graphql.service';
+import {NotifyService} from './services/notify.service';
 
 @Module({
   imports: [
@@ -25,14 +27,16 @@ import {UserValidatorService} from './services/user-validator.service';
     TypeOrmModule,
   ],
   providers: [
-    UsersResolver,
+    AuthService,
+    ClientService,
+    GraphqlService,
+    JwtStrategy,
+    NotifyService,
+    RandomStringService,
     UserService,
     UserService,
     UserValidatorService,
-    ClientService,
-    AuthService,
-    JwtStrategy,
-    RandomStringService,
+    UsersResolver,
   ],
 })
 export class UsersModule {

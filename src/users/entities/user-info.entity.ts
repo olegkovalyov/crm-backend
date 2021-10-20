@@ -17,13 +17,6 @@ export class UserInfo {
   @JoinColumn()
   user: User;
 
-  @Column({
-    type: 'enum',
-    enum: UserStatus,
-    default: UserStatus.ACTIVE,
-  })
-  status: UserStatus;
-
   @Column()
   firstName: string;
 
