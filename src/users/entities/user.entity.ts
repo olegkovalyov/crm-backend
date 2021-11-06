@@ -3,9 +3,10 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn, OneToOne,
 } from 'typeorm';
 import {UserStatus} from '../interfaces/user.interface';
+import {UserInfo} from './user-info.entity';
 
 @Entity()
 export class User {
@@ -52,4 +53,14 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(
+    () => UserInfo,
+    (userInfo) => userInfo.user,
+    {
+      eager: true,
+      cascade: true
+    },
+  )
+  userInfo: UserInfo;
 }

@@ -20,7 +20,7 @@ export class AuthService {
     const status = UserStatus.ACTIVE;
     const firstName = 'Oleh';
     const lastName = 'Kovalov';
-    const roles = [UserRole.SKYDIVER];
+    const role = [UserRole.SKYDIVER];
     const licenseType = [LicenseType.D];
     return this.jwtService.signAsync({
         id,
@@ -28,7 +28,7 @@ export class AuthService {
         email,
         firstName,
         lastName,
-        roles,
+        role: role,
         licenseType,
       },
       {

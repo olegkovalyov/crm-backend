@@ -1,6 +1,6 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { ArrayUnique, IsOptional } from 'class-validator';
-import { UserRole, UserStatus } from '../../interfaces/user.interface';
+import {Field, InputType} from '@nestjs/graphql';
+import {ArrayUnique, IsOptional} from 'class-validator';
+import {LicenseType, UserRole, UserStatus} from '../../interfaces/user.interface';
 
 @InputType()
 export class GetUsersInput {
@@ -8,10 +8,23 @@ export class GetUsersInput {
   @Field(type => [UserStatus])
   @IsOptional()
   @ArrayUnique()
-  statuses?: UserStatus[];
+  status?: UserStatus[];
 
   @Field(type => [UserRole])
   @IsOptional()
   @ArrayUnique()
-  roles?: UserRole[];
+  role?: UserRole[];
+
+  @Field(type => [LicenseType])
+  @IsOptional()
+  @ArrayUnique()
+  licenseType?: LicenseType[];
+
+  @Field(type => String)
+  @IsOptional()
+  firstName?: string;
+
+  @Field(type => String)
+  @IsOptional()
+  lastName?: string;
 }

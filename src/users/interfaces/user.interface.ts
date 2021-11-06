@@ -1,13 +1,18 @@
-import { registerEnumType } from '@nestjs/graphql';
+import {registerEnumType} from '@nestjs/graphql';
+import {FindOperator} from 'typeorm';
 
+export interface GetUsersFilterConditionInterface {
+  status?: FindOperator<any>;
+  userInfo?: Record<string, unknown>;
+}
 
-export interface MemberAccessTokenPayloadInterface {
+export interface UserAccessTokenPayloadInterface {
   id: string,
   status: string,
   firstName: string,
   lastName: string,
   email: string,
-  roles: UserRole[],
+  role: UserRole[],
   iat: number,
   exp: number,
 }
@@ -38,7 +43,7 @@ export enum UserStatus {
 }
 
 registerEnumType(UserStatus, {
-  name: 'MemberStatus',
+  name: 'UserStatus',
 });
 
 registerEnumType(LicenseType, {
@@ -46,5 +51,5 @@ registerEnumType(LicenseType, {
 });
 
 registerEnumType(UserRole, {
-  name: 'MemberRole',
+  name: 'UserRole',
 });

@@ -20,7 +20,7 @@ export class UserModel {
   lastName: string;
 
   @Field(type => [UserRole])
-  roles: UserRole[];
+  role: UserRole[];
 
   @Field(type => LicenseType)
   licenseType?: LicenseType;

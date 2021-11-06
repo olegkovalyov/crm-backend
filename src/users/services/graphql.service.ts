@@ -1,20 +1,19 @@
 import {Injectable, Scope} from '@nestjs/common';
 import {UserModel} from '../models/user.model';
 import {User} from '../entities/user.entity';
-import {UserInfo} from '../entities/user-info.entity';
 
 @Injectable({scope: Scope.REQUEST})
 export class GraphqlService {
 
-  constructUserModel(user: User, userInfo: UserInfo): UserModel {
+  constructUserModel(user: User): UserModel {
     return {
       id: user.id,
       status: user.status,
-      firstName: userInfo.firstName,
-      lastName: userInfo.lastName,
+      firstName: user.userInfo.firstName,
+      lastName: user.userInfo.lastName,
       email: user.email,
-      roles: userInfo.roles,
-      licenseType: userInfo.licenseType,
+      role: user.userInfo.role,
+      licenseType: user.userInfo.licenseType,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

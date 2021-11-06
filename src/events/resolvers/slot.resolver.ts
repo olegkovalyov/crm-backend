@@ -38,7 +38,7 @@ export class SlotResolver {
       throw new BadRequestException(`Load with id: ${createData.loadId} doesnt exists`);
     }
 
-    const addedUsers = await this.userService.getMembersByIds(createData.userIds,[]);
+    const addedUsers = []// await this.userService.getMembersByIds(createData.userIds,[]);
     if (addedUsers.length !== createData.userIds.length) {
       const addedUserIds = addedUsers.map((addedUser) => addedUser.id);
       const inactiveUserIds = createData.userIds.filter(x => !addedUserIds.includes(x));

@@ -35,7 +35,7 @@ export class CreateUserInput {
   @Field(type => [UserRole])
   @ArrayNotEmpty()
   @ArrayUnique()
-  roles: UserRole[];
+  role: UserRole[];
 
   @Field(type => LicenseType)
   @IsNotEmpty()

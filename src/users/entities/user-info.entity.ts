@@ -13,7 +13,7 @@ export class UserInfo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, {onDelete: 'CASCADE'})
   @JoinColumn()
   user: User;
 
@@ -28,7 +28,7 @@ export class UserInfo {
     enum: UserRole,
     array: true,
   })
-  roles: UserRole[];
+  role: UserRole[];
 
   @Column({
     type: 'enum',

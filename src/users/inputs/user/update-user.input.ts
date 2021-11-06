@@ -8,6 +8,12 @@ export class UpdateUserInput {
   @IsNotEmpty()
   id: number;
 
+  @Field()
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEmail()
+  email?: string;
+
   @Field(type => UserStatus)
   @IsOptional()
   @IsNotEmpty()
@@ -26,15 +32,9 @@ export class UpdateUserInput {
   @MaxLength(20)
   lastName?: string;
 
-  @Field()
-  @IsOptional()
-  @IsNotEmpty()
-  @IsEmail()
-  email?: string;
-
   @Field(type => [UserRole])
   @IsOptional()
-  roles?: UserRole[];
+  role?: UserRole[];
 
   @Field(type => LicenseType)
   @IsOptional()

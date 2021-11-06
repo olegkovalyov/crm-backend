@@ -13,6 +13,8 @@ import {UserService} from './services/user.service';
 import {UserValidatorService} from './services/user-validator.service';
 import {GraphqlService} from './services/graphql.service';
 import {NotifyService} from './services/notify.service';
+import {AuthResolver} from './resolvers/auth.resolver';
+import {ClientsResolver} from './resolvers/clients.resolver';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import {NotifyService} from './services/notify.service';
     UserService,
     UserValidatorService,
     UsersResolver,
+    AuthResolver,
+    ClientsResolver,
   ],
 })
 export class UsersModule {
