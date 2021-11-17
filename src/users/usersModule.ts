@@ -30,11 +30,11 @@ import {ClientsResolver} from './resolvers/clients.resolver';
   ],
   providers: [
     AuthService,
-    ClientService,
     GraphqlService,
     JwtStrategy,
     NotifyService,
     RandomStringService,
+    ClientService,
     UserService,
     UserService,
     UserValidatorService,

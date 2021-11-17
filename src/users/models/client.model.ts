@@ -1,5 +1,5 @@
 import {Field, Int, ObjectType} from '@nestjs/graphql';
-import {ClientStatus, ClientRole, Gender} from '../interfaces/client.interface';
+import {ClientStatus, ClientRole, Gender, PaymentStatus} from '../interfaces/client.interface';
 
 @ObjectType()
 export class ClientModel {
@@ -7,8 +7,8 @@ export class ClientModel {
   @Field(type => Int)
   id: number;
 
-  @Field(type => Int)
-  userId: number;
+  @Field()
+  personId: string;
 
   @Field(type => ClientRole)
   role: ClientRole;
@@ -16,11 +16,14 @@ export class ClientModel {
   @Field(type => ClientStatus)
   status: ClientStatus;
 
+  @Field(type => PaymentStatus)
+  paymentStatus: PaymentStatus;
+
   @Field(type => Gender)
   gender: Gender;
 
   @Field()
-  age: number;
+  dateOfBirth: Date;
 
   @Field()
   firstName: string;
@@ -36,18 +39,6 @@ export class ClientModel {
 
   @Field()
   phone: string;
-
-  @Field()
-  address: string;
-
-  @Field()
-  withHandCameraVideo: boolean;
-
-  @Field()
-  withCameraman: boolean;
-
-  @Field({nullable: true})
-  notes: string;
 
   @Field({nullable: true})
   certificate: string;

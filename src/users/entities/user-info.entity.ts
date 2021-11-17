@@ -6,7 +6,7 @@ import {
   OneToOne,
 } from 'typeorm';
 import {User} from './user.entity';
-import {LicenseType, UserRole, UserStatus} from '../interfaces/user.interface';
+import {LicenseType, UserRole} from '../interfaces/user.interface';
 
 @Entity()
 export class UserInfo {

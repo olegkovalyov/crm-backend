@@ -31,14 +31,14 @@ export class UsersResolver {
   ) {
   }
 
-  @Query(returns => [UserModel])
+  @Query(() => [UserModel])
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getUsers(@Args('getUsersInput') getUsersInput: GetUsersInput): Promise<UserModel[]> {
     const users = await this.userService.getUsers(getUsersInput);
     return users.map(user => this.graphQlService.constructUserModel(user));
   }
 
-  @Query(returns => UserModel, {nullable: true})
+  @Query(() => UserModel, {nullable: true})
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getUser(@Args('id', {type: () => Int}) id: number): Promise<UserModel> {
     const user = await this.userService.getUserById(id);
@@ -48,28 +48,28 @@ export class UsersResolver {
     return this.graphQlService.constructUserModel(user);
   }
 
-  @Mutation(returns => UserModel)
+  @Mutation(() => UserModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async createUser(@Args('createUserInput') createUserInput: CreateUserInput): Promise<UserModel> {
     const user = await this.userService.createUser(createUserInput);
     return this.graphQlService.constructUserModel(user);
   }
 
-  @Mutation(returns => UserModel)
+  @Mutation(() => UserModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async updateUser(@Args('updateUserInput') updateUserData: UpdateUserInput): Promise<UserModel> {
     const updatedUser = await this.userService.updateUser(updateUserData);
     return this.graphQlService.constructUserModel(updatedUser);
   }
 
-  @Mutation(returns => UserModel)
+  @Mutation(() => UserModel)
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async deleteUser(@Args('id', {type: () => Int}) id: number): Promise<UserModel> {
     const user = await this.userService.deleteUserById(id);
     return this.graphQlService.constructUserModel(user);
   }
 
-  @Query(returns => [UserModel], {nullable: true})
+  @Query(() => [UserModel], {nullable: true})
   async getStaff(): Promise<UserModel[]> {
     const staff = await this.userService.getUsers({
       role: [

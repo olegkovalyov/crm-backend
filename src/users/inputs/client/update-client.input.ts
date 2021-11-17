@@ -1,7 +1,7 @@
-import {Field, InputType} from '@nestjs/graphql';
+import {Field, InputType, Int} from '@nestjs/graphql';
 import {
   IsBoolean,
-  IsEmail,
+  IsDate, IsEmail,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -9,28 +9,33 @@ import {
   MaxLength, Min,
   MinLength,
 } from 'class-validator';
-import {ClientStatus, ClientRole, Gender} from '../../interfaces/client.interface';
+import {ClientStatus, ClientRole, Gender, PaymentStatus} from '../../interfaces/client.interface';
 
 @InputType()
-export class CreateClientInput {
+export class UpdateClientInput {
+
+  @Field(type => Int)
+  @IsNotEmpty()
+  id: number;
 
   @Field(type => ClientRole)
-  @IsEnum(ClientRole)
   role: ClientRole;
 
   @Field(type => ClientStatus)
   @IsEnum(ClientStatus)
   status: ClientStatus;
 
+  @Field(type => PaymentStatus)
+  @IsEnum(PaymentStatus)
+  paymentStatus: PaymentStatus;
+
   @Field(type => Gender)
   @IsEnum(Gender)
   gender: Gender;
 
-  @Field()
-  @IsInt()
-  @Min(3)
-  @Max(100)
-  age: number;
+  @Field(type => Date)
+  @IsDate()
+  dateOfBirth: Date;
 
   @Field()
   @IsNotEmpty()
@@ -47,7 +52,7 @@ export class CreateClientInput {
   @Field({nullable: true})
   @IsEmail()
   @IsOptional()
-  email: string;
+  email?: string;
 
   @Field()
   @IsNotEmpty()
@@ -60,27 +65,16 @@ export class CreateClientInput {
   @MaxLength(20)
   phone: string;
 
-  @Field()
-  @IsNotEmpty()
-  @MinLength(5)
-  @MaxLength(200)
-  address: string;
-
-  @Field()
-  @IsNotEmpty()
-  @IsBoolean()
-  withHandCameraVideo: boolean;
-
-  @Field()
-  @IsNotEmpty()
-  @IsBoolean()
-  withCameraman: boolean;
+  @Field({nullable: true})
+  @IsOptional()
+  additionalInfo?: string;
 
   @Field({nullable: true})
   @IsOptional()
-  notes: string;
+  certificate?: string;
 
-  @Field({nullable: true})
+  @Field(type => Date)
+  @IsDate()
   @IsOptional()
-  certificate: string;
+  processedAt?: Date;
 }

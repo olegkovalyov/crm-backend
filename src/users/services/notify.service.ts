@@ -65,7 +65,7 @@ export class NotifyService {
           to: email,
           from: this.configService.get<string>('MAIL_DEFAULT_FROM'),
           subject: 'Your password successfully changes',
-          template: 'reset-password',
+          template: process.cwd() + '/email-templates/reset-password',
           context: {
             username: `${firstName} ${lastName}`,
           },

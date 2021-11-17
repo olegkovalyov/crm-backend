@@ -13,15 +13,13 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({
+    nullable: true,
+  })
+  personId: string;
+
   @Column()
   email: string;
-
-  @Column({
-    type: 'enum',
-    enum: UserStatus,
-    default: UserStatus.ACTIVE,
-  })
-  status: UserStatus;
 
   @Column({
     nullable: true,
@@ -47,6 +45,13 @@ export class User {
     nullable: true,
   })
   refreshToken: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 
   @CreateDateColumn()
   createdAt: Date;

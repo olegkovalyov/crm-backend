@@ -1,15 +1,16 @@
 import {BadRequestException, Injectable, InternalServerErrorException, Scope} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
-import {Like, Raw, Repository} from 'typeorm';
+import {FindOperator, Like, Raw, Repository} from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import {User} from '../entities/user.entity';
 import {CreateUserInput} from '../inputs/user/create-user.input';
 import {GetUsersInput} from '../inputs/user/get-users.input';
 import {UpdateUserInput} from '../inputs/user/update-user.input';
-import {GetUsersFilterConditionInterface} from '../interfaces/user.interface';
+import {GetUsersFilterConditionInterface, LicenseType, UserRole, UserStatus} from '../interfaces/user.interface';
 import {UserInfo} from '../entities/user-info.entity';
+import {v4 as uuidv4} from 'uuid';
 
-@Injectable({scope: Scope.REQUEST})
+@Injectable({scope: Scope.DEFAULT})
 export class UserService {
 
   constructor(
@@ -18,71 +19,19 @@ export class UserService {
   ) {
   }
 
-  async getUsers(filterParams: GetUsersInput): Promise<User[]> {
-    const conditions: GetUsersFilterConditionInterface = {};
-
-    if (filterParams.role
-      || filterParams.status
-      || filterParams.licenseType
-      || filterParams.firstName
-      || filterParams.lastName
-    ) {
-      if (filterParams.role
-        && filterParams.role.length
-      ) {
-        conditions.userInfo = {};
-        conditions.userInfo.role = Raw((alias) => `${alias} && ARRAY[:...role]::user_info_role_enum[]`,
-          {
-            role: filterParams.role,
-          },
-        );
-      }
-
-      if (filterParams.licenseType
-        && filterParams.licenseType.length
-      ) {
-        if (conditions.userInfo === undefined) {
-          conditions.userInfo = {};
-        }
-        conditions.userInfo.licenseType = Raw((alias) => `${alias} IN(:...licenseType)`,
-          {
-            licenseType: filterParams.licenseType,
-          },
-        );
-      }
-
-      if (filterParams.firstName
-        && filterParams.firstName.length > 2
-      ) {
-        if (conditions.userInfo === undefined) {
-          conditions.userInfo = {};
-        }
-        conditions.userInfo.firstName = Like(`%${filterParams.firstName}%`);
-      }
-
-      if (filterParams.lastName
-        && filterParams.lastName.length > 2
-      ) {
-        if (conditions.userInfo === undefined) {
-          conditions.userInfo = {};
-        }
-        conditions.userInfo.lastName = Like(`%${filterParams.lastName}%`);
-      }
-
-      if (filterParams.status
-        && filterParams.status.length
-      ) {
-        conditions.status = Raw((alias) => `${alias} IN(:...status)`,
-          {
-            status: filterParams.status,
-          });
-      }
+  async getUsers(filterParams: Partial<GetUsersInput>): Promise<User[]> {
+    if (Object.keys(filterParams).length === 0) {
+      return this.usersRepository.find({
+        relations: ['userInfo'],
+      });
     }
+
+    const conditions = UserService.composeSearchConditions(filterParams);
+
     return this.usersRepository.find({
       relations: ['userInfo'],
       where: conditions,
     });
-
   }
 
   async createUser(input: CreateUserInput): Promise<User> {
@@ -95,6 +44,7 @@ export class UserService {
 
     const user = new User();
     const salt = await bcrypt.genSalt();
+    user.personId = uuidv4();
     user.email = email;
     user.status = status;
     user.passwordHash = await bcrypt.hash(password, salt);
@@ -138,7 +88,6 @@ export class UserService {
     if (!user) {
       throw new BadRequestException(`User with id: ${id} doesnt exists`);
     }
-
 
     if (email) {
       const userWithEmail = await this.getUserByEmail(email);
@@ -218,4 +167,60 @@ export class UserService {
   async getUserByResetToken(token: string): Promise<User> {
     return this.usersRepository.findOne({resetPasswordToken: token});
   }
+
+  private static composeSearchConditions(filterParams: Partial<GetUsersInput>): GetUsersFilterConditionInterface {
+    const {role, licenseType, firstName, lastName, status} = filterParams;
+    const conditions: GetUsersFilterConditionInterface = {};
+    conditions.userInfo = {};
+
+    if (role) {
+      conditions.userInfo.role = UserService.applyRoleFilter(role);
+    }
+
+    if (licenseType) {
+      conditions.userInfo.licenseType = UserService.applyLicenseTypeFilter(licenseType);
+    }
+
+    if (firstName
+      && firstName.length > 2
+    ) {
+      conditions.userInfo.firstName = Like(`%${firstName}%`);
+    }
+
+    if (lastName
+      && lastName.length > 2
+    ) {
+      conditions.userInfo.lastName = Like(`%${lastName}%`);
+    }
+
+    if (status) {
+      conditions.status = UserService.applyStatusFilter(status);
+    }
+
+    return conditions;
+  }
+
+  private static applyRoleFilter(role: UserRole[]): FindOperator<any> {
+    return Raw((alias) => `${alias} && ARRAY[:...role]::user_info_role_enum[]`,
+      {
+        role,
+      },
+    );
+  }
+
+  private static applyLicenseTypeFilter(licenseType: LicenseType[]): FindOperator<any> {
+    return Raw((alias) => `${alias} IN(:...licenseType)`,
+      {
+        licenseType,
+      },
+    );
+  }
+
+  private static applyStatusFilter(status: UserStatus[]): FindOperator<any> {
+    return Raw((alias) => `${alias} IN(:...status)`,
+      {
+        status,
+      });
+  }
+
 }

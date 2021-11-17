@@ -2,44 +2,45 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  JoinColumn,
-  OneToOne, CreateDateColumn, ManyToOne, UpdateDateColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import {User} from './user.entity';
-import {ClientStatus, ClientRole, Gender} from '../interfaces/client.interface';
+import {ClientStatus, ClientRole, Gender, PaymentStatus} from '../interfaces/client.interface';
 
 @Entity()
 export class Client {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => User)
-  @JoinColumn()
-  user: User;
+  @Column()
+  personId: string;
 
   @Column({
     type: 'enum',
     enum: ClientRole,
-    nullable: true,
   })
   role: ClientRole;
 
   @Column({
     type: 'enum',
     enum: ClientStatus,
-    nullable: true,
   })
   status: ClientStatus;
 
   @Column({
     type: 'enum',
+    enum: PaymentStatus,
+  })
+  paymentStatus: PaymentStatus;
+
+  @Column({
+    type: 'enum',
     enum: Gender,
-    nullable: true,
   })
   gender: Gender;
 
   @Column()
-  age: number;
+  dateOfBirth: Date;
 
   @Column()
   firstName: string;
@@ -47,7 +48,9 @@ export class Client {
   @Column()
   lastName: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   email: string;
 
   @Column()
@@ -56,43 +59,21 @@ export class Client {
   @Column()
   phone: string;
 
-  @Column()
-  address: string;
-
-  @Column()
-  withHandCameraVideo: boolean;
-
-  @Column()
-  withCameraman: boolean;
-
-  @Column({
-    nullable: true,
-  })
-  notes: string;
-
   @Column({
     nullable: true,
   })
   certificate: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn()
-  tm: User;
-
-  @ManyToOne(() => User)
-  @JoinColumn()
-  cameraman: User;
+  @Column({
+    nullable: true,
+  })
+  additionalInfo: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column({
-    default: false,
-  })
-  isAssigned: boolean;
 
   @Column({
     nullable: true,

@@ -7,6 +7,11 @@ export class UserModel {
   @Field(type => Int)
   id: number;
 
+  @Field({
+    nullable: true
+  })
+  personId: string;
+
   @Field()
   email: string;
 

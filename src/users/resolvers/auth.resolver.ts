@@ -37,7 +37,7 @@ export class AuthResolver {
   ) {
   }
 
-  @Mutation(returns => AuthModel)
+  @Mutation(() => AuthModel)
   async register(
     @Args('registerInput') input: CreateUserInput,
     @ServerResponse() res: Response,
@@ -67,7 +67,7 @@ export class AuthResolver {
     };
   }
 
-  @Mutation(returns => AuthModel)
+  @Mutation(() => AuthModel)
   async login(
     @Args('loginInput') input: LoginInput,
     @ServerResponse() res: Response,
@@ -100,7 +100,7 @@ export class AuthResolver {
     };
   }
 
-  @Query(returns => AuthModel)
+  @Query(() => AuthModel)
   async refreshToken(
     @ServerResponse() res: Response,
     @ServerRequest() req: Request,
@@ -127,7 +127,7 @@ export class AuthResolver {
     };
   }
 
-  @Query(returns => Boolean)
+  @Query(() => Boolean)
   async logout(
     @ServerResponse() res: Response,
     @ServerRequest() req: Request,
@@ -145,7 +145,7 @@ export class AuthResolver {
     return true;
   }
 
-  @Mutation(returns => ForgotPasswordModel)
+  @Mutation(() => ForgotPasswordModel)
   async forgotPassword(@Args('forgotPasswordInput') forgotPasswordData: ForgotPasswordInput) {
     const user = await this.userService.getUserByEmail(forgotPasswordData.email);
 
@@ -173,7 +173,7 @@ export class AuthResolver {
     };
   }
 
-  @Mutation(returns => AuthModel)
+  @Mutation(() => AuthModel)
   async resetPassword(
     @Args('resetPasswordInput') resetPasswordData: ResetPasswordInput,
     @ServerResponse() res: Response,
