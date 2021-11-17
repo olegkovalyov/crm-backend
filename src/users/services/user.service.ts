@@ -9,6 +9,13 @@ import {UpdateUserInput} from '../inputs/user/update-user.input';
 import {GetUsersFilterConditionInterface, LicenseType, UserRole, UserStatus} from '../interfaces/user.interface';
 import {UserInfo} from '../entities/user-info.entity';
 import {v4 as uuidv4} from 'uuid';
+import {sprintf} from 'sprintf-js';
+import {
+  ERR_FAILED_TO_CREATE_USER,
+  ERR_FAILED_TO_DELETE_USER,
+  ERR_USER_ALREADY_EXIST,
+  ERR_USER_NOT_FOUND,
+} from '../constants/user.error';
 
 @Injectable({scope: Scope.DEFAULT})
 export class UserService {
@@ -39,7 +46,7 @@ export class UserService {
 
     const alreadyExist = await this.usersRepository.findOne({email: email});
     if (alreadyExist) {
-      throw new BadRequestException('User with this email already exists');
+      throw new BadRequestException(sprintf(ERR_USER_ALREADY_EXIST, email));
     }
 
     const user = new User();
@@ -61,7 +68,7 @@ export class UserService {
     try {
       return this.usersRepository.save(user);
     } catch (e) {
-      throw new InternalServerErrorException('Failed to create user');
+      throw new InternalServerErrorException(ERR_FAILED_TO_CREATE_USER);
     }
   }
 
@@ -86,7 +93,7 @@ export class UserService {
 
     const user = await this.getUserById(id);
     if (!user) {
-      throw new BadRequestException(`User with id: ${id} doesnt exists`);
+      throw new BadRequestException(sprintf(ERR_USER_NOT_FOUND, id));
     }
 
     if (email) {
@@ -94,7 +101,7 @@ export class UserService {
       if (userWithEmail
         && userWithEmail.id !== id
       ) {
-        throw new BadRequestException(`User with email: ${email} already exists`);
+        throw new BadRequestException(sprintf(ERR_USER_ALREADY_EXIST, email));
       }
       user.email = email;
     }
@@ -127,11 +134,11 @@ export class UserService {
   async deleteUserById(id: number): Promise<User> {
     const user = await this.getUserById(id);
     if (!user) {
-      throw new BadRequestException(`User with id: ${id} doesn't exists`);
+      throw new BadRequestException(sprintf(ERR_USER_NOT_FOUND, id));
     }
     const deleteResult = await this.usersRepository.delete({id: user.id});
     if (deleteResult.affected !== 1) {
-      throw new InternalServerErrorException(`Failed to delete user with id: ${id}`);
+      throw new InternalServerErrorException(sprintf(ERR_FAILED_TO_DELETE_USER, user.id));
     }
     return user;
   }

@@ -1,19 +1,21 @@
-import { Module } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { CryptoModule } from '@akanass/nestjsx-crypto';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import {Module} from '@nestjs/common';
+import {GraphQLModule} from '@nestjs/graphql';
+import {MongooseModule} from '@nestjs/mongoose';
+import {ConfigModule, ConfigService} from '@nestjs/config';
+import {MailerModule} from '@nestjs-modules/mailer';
+import {PugAdapter} from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
+import {JwtModule} from '@nestjs/jwt';
+import {PassportModule} from '@nestjs/passport';
+import {CryptoModule} from '@akanass/nestjsx-crypto';
+import {TypeOrmModule} from '@nestjs/typeorm';
+import {GraphQLError} from 'graphql';
 
 @Module({
   imports: [
     GraphQLModule.forRoot({
-      context: ({ req, res }) => ({ req, res }),
+      context: ({req, res}) => ({req, res}),
       autoSchemaFile: true,
+      formatError: (error: GraphQLError) => new GraphQLError(error.message),
     }),
     MongooseModule.forRootAsync({
       imports: [
@@ -56,7 +58,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('SECRET'),
-        signOptions: { expiresIn: 3600 * 24 },
+        signOptions: {expiresIn: 3600 * 24},
       }),
     }),
     PassportModule,

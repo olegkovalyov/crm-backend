@@ -20,6 +20,10 @@ import {ClientService} from '../services/client.service';
 import {GraphqlService} from '../services/graphql.service';
 import {NotifyService} from '../services/notify.service';
 import {User} from '../entities/user.entity';
+import {
+  ERR_EMAIL_OR_PASSWORD_ARE_INVALID,
+  ERR_USER_NOT_FOUND_OR_TOKEN_EXPIRED,
+} from '../constants/auth.error';
 
 @Resolver('Auth')
 export class AuthResolver {
@@ -76,12 +80,12 @@ export class AuthResolver {
     const user = await this.userService.getUserByEmail(email);
 
     if (!user) {
-      throw new UnauthorizedException('Email or password are invalid');
+      throw new UnauthorizedException(ERR_EMAIL_OR_PASSWORD_ARE_INVALID);
     }
 
     const passwordHash = await bcrypt.hash(password, user.passwordSalt);
     if (passwordHash !== user.passwordHash) {
-      throw new UnauthorizedException('Email or password are invalid');
+      throw new UnauthorizedException(ERR_EMAIL_OR_PASSWORD_ARE_INVALID);
     }
 
     const accessToken = await this.authService.generateAccessToken(user);
@@ -110,7 +114,7 @@ export class AuthResolver {
     const user = await this.getUserFromRefreshToken(refreshToken);
     if (!user) {
       res.clearCookie('refreshToken');
-      throw new UnauthorizedException('User not found or session is expired');
+      throw new UnauthorizedException(ERR_USER_NOT_FOUND_OR_TOKEN_EXPIRED);
     }
 
     const accessToken = await this.authService.generateAccessToken(user);
@@ -137,7 +141,7 @@ export class AuthResolver {
     const user = await this.getUserFromRefreshToken(refreshToken);
     if (!user) {
       res.clearCookie('refreshToken');
-      throw new UnauthorizedException('User not found or session is expired');
+      throw new UnauthorizedException(ERR_USER_NOT_FOUND_OR_TOKEN_EXPIRED);
     }
 
     await this.userService.updateRefreshToken(user.id, null);
@@ -183,7 +187,7 @@ export class AuthResolver {
     if (!user
       || Date.now() > (new Date(user.resetPasswordExpirationDate)).getTime()
     ) {
-      throw new UnauthorizedException('User not found or token is expired');
+      throw new UnauthorizedException(ERR_USER_NOT_FOUND_OR_TOKEN_EXPIRED);
     }
 
     await this.userService.updateResetPasswordData(user.id, null, resetPasswordData.password);
@@ -192,7 +196,7 @@ export class AuthResolver {
     await this.notifyService.notifySuccessOfPasswordReset(
       user.email,
       user.userInfo.firstName,
-      user.userInfo.lastName
+      user.userInfo.lastName,
     );
 
     const accessToken = await this.authService.generateAccessToken(user);

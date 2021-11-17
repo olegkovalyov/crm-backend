@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
-import { ConfigService } from '@nestjs/config';
-import { User } from '../entities/user.entity';
-import {LicenseType, UserRole, UserStatus} from '../interfaces/user.interface';
+import {Injectable} from '@nestjs/common';
+import {JwtService} from '@nestjs/jwt';
+import {MailerService} from '@nestjs-modules/mailer';
+import {ConfigService} from '@nestjs/config';
+import {User} from '../entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -14,21 +13,21 @@ export class AuthService {
   ) {
   }
 
-  async generateAccessToken(member: User): Promise<string> {
-    const { id, email} = member;
+  async generateAccessToken(user: User): Promise<string> {
+    const {id, email} = user;
 
-    const status = UserStatus.ACTIVE;
-    const firstName = 'Oleh';
-    const lastName = 'Kovalov';
-    const role = [UserRole.SKYDIVER];
-    const licenseType = [LicenseType.D];
+    const status = user.status;
+    const firstName = user.userInfo.firstName;
+    const lastName = user.userInfo.lastName;
+    const role = user.userInfo.role;
+    const licenseType = user.userInfo.licenseType;
     return this.jwtService.signAsync({
         id,
         status,
         email,
         firstName,
         lastName,
-        role: role,
+        role,
         licenseType,
       },
       {
@@ -37,7 +36,7 @@ export class AuthService {
   }
 
   async generateRefreshToken(member: User): Promise<string> {
-    const { email } = member;
+    const {email} = member;
     return this.jwtService.signAsync(
       {
         email,

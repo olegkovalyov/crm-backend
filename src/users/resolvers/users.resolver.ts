@@ -14,6 +14,8 @@ import {RandomStringService} from '@akanass/nestjsx-crypto';
 import {ClientService} from '../services/client.service';
 import {GraphqlService} from '../services/graphql.service';
 import {NotifyService} from '../services/notify.service';
+import {sprintf} from 'sprintf-js';
+import {ERR_USER_NOT_FOUND} from '../constants/user.error';
 
 @Resolver('User')
 export class UsersResolver {
@@ -43,7 +45,7 @@ export class UsersResolver {
   async getUser(@Args('id', {type: () => Int}) id: number): Promise<UserModel> {
     const user = await this.userService.getUserById(id);
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException(sprintf(ERR_USER_NOT_FOUND, id));
     }
     return this.graphQlService.constructUserModel(user);
   }

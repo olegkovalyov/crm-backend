@@ -13,6 +13,13 @@ import {
   PaymentStatus,
 } from '../interfaces/client.interface';
 import {UpdateClientInput} from '../inputs/client/update-client.input';
+import {sprintf} from 'sprintf-js';
+import {
+  ERR_CLIENT_ALREADY_EXIST,
+  ERR_CLIENT_NOT_FOUND,
+  ERR_FAILED_TO_CREATE_CLIENT,
+  ERR_FAILED_TO_DELETE_CLIENT,
+} from '../constants/client.error';
 
 @Injectable()
 export class ClientService {
@@ -40,7 +47,7 @@ export class ClientService {
 
     const alreadyExist = await this.clientsRepository.findOne({phone});
     if (alreadyExist) {
-      throw new BadRequestException('Client with this phone already exists');
+      throw new BadRequestException(sprintf(ERR_CLIENT_ALREADY_EXIST, phone));
     }
 
     const client = new Client();
@@ -61,7 +68,7 @@ export class ClientService {
     try {
       return this.clientsRepository.save(client);
     } catch (e) {
-      throw new InternalServerErrorException('Failed to create client');
+      throw new InternalServerErrorException(ERR_FAILED_TO_CREATE_CLIENT);
     }
   }
 
@@ -245,7 +252,7 @@ export class ClientService {
 
     const client = await this.getClientById(id);
     if (!client) {
-      throw new BadRequestException(`Client with id: ${id} doesnt exists`);
+      throw new BadRequestException(sprintf(ERR_CLIENT_NOT_FOUND, id));
     }
 
     if (status) {
@@ -312,11 +319,11 @@ export class ClientService {
   async deleteClientById(id: number): Promise<Client> {
     const client = await this.clientsRepository.findOne({id});
     if (!client) {
-      throw new BadRequestException(`Client with id: ${id} doesn't exists`);
+      throw new BadRequestException(sprintf(ERR_CLIENT_NOT_FOUND, id));
     }
     const deleteResult = await this.clientsRepository.delete({id: client.id});
     if (deleteResult.affected !== 1) {
-      throw new InternalServerErrorException(`Failed to delete client with id: ${id}`);
+      throw new InternalServerErrorException(sprintf(ERR_FAILED_TO_DELETE_CLIENT, client.id));
     }
     return client;
   }
