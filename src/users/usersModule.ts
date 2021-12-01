@@ -10,7 +10,6 @@ import {RandomStringService} from '@akanass/nestjsx-crypto';
 import {Client} from './entities/client.entity';
 import {ClientService} from './services/client.service';
 import {UserService} from './services/user.service';
-import {UserValidatorService} from './services/user-validator.service';
 import {GraphqlService} from './services/graphql.service';
 import {NotifyService} from './services/notify.service';
 import {AuthResolver} from './resolvers/auth.resolver';
@@ -37,7 +36,6 @@ import {ClientsResolver} from './resolvers/clients.resolver';
     ClientService,
     UserService,
     UserService,
-    UserValidatorService,
     UsersResolver,
     AuthResolver,
     ClientsResolver,

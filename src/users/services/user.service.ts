@@ -6,7 +6,7 @@ import {User} from '../entities/user.entity';
 import {CreateUserInput} from '../inputs/user/create-user.input';
 import {GetUsersInput} from '../inputs/user/get-users.input';
 import {UpdateUserInput} from '../inputs/user/update-user.input';
-import {GetUsersFilterConditionInterface, LicenseType, UserRole, UserStatus} from '../interfaces/user.interface';
+import {GetUsersConditionInterface, LicenseType, UserRole, UserStatus} from '../interfaces/user.interface';
 import {UserInfo} from '../entities/user-info.entity';
 import {v4 as uuidv4} from 'uuid';
 import {sprintf} from 'sprintf-js';
@@ -175,9 +175,9 @@ export class UserService {
     return this.usersRepository.findOne({resetPasswordToken: token});
   }
 
-  private static composeSearchConditions(filterParams: Partial<GetUsersInput>): GetUsersFilterConditionInterface {
+  private static composeSearchConditions(filterParams: Partial<GetUsersInput>): GetUsersConditionInterface {
     const {role, licenseType, firstName, lastName, status} = filterParams;
-    const conditions: GetUsersFilterConditionInterface = {};
+    const conditions: GetUsersConditionInterface = {};
     conditions.userInfo = {};
 
     if (role) {

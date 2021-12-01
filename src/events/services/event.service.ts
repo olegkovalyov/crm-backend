@@ -1,80 +1,79 @@
-import {Injectable} from '@nestjs/common';
-import {Connection, Repository} from 'typeorm';
+import {BadRequestException, Injectable, InternalServerErrorException} from '@nestjs/common';
+import {FindOperator, Like, Raw, Repository} from 'typeorm';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Event} from '../entities/event.entity';
 import {CreateEventInput} from '../inputs/events/create-event.input';
-import {EventModel} from '../models/event.model';
-import {GetEventsFilterInput} from '../inputs/events/get-events-filter.input';
+import {
+  ERR_DATE_FILTERS_NOT_SET,
+  ERR_EVENT_NOT_FOUND,
+  ERR_FAILED_TO_CREATE_EVENT,
+  ERR_FAILED_TO_DELETE_EVENT,
+} from '../constants/event.error';
+import {GetEventsInput} from '../inputs/events/get-events.input';
+import {GetEventsConditionInterface} from '../interfaces/event.interface';
+import {sprintf} from 'sprintf-js';
 import {UpdateEventInput} from '../inputs/events/update-event.input';
-import {Load} from '../entities/load.entity';
 
 @Injectable()
 export class EventService {
 
   constructor(
-    private connection: Connection,
     @InjectRepository(Event)
     private readonly eventsRepository: Repository<Event>,
   ) {
   }
 
-  async getEvents(filterParams: GetEventsFilterInput): Promise<Event[]> {
-    const eventsQueryBuilder = this.eventsRepository.createQueryBuilder('event');
-
-    if (filterParams.dateMin
-      || filterParams.dateMax
-    ) {
-      const queryParts = [];
-      const queryParameters = [];
-
-      if (filterParams.dateMin) {
-        queryParts.push('event.startDate >= :date ');
-        queryParameters.push({date: filterParams.dateMin});
-      }
-
-      if (filterParams.dateMax) {
-        queryParts.push('event.endDate <= :date ');
-        queryParameters.push({date: filterParams.dateMax});
-      }
-
-      for (let i = 0; i < queryParts.length; i++) {
-        if (i === 0) {
-          eventsQueryBuilder.where(queryParts[i], queryParameters[i]);
-        } else {
-          eventsQueryBuilder.andWhere(queryParts[i], queryParameters[i]);
-        }
-      }
-    }
-    eventsQueryBuilder.orderBy('event.startDate', 'DESC');
-
-    return eventsQueryBuilder.getMany();
+  async getEvents(filterParams: Partial<GetEventsInput>): Promise<Event[]> {
+    const conditions = EventService.composeSearchConditions(filterParams);
+    return this.eventsRepository.find({
+      where: conditions,
+      order: {
+        id: 'DESC',
+      },
+    });
   }
 
-  async createEvent(createData: CreateEventInput): Promise<Event> {
+  async createEvent(input: CreateEventInput): Promise<Event> {
     const {
-      title,
+      name,
       startDate,
       endDate,
-      notes,
-    } = createData;
+      info,
+    } = input;
+
     const event = new Event();
-    event.title = title;
+    event.name = name;
     event.startDate = startDate;
     event.endDate = endDate;
-    event.notes = notes;
-    return await this.eventsRepository.save(event);
+    event.info = info;
+
+    try {
+      return this.eventsRepository.save(event);
+    } catch (e) {
+      throw new InternalServerErrorException(ERR_FAILED_TO_CREATE_EVENT);
+    }
   }
 
-  async updateEvent(event: Event, updateData: UpdateEventInput): Promise<Event> {
+  async getEventById(id: number): Promise<Event> {
+    return this.eventsRepository.findOne({id: id});
+  }
+
+  async updateEvent(updateData: UpdateEventInput): Promise<Event> {
     const {
-      title,
+      id,
+      name,
       startDate,
       endDate,
-      notes,
+      info,
     } = updateData;
 
-    if (title) {
-      event.title = title;
+    const event = await this.getEventById(id);
+    if (!event) {
+      throw new BadRequestException(sprintf(ERR_EVENT_NOT_FOUND, id));
+    }
+
+    if (name) {
+      event.name = name;
     }
 
     if (startDate) {
@@ -85,40 +84,94 @@ export class EventService {
       event.endDate = endDate;
     }
 
-    if (notes) {
-      event.notes = notes;
+    if (info) {
+      event.info = info;
     }
 
-    return await this.eventsRepository.save(event);
+    event.updatedAt = new Date();
+
+    return this.eventsRepository.save(event);
   }
 
-  async deleteEventById(id: number): Promise<boolean> {
-    const deleteResult = await this.connection
-      .createQueryBuilder()
-      .relation(Load, 'load')
-      .delete()
-      .from(Event)
-      .where('id = :id', {id: id})
-      .execute();
-    return deleteResult.affected === 1;
+  async deleteEventById(id: number): Promise<Event> {
+    const event = await this.getEventById(id);
+    if (!event) {
+      throw new BadRequestException(sprintf(ERR_EVENT_NOT_FOUND, id));
+    }
+    const deleteResult = await this.eventsRepository.delete({id: event.id});
+    if (deleteResult.affected !== 1) {
+      throw new InternalServerErrorException(sprintf(ERR_FAILED_TO_DELETE_EVENT, event.id));
+    }
+    return event;
   }
 
-  async getEventById(id: number): Promise<Event | null> {
-    const event = await this.eventsRepository
-      .createQueryBuilder('event')
-      .where('event.id = :id', {id: id})
-      .getOne();
-    return (event !== undefined) ? event : null;
+  private static composeSearchConditions(filterParams: Partial<GetEventsInput>): GetEventsConditionInterface {
+    const {
+      name,
+      startDateMax,
+      startDateMin,
+      endDateMax,
+      endDateMin,
+    } = filterParams;
+    const conditions: GetEventsConditionInterface = {};
+
+    if (name
+      && name.length > 2
+    ) {
+      conditions.name = Like(`%${name}%`);
+    }
+
+    if (startDateMin
+      || startDateMax
+    ) {
+      conditions.startDate = EventService.composeMaxMinDateCondition(startDateMin, startDateMax);
+    }
+
+    if (endDateMin
+      || endDateMax
+    ) {
+      conditions.endDate = EventService.composeMaxMinDateCondition(endDateMin, endDateMax);
+    }
+
+    return conditions;
   }
 
-  async transformToGraphQlEventModel(event: Event): Promise<EventModel> {
+  private static composeMaxMinDateCondition(
+    dateMin: Date | undefined,
+    dateMax: Date | undefined,
+  ): FindOperator<any> {
 
-    return {
-      id: event.id,
-      title: event.title,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      notes: event.notes,
-    };
+    if (!dateMin
+      && !dateMax
+    ) {
+      throw new InternalServerErrorException(ERR_DATE_FILTERS_NOT_SET);
+    }
+
+    let findOperator: FindOperator<any>;
+
+    if (dateMin) {
+      findOperator = Raw((alias) => `${alias} >= :date`,
+        {date: dateMin},
+      );
+    }
+
+    if (dateMax) {
+      findOperator = Raw((alias) => `${alias} <= :date`,
+        {date: dateMax},
+      );
+    }
+
+    if (dateMin
+      && dateMax
+    ) {
+      findOperator = Raw((alias) => `${alias} >= :dateMin AND ${alias} <= :dateMax`,
+        {
+          dateMin,
+          dateMax,
+        },
+      );
+    }
+
+    return findOperator;
   }
 }

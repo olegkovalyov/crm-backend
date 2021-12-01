@@ -8,23 +8,23 @@ export class UpdateEventInput {
   @IsNotEmpty()
   id: number;
 
-  @Field({nullable: true})
+  @Field()
   @IsOptional()
   @MinLength(3)
   @MaxLength(20)
-  title?: string;
+  name?: string;
 
-  @Field({nullable: true})
+  @Field()
   @IsOptional()
   @IsDate()
   startDate?: Date;
 
-  @Field({nullable: true})
+  @Field()
   @IsOptional()
   @IsDate()
   endDate?: Date;
 
-  @Field({nullable: true})
+  @Field()
   @IsOptional()
-  notes?: string;
+  info?: string;
 }

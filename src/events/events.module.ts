@@ -14,8 +14,7 @@ import {Slot} from './entities/slot.entity';
 import {SlotService} from './services/slot.service';
 import {SlotResolver} from './resolvers/slot.resolver';
 import {SlotValidatorService} from './services/slot-validator.service';
-import {UserValidatorService} from '../users/services/user-validator.service';
-import {EventValidatorService} from './services/event-validator.service';
+import {GraphqlService} from './services/graphql.service';
 
 @Module({
   imports: [
@@ -35,11 +34,10 @@ import {EventValidatorService} from './services/event-validator.service';
     ClientService,
     LoadService,
     EventService,
-    EventValidatorService,
     UserService,
-    UserValidatorService,
     SlotService,
     SlotValidatorService,
+    GraphqlService
   ],
 })
 export class EventsModule {

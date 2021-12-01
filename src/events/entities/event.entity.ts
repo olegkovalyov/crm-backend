@@ -1,4 +1,4 @@
-import {Entity, Column, PrimaryGeneratedColumn, OneToMany} from 'typeorm';
+import {Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn} from 'typeorm';
 import {Load} from './load.entity';
 
 @Entity()
@@ -7,7 +7,7 @@ export class Event {
   id: number;
 
   @Column()
-  title: string;
+  name: string;
 
   @Column()
   startDate: Date;
@@ -15,11 +15,22 @@ export class Event {
   @Column()
   endDate: Date;
 
-  @Column({
-    nullable: true,
-  })
-  notes?: string;
+  @Column()
+  info: string;
 
-  @OneToMany(() => Load, load => load.event )
+  @OneToMany(
+    () => Load,
+    load => load.event,
+    {
+      eager: true,
+      cascade: true,
+    },
+  )
   loads: Load[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

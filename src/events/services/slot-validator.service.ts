@@ -220,28 +220,28 @@ export class SlotValidatorService {
   //   }
   // }
   //
-  async validateTotalLoadCapacity(usersInSlot: User[], load: Load): Promise<boolean> {
-    let isValid = true;
-    const slots = await this.slotService.getSlots(load.id);
-    let usersInLoad = 0;
-    for (const slot of slots) {
-      usersInLoad += slot.userIds.length;
-    }
-    if (usersInLoad + usersInSlot.length > load.capacity) {
-      isValid = false;
-    }
-    return isValid;
-  }
-
-  async validateUsersCountInSlot(usersInSlot: User[], requiredCount: number | null = null): Promise<boolean> {
-    let isValid = true;
-    if (usersInSlot.length === 0) {
-      isValid = false;
-    }
-    if (requiredCount !== null
-      && usersInSlot.length !== requiredCount) {
-      isValid = false;
-    }
-    return isValid;
-  }
+  // async validateTotalLoadCapacity(usersInSlot: User[], load: Load): Promise<boolean> {
+  //   let isValid = true;
+  //   const slots = await this.slotService.getSlots(load.id);
+  //   let usersInLoad = 0;
+  //   for (const slot of slots) {
+  //     usersInLoad += slot.userIds.length;
+  //   }
+  //   if (usersInLoad + usersInSlot.length > load.capacity) {
+  //     isValid = false;
+  //   }
+  //   return isValid;
+  // }
+  //
+  // async validateUsersCountInSlot(usersInSlot: User[], requiredCount: number | null = null): Promise<boolean> {
+  //   let isValid = true;
+  //   if (usersInSlot.length === 0) {
+  //     isValid = false;
+  //   }
+  //   if (requiredCount !== null
+  //     && usersInSlot.length !== requiredCount) {
+  //     isValid = false;
+  //   }
+  //   return isValid;
+  // }
 }

@@ -1,13 +1,12 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-
+import {Field, ObjectType} from '@nestjs/graphql';
 
 @ObjectType()
 export class EventModel {
-  @Field(type => Int)
+  @Field()
   id: number;
 
   @Field()
-  title: string;
+  name: string;
 
   @Field()
   startDate: Date;
@@ -15,6 +14,12 @@ export class EventModel {
   @Field()
   endDate: Date;
 
-  @Field({nullable: true})
-  notes?: string;
+  @Field()
+  info: string;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
 }

@@ -1,7 +1,7 @@
 import {registerEnumType} from '@nestjs/graphql';
 import {FindOperator} from 'typeorm';
 
-export interface GetUsersFilterConditionInterface {
+export interface GetUsersConditionInterface {
   status?: FindOperator<any>;
   userInfo?: Record<string, unknown>;
 }

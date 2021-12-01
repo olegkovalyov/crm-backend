@@ -17,26 +17,35 @@ export class Load {
   })
   status: LoadStatus;
 
-  @Column({
-    nullable: true,
-  })
-  order?: number;
+  @Column()
+  order: number;
 
   @Column({
     nullable: true,
   })
-  time: number;
+  takeOffTime?: Date;
 
   @Column({
     nullable: true,
   })
-  notes?: string;
+  landingTime?: Date;
 
-  @ManyToOne(() => Event, event => event.loads, {
-    onDelete: 'CASCADE'
-  })
+  @Column()
+  info: string;
+
+  @ManyToOne(
+    () => Event,
+    event => event.loads,
+  )
   event: Event;
 
-  @OneToMany(() => Slot, slot => slot.load)
+  @OneToMany(
+    () => Slot,
+    slot => slot.load,
+    {
+      eager: true,
+      cascade: true,
+    },
+  )
   slots: Slot[];
 }

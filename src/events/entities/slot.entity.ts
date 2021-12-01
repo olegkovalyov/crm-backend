@@ -13,16 +13,19 @@ export class Slot {
   })
   type: SlotType;
 
-  @Column('int', {array: true})
-  userIds: number[];
+  @Column('text',
+    {
+      array: true,
+    },
+  )
+  personIds: string[];
 
-  @Column({
-    nullable: true,
-  })
-  notes?: string;
+  @Column()
+  info: string;
 
-  @ManyToOne(() => Load, load => load.slots, {
-    onDelete: 'CASCADE'
-  })
+  @ManyToOne(
+    () => Load,
+    load => load.slots,
+  )
   load: Load;
 }
