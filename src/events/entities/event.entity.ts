@@ -21,10 +21,6 @@ export class Event {
   @OneToMany(
     () => Load,
     load => load.event,
-    {
-      eager: true,
-      cascade: true,
-    },
   )
   loads: Load[];
 

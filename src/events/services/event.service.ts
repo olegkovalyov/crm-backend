@@ -19,13 +19,13 @@ export class EventService {
 
   constructor(
     @InjectRepository(Event)
-    private readonly eventsRepository: Repository<Event>,
+    private readonly eventRepository: Repository<Event>,
   ) {
   }
 
   async getEvents(filterParams: Partial<GetEventsInput>): Promise<Event[]> {
     const conditions = EventService.composeSearchConditions(filterParams);
-    return this.eventsRepository.find({
+    return this.eventRepository.find({
       where: conditions,
       order: {
         id: 'DESC',
@@ -48,14 +48,14 @@ export class EventService {
     event.info = info;
 
     try {
-      return this.eventsRepository.save(event);
+      return this.eventRepository.save(event);
     } catch (e) {
       throw new InternalServerErrorException(ERR_FAILED_TO_CREATE_EVENT);
     }
   }
 
   async getEventById(id: number): Promise<Event> {
-    return this.eventsRepository.findOne({id: id});
+    return this.eventRepository.findOne({id: id});
   }
 
   async updateEvent(updateData: UpdateEventInput): Promise<Event> {
@@ -90,7 +90,7 @@ export class EventService {
 
     event.updatedAt = new Date();
 
-    return this.eventsRepository.save(event);
+    return this.eventRepository.save(event);
   }
 
   async deleteEventById(id: number): Promise<Event> {
@@ -98,7 +98,7 @@ export class EventService {
     if (!event) {
       throw new BadRequestException(sprintf(ERR_EVENT_NOT_FOUND, id));
     }
-    const deleteResult = await this.eventsRepository.delete({id: event.id});
+    const deleteResult = await this.eventRepository.delete({id: event.id});
     if (deleteResult.affected !== 1) {
       throw new InternalServerErrorException(sprintf(ERR_FAILED_TO_DELETE_EVENT, event.id));
     }

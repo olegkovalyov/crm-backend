@@ -1,4 +1,12 @@
-import {Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany} from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import {LoadStatus} from '../interfaces/load.interface';
 import {Event} from './event.entity';
 import {Slot} from './slot.entity';
@@ -36,16 +44,21 @@ export class Load {
   @ManyToOne(
     () => Event,
     event => event.loads,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   event: Event;
 
   @OneToMany(
     () => Slot,
     slot => slot.load,
-    {
-      eager: true,
-      cascade: true,
-    },
   )
   slots: Slot[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -25,12 +25,14 @@ export class EventResolver {
   }
 
   @Mutation(()=> EventModel)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async createEvent(@Args('createEventInput') createEventData: CreateEventInput): Promise<EventModel> {
     const event = await this.eventService.createEvent(createEventData);
     return this.graphQlService.constructEventModel(event);
   }
 
   @Query(() => EventModel, {nullable: true})
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getEvent(@Args('id', {type: () => Int}) id: number): Promise<EventModel> {
     const event = await this.eventService.getEventById(id);
     if (!event) {
