@@ -4,7 +4,7 @@ import {IsDate, IsNotEmpty, IsOptional, MaxLength, MinLength} from 'class-valida
 @InputType()
 export class UpdateEventInput {
 
-  @Field(type => Int)
+  @Field(() => Int)
   @IsNotEmpty()
   id: number;
 

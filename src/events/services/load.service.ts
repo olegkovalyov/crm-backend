@@ -12,6 +12,7 @@ import {
   ERR_FAILED_TO_DELETE_LOAD,
   ERR_LOAD_NOT_FOUND,
 } from '../constants/load.error';
+import {UpdateLoadInput} from '../inputs/loads/update-load.input';
 
 @Injectable()
 export class LoadService {
@@ -68,6 +69,41 @@ export class LoadService {
     } catch (e) {
       throw new InternalServerErrorException(ERR_FAILED_TO_CREATE_LOAD);
     }
+  }
+
+  async updateLoad(updateData: UpdateLoadInput): Promise<Load> {
+    const {
+      id,
+      capacity,
+      landingTime,
+      takeOffTime,
+      info,
+    } = updateData;
+
+    const load = await this.getLoadById(id);
+    if (!load) {
+      throw new BadRequestException(sprintf(ERR_LOAD_NOT_FOUND, id));
+    }
+
+    if (capacity) {
+      load.capacity = capacity;
+    }
+
+    if (takeOffTime) {
+      load.takeOffTime = takeOffTime;
+    }
+
+    if (landingTime) {
+      load.landingTime = landingTime;
+    }
+
+    if (info) {
+      load.info = info;
+    }
+
+    load.updatedAt = new Date();
+
+    return this.loadRepository.save(load);
   }
 
   async deleteLoadById(id: number): Promise<Load> {

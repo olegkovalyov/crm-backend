@@ -1,33 +1,33 @@
 import {Field, InputType, Int} from '@nestjs/graphql';
-import {IsDate, IsEnum, IsNotEmpty, IsOptional} from 'class-validator';
+import {IsDate, IsNotEmpty, IsOptional} from 'class-validator';
 import {LoadStatus} from '../../interfaces/load.interface';
 
 @InputType()
 export class UpdateLoadInput {
 
-  @Field(type => Int)
+  @Field(() => Int)
   @IsNotEmpty()
   id: number;
 
-  @Field(type => Int)
+  @Field(() => Int)
   @IsOptional()
   capacity?: number;
 
-  @Field(type => LoadStatus)
+  @Field(() => LoadStatus)
   @IsOptional()
-  @IsEnum(LoadStatus)
   status?: LoadStatus;
 
-  @Field(type => Int)
-  @IsOptional()
-  order?: number;
-
-  @Field(type => Int, {nullable: true})
+  @Field()
   @IsOptional()
   @IsDate()
-  time?: number;
+  takeOffTime?: Date;
 
-  @Field({nullable: true})
+  @Field()
   @IsOptional()
-  notes?: string;
+  @IsDate()
+  landingTime?: Date;
+
+  @Field()
+  @IsOptional()
+  info?: string;
 }

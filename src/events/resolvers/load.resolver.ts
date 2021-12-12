@@ -7,6 +7,7 @@ import {EventService} from '../services/event.service';
 import {GraphqlService} from '../services/graphql.service';
 import {sprintf} from 'sprintf-js';
 import {ERR_LOAD_NOT_FOUND} from '../constants/load.error';
+import {UpdateLoadInput} from '../inputs/loads/update-load.input';
 
 @Resolver(() => LoadModel)
 export class LoadResolver {
@@ -46,5 +47,12 @@ export class LoadResolver {
   async deleteLoad(@Args('id', {type: () => Int}) id: number): Promise<LoadModel> {
     const load = await this.loadService.deleteLoadById(id);
     return this.graphQlService.constructLoadModel(load);
+  }
+
+  @Mutation(() => LoadModel)
+  // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
+  async updateLoad(@Args('updateLoadInput') updateLoadData: UpdateLoadInput): Promise<LoadModel> {
+    const updatedLoad = await this.loadService.updateLoad(updateLoadData);
+    return this.graphQlService.constructLoadModel(updatedLoad);
   }
 }

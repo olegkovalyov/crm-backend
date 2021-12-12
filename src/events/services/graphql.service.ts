@@ -25,6 +25,8 @@ export class GraphqlService {
       status: load.status,
       capacity: load.capacity,
       order: load.order,
+      takeOffTime: load.takeOffTime,
+      landingTime: load.landingTime,
       slots: [],
       info: load.info,
       createdAt: load.createdAt,
