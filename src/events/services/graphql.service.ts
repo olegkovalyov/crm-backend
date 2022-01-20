@@ -3,6 +3,8 @@ import {Event} from '../entities/event.entity';
 import {EventModel} from '../models/event.model';
 import {Load} from '../entities/load.entity';
 import {LoadModel} from '../models/load.model';
+import {Slot} from '../entities/slot.entity';
+import {SlotModel} from '../models/slot.model';
 
 @Injectable({scope: Scope.REQUEST})
 export class GraphqlService {
@@ -31,6 +33,15 @@ export class GraphqlService {
       info: load.info,
       createdAt: load.createdAt,
       updatedAt: load.updatedAt,
+    };
+  }
+
+  constructSlotModel(slot: Slot): SlotModel {
+    return {
+      id: slot.id,
+      type: slot.type,
+      personIds: slot.personIds,
+      info: slot.info,
     };
   }
 }

@@ -28,11 +28,11 @@ export class LoadResolver {
   @Query(() => LoadModel, {nullable: true})
   // @UseGuards(JwtAuthGuard, IsAdminOrManifestGuard)
   async getLoad(@Args('id', {type: () => Int}) id: number): Promise<LoadModel> {
-    const event = await this.loadService.getLoadById(id);
-    if (!event) {
+    const load = await this.loadService.getLoadById(id);
+    if (!load) {
       throw new BadRequestException(sprintf(ERR_LOAD_NOT_FOUND, id));
     }
-    return this.graphQlService.constructLoadModel(event);
+    return this.graphQlService.constructLoadModel(load);
   }
 
   @Mutation(() => LoadModel)

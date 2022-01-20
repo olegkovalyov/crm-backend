@@ -1,21 +1,22 @@
-import {Field, InputType, Int} from '@nestjs/graphql';
-import {IsEnum, IsOptional} from 'class-validator';
+import {Field, InputType} from '@nestjs/graphql';
+import {ArrayUnique, IsEnum, IsOptional} from 'class-validator';
 import {SlotType} from '../../interfaces/slot.interface';
 
 @InputType()
 export class CreateSlotInput {
 
-  @Field(type => Int)
+  @Field()
   loadId: number;
 
-  @Field(type => SlotType)
+  @Field(() => SlotType)
   @IsEnum(SlotType)
   type: SlotType;
 
-  @Field(type => [Int])
-  userIds: number[];
+  @Field(() => [String])
+  @ArrayUnique()
+  personIds: string[];
 
-  @Field({nullable: true})
+  @Field()
   @IsOptional()
-  notes?: string;
+  info: string;
 }
