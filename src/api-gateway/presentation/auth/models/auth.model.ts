@@ -1,7 +1,7 @@
 import {ObjectType, Field} from '@nestjs/graphql';
 
 @ObjectType()
-export class Auth {
+export class AuthModel {
   private constructor(
     id: number,
     email: string,
@@ -43,8 +43,8 @@ export class Auth {
     lastName: string,
     accessToken: string | null = null,
     refreshToken: string | null = null,
-  ): Auth {
-    return new Auth(
+  ): AuthModel {
+    return new AuthModel(
       id,
       email,
       firstName,

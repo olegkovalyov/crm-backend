@@ -2,13 +2,13 @@ import {Resolver, Mutation, Args, Query} from '@nestjs/graphql';
 import {CommandBus, QueryBus} from '@nestjs/cqrs';
 import {JwtService} from '@nestjs/jwt';
 import {RegisterInput} from '../inputs/register.input';
-import {Auth} from '../models/auth.model';
+import {AuthModel} from '../models/auth.model';
 import {LoginInput} from '../inputs/login.input';
 import {AccessTokenInput} from '../inputs/access-token.input';
 import {AccessToken} from '../models/access-token.model';
 import {CreateAccountCommand} from '../../../../accounts/application/commands/createAccount.command';
-import {LoadAccountQuery} from '../../../../accounts/application/queries/loadAccount.query';
-import {Account} from '../../../../accounts/domain/entities/account.entity';
+import {GetAuthQuery} from '../../../application/auth/queries/getAuthQuery';
+import {Auth} from '../../../domain/entities/auth.entity';
 
 @Resolver()
 export class AuthResolver {
@@ -19,32 +19,35 @@ export class AuthResolver {
   ) {
   }
 
-  @Mutation(() => Auth)
-  async register(@Args('registerInput') registerInput: RegisterInput): Promise<Auth> {
+  @Mutation(() => AuthModel)
+  async register(@Args('registerInput') registerInput: RegisterInput): Promise<AuthModel> {
 
     const createAccountCommand = new CreateAccountCommand(
-      'okovalyov@test.com',
-      'Oleh',
-      'Kovalov',
+      registerInput.email,
+      registerInput.firstName,
+      registerInput.lastName,
+      registerInput.password,
     );
 
-    const id: number = await this.commandBus.execute(createAccountCommand);
+    const accountId: number = await this.commandBus.execute(createAccountCommand);
 
-    const loadAccountQuery = new LoadAccountQuery(id);
+    const getAuthQuery = new GetAuthQuery(accountId);
 
-    const account: Account = await this.queryBus.execute(loadAccountQuery);
+    const auth: Auth = await this.queryBus.execute(getAuthQuery);
 
-    return Auth.create(
-      id,
-      account.getEmail(),
-      account.getFirstName(),
-      account.getLastName(),
+    return AuthModel.create(
+      accountId,
+      auth.getEmail(),
+      auth.getFirstName(),
+      auth.getLastName(),
+      auth.getAccessToken(),
+      auth.getRefreshToken(),
     );
   }
 
-  @Mutation(() => Auth)
-  async login(@Args('loginInput') loginInput: LoginInput): Promise<Auth> {
-    return Auth.create(
+  @Mutation(() => AuthModel)
+  async login(@Args('loginInput') loginInput: LoginInput): Promise<AuthModel> {
+    return AuthModel.create(
       1,
       loginInput.email,
       'Oleh',

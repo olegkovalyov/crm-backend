@@ -7,14 +7,17 @@ import {
   VersionColumn,
 } from 'typeorm';
 
-@Entity(
-  {name: 'account'},
-)
-export class AccountEntity {
+@Entity({
+  name: 'auth',
+})
+export class AuthEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({unique: true})
+  accountId: number;
+
+  @Column()
   email: string;
 
   @Column()
@@ -25,6 +28,12 @@ export class AccountEntity {
 
   @Column()
   isActive: boolean;
+
+  @Column()
+  accessToken: string;
+
+  @Column()
+  refreshToken: string;
 
   @CreateDateColumn()
   createdAt: Date;

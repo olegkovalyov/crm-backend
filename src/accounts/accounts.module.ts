@@ -1,21 +1,24 @@
 import {Module} from '@nestjs/common';
 import {TypeOrmModule} from '@nestjs/typeorm';
-import {Account} from './infrastructure/typeorm/entities/account.entity';
-import {TestEventHandler} from './eventHandlers/test.event.handler';
+import {AccountEntity} from './infrastructure/typeorm/entities/account.entity';
 import {CreateAccountCommandHandler} from './application/commands/handlers/createAccount.command.handler';
 import {CoreModule} from '../core/core.module';
-import {LoadAccountQuery} from './application/queries/loadAccount.query';
-import {LoadAccountQueryHandler} from './application/queries/handlers/loadAccount.query.handler';
+import {GetAccountQueryHandler} from './application/queries/handlers/getAccountQueryHandler';
+import {AccountRepository} from './abstract/repository/account.repository';
+import {AccountRepositoryTypeorm} from './infrastructure/typeorm/repositories/account.repository';
 
 @Module({
   imports: [
     CoreModule,
-    TypeOrmModule.forFeature([Account]),
+    TypeOrmModule.forFeature([AccountEntity]),
   ],
   providers: [
-    TestEventHandler,
     CreateAccountCommandHandler,
-    LoadAccountQueryHandler,
+    GetAccountQueryHandler,
+    {
+      provide: AccountRepository,
+      useClass: AccountRepositoryTypeorm,
+    },
   ],
 })
 export class AccountsModule {

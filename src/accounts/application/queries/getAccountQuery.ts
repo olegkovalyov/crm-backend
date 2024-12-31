@@ -1,4 +1,4 @@
-export class LoadAccountQuery {
+export class GetAccountQuery {
   constructor(
     public readonly id: number,
   ) {

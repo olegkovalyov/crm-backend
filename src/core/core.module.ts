@@ -12,6 +12,15 @@ import {CqrsModule} from '@nestjs/cqrs';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      formatError: (error, originalError) => {
+        console.warn(error);
+        return {
+          message: error.message,
+          extensions: {
+            code: error.extensions.code,
+          },
+        };
+      },
     }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({

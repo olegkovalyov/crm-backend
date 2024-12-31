@@ -1,15 +1,15 @@
 import {EventBus, IQueryHandler, QueryHandler} from '@nestjs/cqrs';
 import {Account} from '../../../domain/entities/account.entity';
-import {LoadAccountQuery} from '../loadAccount.query';
+import {GetAccountQuery} from '../getAccountQuery';
 
-@QueryHandler(LoadAccountQuery)
-export class LoadAccountQueryHandler implements IQueryHandler<LoadAccountQuery> {
+@QueryHandler(GetAccountQuery)
+export class GetAccountQueryHandler implements IQueryHandler<GetAccountQuery> {
   constructor(
     private readonly eventBus: EventBus,
   ) {
   }
 
-  async execute(query: LoadAccountQuery) {
+  async execute(query: GetAccountQuery) {
     // Here will go logic from retrieving account from DB
 
     // return loaded acc
@@ -18,6 +18,7 @@ export class LoadAccountQueryHandler implements IQueryHandler<LoadAccountQuery> 
       'okovalyov@test.com',
       'Oleh',
       'Kovalov',
+      true,
     );
   }
 }

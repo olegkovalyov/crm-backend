@@ -6,11 +6,14 @@ export class RegisterInput {
   email: string;
 
   @Field()
-  password: string;
-
-  @Field()
   firstName: string;
 
   @Field()
   lastName: string;
+
+  @Field()
+  password: string;
+
+  @Field()
+  passwordConfirmation: string;
 }
