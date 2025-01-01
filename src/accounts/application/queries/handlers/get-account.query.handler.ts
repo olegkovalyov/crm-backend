@@ -1,6 +1,6 @@
 import {EventBus, IQueryHandler, QueryHandler} from '@nestjs/cqrs';
-import {Account} from '../../../domain/entities/account.entity';
-import {GetAccountQuery} from '../getAccountQuery';
+import {GetAccountQuery} from '../get-account.query';
+import {Account} from '../../../domain/entities/account';
 
 @QueryHandler(GetAccountQuery)
 export class GetAccountQueryHandler implements IQueryHandler<GetAccountQuery> {

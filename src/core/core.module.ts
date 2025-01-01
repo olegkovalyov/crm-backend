@@ -6,6 +6,9 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import {ConfigModule, ConfigService} from '@nestjs/config';
 import {JwtModule} from '@nestjs/jwt';
 import {CqrsModule} from '@nestjs/cqrs';
+import {AuthEntity} from './infrasctucture/typeorm/entities/auth.entity';
+import {UserInfoEntity} from './infrasctucture/typeorm/entities/user-info.entity';
+import {AccountEntity} from './infrasctucture/typeorm/entities/account.entity';
 
 @Module({
   imports: [
@@ -34,6 +37,11 @@ import {CqrsModule} from '@nestjs/cqrs';
         database: String(configService.get('DB_DATABASE_AUTH')),
         autoLoadEntities: true,
         synchronize: true,
+        entities: [
+          AuthEntity,
+          UserInfoEntity,
+          AccountEntity,
+        ],
       }),
       inject: [ConfigService],
     }),
@@ -58,6 +66,7 @@ import {CqrsModule} from '@nestjs/cqrs';
     JwtModule,
     ConfigModule,
     CqrsModule,
+    TypeOrmModule,
   ],
   controllers: [],
   providers: [],

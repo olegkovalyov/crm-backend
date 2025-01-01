@@ -1,6 +1,6 @@
 export class GetAuthQuery {
   constructor(
-    public readonly accountId: number,
+    public readonly authId: number,
   ) {
   }
 }

@@ -18,18 +18,6 @@ export class AuthEntity {
   accountId: number;
 
   @Column()
-  email: string;
-
-  @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
-
-  @Column()
-  isActive: boolean;
-
-  @Column()
   accessToken: string;
 
   @Column()

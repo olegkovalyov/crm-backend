@@ -1,9 +1,9 @@
-import {Auth} from '../../domain/entities/auth.entity';
+import {Auth} from '../../domain/entities/auth';
 
 export abstract class AuthRepository {
   abstract findAll(): Promise<Auth[]>
 
-  abstract findByAccountId(accountId: number): Promise<Auth | null>
+  abstract findById(id: number): Promise<Auth | null>
 
   abstract save(auth: Auth): Promise<Auth>
 }

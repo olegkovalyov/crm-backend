@@ -1,4 +1,4 @@
-import {Account} from '../../domain/entities/account.entity';
+import {Account} from '../../domain/entities/account';
 
 export abstract class AccountRepository {
   abstract findAll(): Promise<Account[]>

@@ -2,20 +2,20 @@ import {Module} from '@nestjs/common';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {CoreModule} from '../core/core.module';
 import {AuthResolver} from './presentation/auth/resolvers/auth.resolver';
-import {AccountCreatedEventHandler} from './application/auth/events/handlers/accountCreated.event.handler';
+import {UserRegisteredEventHandler} from './application/auth/events/handlers/user-registered.event.handler';
 import {AuthRepository} from './abstract/repository/auth.repository';
 import {AuthRepositoryTypeorm} from './infrastructure/typeorm/repositories/auth.repository';
-import {AuthEntity} from './infrastructure/typeorm/entities/auth.entity';
-import {GetAuthQueryHandler} from './application/auth/queries/handlers/getAuthQueryHandler';
+import {CreateAuthCommandHandler} from './application/auth/commands/handlers/create-auth.command.handler';
+import {GetAuthQueryHandler} from './application/auth/queries/handlers/get-auth.query.handler';
 
 @Module({
   imports: [
     CoreModule,
-    TypeOrmModule.forFeature([AuthEntity]),
   ],
   providers: [
-    AccountCreatedEventHandler,
+    UserRegisteredEventHandler,
     AuthResolver,
+    CreateAuthCommandHandler,
     GetAuthQueryHandler,
     {
       provide: AuthRepository,

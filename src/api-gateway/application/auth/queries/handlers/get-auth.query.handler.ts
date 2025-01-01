@@ -1,7 +1,7 @@
 import {EventBus, IQueryHandler, QueryHandler} from '@nestjs/cqrs';
-import {GetAuthQuery} from '../getAuthQuery';
 import {AuthRepository} from '../../../../abstract/repository/auth.repository';
-import {Auth} from '../../../../domain/entities/auth.entity';
+import {GetAuthQuery} from '../get-auth.query';
+import {Auth} from '../../../../domain/entities/auth';
 
 @QueryHandler(GetAuthQuery)
 export class GetAuthQueryHandler implements IQueryHandler<GetAuthQuery> {
@@ -12,6 +12,6 @@ export class GetAuthQueryHandler implements IQueryHandler<GetAuthQuery> {
   }
 
   async execute(query: GetAuthQuery): Promise<Auth | null> {
-    return await this.authRepository.findByAccountId(query.accountId);
+    return await this.authRepository.findById(query.authId);
   }
 }

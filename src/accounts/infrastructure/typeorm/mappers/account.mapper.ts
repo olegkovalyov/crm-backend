@@ -1,5 +1,5 @@
-import {AccountEntity} from '../entities/account.entity';
-import {Account} from '../../../domain/entities/account.entity';
+import {AccountEntity} from '../../../../core/infrasctucture/typeorm/entities/account.entity';
+import {Account} from '../../../domain/entities/account';
 
 export class AccountMapper {
   static toDomain(accountEntity: AccountEntity): Account {

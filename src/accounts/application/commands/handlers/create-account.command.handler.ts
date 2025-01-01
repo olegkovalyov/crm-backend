@@ -1,8 +1,8 @@
 import {CommandHandler, EventBus, ICommandHandler} from '@nestjs/cqrs';
-import {CreateAccountCommand} from '../createAccount.command';
-import {Account} from '../../../domain/entities/account.entity';
-import {AccountCreatedEvent} from '../../events/accountCreated.event';
 import {AccountRepository} from '../../../abstract/repository/account.repository';
+import {CreateAccountCommand} from '../create-account.command';
+import {Account} from '../../../domain/entities/account';
+import {AccountCreatedEvent} from '../../events/account-created.event';
 
 @CommandHandler(CreateAccountCommand)
 export class CreateAccountCommandHandler implements ICommandHandler<CreateAccountCommand> {

@@ -1,26 +1,26 @@
 import {Injectable} from '@nestjs/common';
-import {Repository} from 'typeorm';
-import {InjectRepository} from '@nestjs/typeorm';
+import {DataSource} from 'typeorm';
 import {AccountRepository} from '../../../abstract/repository/account.repository';
-import {AccountEntity} from '../entities/account.entity';
-import {Account} from '../../../domain/entities/account.entity';
 import {AccountMapper} from '../mappers/account.mapper';
+import {AccountEntity} from '../../../../core/infrasctucture/typeorm/entities/account.entity';
+import {Account} from '../../../domain/entities/account';
 
 @Injectable()
 export class AccountRepositoryTypeorm implements AccountRepository {
   constructor(
-    @InjectRepository(AccountEntity)
-    private readonly accountRepository: Repository<AccountEntity>,
+    private readonly dataSource: DataSource,
   ) {
   }
 
   async findAll(): Promise<Account[]> {
-    const accountEntities = await this.accountRepository.find();
+    const accountRepository = this.dataSource.getRepository(AccountEntity);
+    const accountEntities = await accountRepository.find();
     return accountEntities.map(accountEntity => AccountMapper.toDomain(accountEntity));
   }
 
   async findById(id: number): Promise<Account | null> {
-    const accountEntity = await this.accountRepository.findOneBy({
+    const accountRepository = this.dataSource.getRepository(AccountEntity);
+    const accountEntity = await accountRepository.findOneBy({
       id,
     });
     if (accountEntity) {
@@ -31,7 +31,8 @@ export class AccountRepositoryTypeorm implements AccountRepository {
 
   async save(account: Account): Promise<Account> {
     const accountEntity = AccountMapper.toPersistence(account);
-    const persistedAccountEntity = await this.accountRepository.save(accountEntity);
+    const accountRepository = this.dataSource.getRepository(AccountEntity);
+    const persistedAccountEntity = await accountRepository.save(accountEntity);
     return AccountMapper.toDomain(persistedAccountEntity);
   }
 }
