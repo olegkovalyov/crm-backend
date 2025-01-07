@@ -1,62 +1,58 @@
 import {Resolver, Mutation, Args, Query} from '@nestjs/graphql';
-import {CommandBus, QueryBus} from '@nestjs/cqrs';
+import {CommandBus, EventBus, QueryBus} from '@nestjs/cqrs';
 import {RegisterInput} from '../inputs/register.input';
 import {AuthModel} from '../models/auth.model';
 import {LoginInput} from '../inputs/login.input';
 import {AccessTokenInput} from '../inputs/access-token.input';
-import {AuthTokenModel} from '../models/auth-token.model';
-import {CreateAccountCommand} from '../../../../accounts/application/commands/create-account.command';
-import {CreateAuthCommand} from '../../../application/auth/commands/create-auth.command';
-import {GetAuthQuery} from '../../../application/auth/queries/get-auth.query';
-import {Auth} from '../../../domain/entities/auth';
+import {RegisterCommand} from '../../../application/auth/commands/register.command';
+import {LoginCommand} from '../../../application/auth/commands/login.command';
 
 @Resolver()
 export class AuthResolver {
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly queryBus: QueryBus,
   ) {
   }
 
-  @Mutation(() => AuthTokenModel)
-  async register(@Args('registerInput') registerInput: RegisterInput): Promise<AuthTokenModel> {
+  @Mutation(() => AuthModel)
+  async register(@Args('registerInput') registerInput: RegisterInput): Promise<AuthModel> {
 
-    const accountId: number = await this.commandBus.execute(new CreateAccountCommand(
+    await this.commandBus.execute(new RegisterCommand(
       registerInput.email,
+      registerInput.password,
       registerInput.firstName,
       registerInput.lastName,
+    ));
+
+    const auth = await this.commandBus.execute(new LoginCommand(
+      registerInput.email,
       registerInput.password,
     ));
 
-    const authId: number = await this.commandBus.execute(new CreateAuthCommand(
-      accountId,
-      registerInput.email,
-      registerInput.firstName,
-      registerInput.lastName,
-      true,
-    ));
-
-    const auth: Auth = await this.queryBus.execute(new GetAuthQuery(authId));
-
-    console.log('auth:', auth);
-
-    return AuthTokenModel.create(
-      auth.getAccessToken(),
-      auth.getRefreshToken(),
+    return AuthModel.create(
+      auth.accessToken,
+      auth.refreshToken,
     );
   }
 
   @Mutation(() => AuthModel)
-  async login(@Args('loginInput') loginInput: LoginInput): Promise<AuthTokenModel> {
-    return AuthTokenModel.create(
-      '',
-      '',
+  async login(@Args('loginInput') loginInput: LoginInput): Promise<AuthModel> {
+    const auth = await this.commandBus.execute(new LoginCommand(
+      loginInput.email,
+      loginInput.password,
+    ));
+
+    return AuthModel.create(
+      auth.accessToken,
+      auth.refreshToken,
     );
   }
 
-  @Query(() => AuthTokenModel)
-  async accessToken(@Args('accessTokenInput') accessTokenInput: AccessTokenInput): Promise<AuthTokenModel> {
-    return AuthTokenModel.create(
+  @Query(() => AuthModel)
+  async accessToken(@Args('accessTokenInput') accessTokenInput: AccessTokenInput): Promise<AuthModel> {
+    return AuthModel.create(
       '',
       '',
     );

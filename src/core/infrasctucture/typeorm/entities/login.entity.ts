@@ -8,9 +8,9 @@ import {
 } from 'typeorm';
 
 @Entity({
-  name: 'auth',
+  name: 'login',
 })
-export class AuthEntity {
+export class LoginEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

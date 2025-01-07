@@ -18,6 +18,9 @@ export class AccountEntity {
   email: string;
 
   @Column()
+  password: string;
+
+  @Column()
   firstName: string;
 
   @Column()

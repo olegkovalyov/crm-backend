@@ -1,19 +1,19 @@
 import {Module} from '@nestjs/common';
-import {TypeOrmModule} from '@nestjs/typeorm';
 import {CoreModule} from '../core/core.module';
 import {AccountRepository} from './abstract/repository/account.repository';
 import {AccountRepositoryTypeorm} from './infrastructure/typeorm/repositories/account.repository';
-import {GetAccountQueryHandler} from './application/queries/handlers/get-account.query.handler';
 import {CreateAccountCommandHandler} from './application/commands/handlers/create-account.command.handler';
+import {GetAccountByIdQueryHandler} from './application/queries/handlers/get-account-by-id.query.handler';
+import {GetAccountByEmailQueryHandler} from './application/queries/handlers/get-account-by-email.query.handler';
 
 @Module({
   imports: [
     CoreModule,
-    TypeOrmModule.forFeature(),
   ],
   providers: [
     CreateAccountCommandHandler,
-    GetAccountQueryHandler,
+    GetAccountByIdQueryHandler,
+    GetAccountByEmailQueryHandler,
     {
       provide: AccountRepository,
       useClass: AccountRepositoryTypeorm,

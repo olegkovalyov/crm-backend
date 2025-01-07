@@ -5,5 +5,7 @@ export abstract class AccountRepository {
 
   abstract findById(id: number): Promise<Account | null>
 
+  abstract findByEmail(email: string): Promise<Account | null>
+
   abstract save(account: Account): Promise<Account>
 }
