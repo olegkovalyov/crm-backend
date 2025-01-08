@@ -5,8 +5,9 @@ import {GetAccountByEmailQuery} from '../../../../../accounts/application/querie
 import * as bcrypt from 'bcrypt';
 import {Account} from '../../../../../accounts/domain/entities/account';
 import {ConfigService} from '@nestjs/config';
+import {Ok, Err, Result} from 'ts-results';
 
-interface AuthInterface {
+export interface AuthInterface {
   accessToken: string,
   refreshToken: string,
 }
@@ -20,15 +21,15 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
   ) {
   }
 
-  async execute(command: LoginCommand): Promise<AuthInterface> {
+  async execute(command: LoginCommand): Promise<Result<AuthInterface, Error>> {
     const account: Account = await this.queryBus.execute(new GetAccountByEmailQuery(command.email));
     if (!account) {
-      throw new Error('Account not found');
+      return Err(new Error('Account not found'));
     }
 
     const isValidPassword = await bcrypt.compare(command.password, account.getPassword().value);
     if (!isValidPassword) {
-      throw new Error('Email or password are invalid');
+      return Err(new Error('Email or password are invalid'));
     }
 
     const accessToken = await this.jwtService.signAsync({
@@ -45,9 +46,9 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
         expiresIn: this.configService.get('JWT_REFRESH_TOKEN_TTL'),
       });
 
-    return {
+    return Ok({
       accessToken: accessToken,
       refreshToken: refreshToken,
-    };
+    });
   }
 }

@@ -6,6 +6,8 @@ import {LoginInput} from '../inputs/login.input';
 import {AccessTokenInput} from '../inputs/access-token.input';
 import {RegisterCommand} from '../../../application/auth/commands/register.command';
 import {LoginCommand} from '../../../application/auth/commands/login.command';
+import {Result} from 'ts-results';
+import {AuthInterface} from '../../../application/auth/commands/handlers/login.command.handler';
 
 @Resolver()
 export class AuthResolver {
@@ -19,35 +21,53 @@ export class AuthResolver {
   @Mutation(() => AuthModel)
   async register(@Args('registerInput') registerInput: RegisterInput): Promise<AuthModel> {
 
-    await this.commandBus.execute(new RegisterCommand(
+    const registerCommandResult: Result<number, Error> = await this.commandBus.execute(new RegisterCommand(
       registerInput.email,
       registerInput.password,
       registerInput.firstName,
       registerInput.lastName,
     ));
 
-    const auth = await this.commandBus.execute(new LoginCommand(
+    if (registerCommandResult.err) {
+      throw new Error('Failed to register user. '+ registerCommandResult.val.message);
+    }
+
+    const loginCommandResult: Result<AuthInterface, Error> = await this.commandBus.execute(new LoginCommand(
       registerInput.email,
       registerInput.password,
     ));
 
-    return AuthModel.create(
-      auth.accessToken,
-      auth.refreshToken,
-    );
+    if (loginCommandResult.err) {
+      throw loginCommandResult.val;
+    }
+
+    if (loginCommandResult.ok) {
+      const {accessToken, refreshToken} = loginCommandResult.val;
+      return AuthModel.create(
+        accessToken,
+        refreshToken,
+      );
+    }
   }
 
   @Mutation(() => AuthModel)
   async login(@Args('loginInput') loginInput: LoginInput): Promise<AuthModel> {
-    const auth = await this.commandBus.execute(new LoginCommand(
+    const loginCommandResult: Result<AuthInterface, Error> = await this.commandBus.execute(new LoginCommand(
       loginInput.email,
       loginInput.password,
     ));
 
-    return AuthModel.create(
-      auth.accessToken,
-      auth.refreshToken,
-    );
+    if (loginCommandResult.err) {
+      throw loginCommandResult.val;
+    }
+
+    if (loginCommandResult.ok) {
+      const {accessToken, refreshToken} = loginCommandResult.val;
+      return AuthModel.create(
+        accessToken,
+        refreshToken,
+      );
+    }
   }
 
   @Query(() => AuthModel)

@@ -7,6 +7,7 @@ import {CreateAccountDto} from '../../../domain/dto/create-account.dto';
 import * as bcrypt from 'bcrypt';
 import {ConfigService} from '@nestjs/config';
 import {BadRequestException} from '@nestjs/common';
+import {Err, Ok, Result} from 'ts-results';
 
 @CommandHandler(CreateAccountCommand)
 export class CreateAccountCommandHandler implements ICommandHandler<CreateAccountCommand> {
@@ -18,10 +19,10 @@ export class CreateAccountCommandHandler implements ICommandHandler<CreateAccoun
   ) {
   }
 
-  async execute(command: CreateAccountCommand) {
+  async execute(command: CreateAccountCommand): Promise<Result<number, Error>> {
     const accountExist = await this.accountRepository.findByEmail(command.email);
     if (accountExist) {
-      throw new BadRequestException('User with this email already exist');
+      return Err(new BadRequestException('User with this email already exist'));
     }
 
     const createAccountDto = new CreateAccountDto();
@@ -35,11 +36,15 @@ export class CreateAccountCommandHandler implements ICommandHandler<CreateAccoun
     const account = Account.create(createAccountDto);
 
     // Here goes logic for saving to Db
-    const newAccount = await this.accountRepository.save(account);
-    // Create event that acc was created
-    this.eventBus.publish(new AccountCreatedEvent(newAccount));
+    try {
+      const newAccount = await this.accountRepository.save(account);
+      // Create event that acc was created
+      this.eventBus.publish(new AccountCreatedEvent(newAccount));
 
-    // return id of newly created acc
-    return newAccount.getId().value;
+      // return id of newly created acc
+      return Ok(newAccount.getId().value);
+    } catch (e: Error) {
+      return Err(e);
+    }
   }
 }
