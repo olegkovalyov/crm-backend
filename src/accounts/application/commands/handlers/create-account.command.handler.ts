@@ -43,8 +43,8 @@ export class CreateAccountCommandHandler implements ICommandHandler<CreateAccoun
 
       // return id of newly created acc
       return Ok(newAccount.getId().value);
-    } catch (e: Error) {
-      return Err(e);
+    } catch (e) {
+      return Err(new Error(e.message));
     }
   }
 }

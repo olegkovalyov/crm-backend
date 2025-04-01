@@ -22,10 +22,13 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
   }
 
   async execute(command: LoginCommand): Promise<Result<AuthInterface, Error>> {
-    const account: Account = await this.queryBus.execute(new GetAccountByEmailQuery(command.email));
-    if (!account) {
+
+    const accountResult: Result<Account, Error> = await this.queryBus.execute(new GetAccountByEmailQuery(command.email));
+    if (accountResult.err) {
       return Err(new Error('Account not found'));
     }
+
+    const account = accountResult.val as Account;
 
     const isValidPassword = await bcrypt.compare(command.password, account.getPassword().value);
     if (!isValidPassword) {
